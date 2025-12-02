@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import HealthKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -16,13 +17,23 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Button("Tap") {
-                healthStore.getWorkouts() { result in
-                    switch result {
-                    case .success(let workouts):
-                        print(workouts)
-                        print(workouts.count)
-                    case .failure(let error):
-                        print(error.localizedDescription)
+                Task {
+                    do {
+                        let workouts = try await healthStore.getWorkouts()
+                        
+                        for workout in workouts {
+                            do {
+                                let distance = try await healthStore.fetchDistance(for: workout)
+                                let hr = try await healthStore.fetchAverageHeartRate(for: workout)
+                                let kcal = try await healthStore.fetchActiveEnergy(for: workout)
+
+                                print("\(workout.startDate): \((distance ?? 0)/1000)km, \(hr ?? 0)bpm, \(kcal ?? 0)kcal")
+                            } catch {
+                                print(error.localizedDescription)
+                                continue
+                            }
+                            
+                        }
                     }
                 }
             }
