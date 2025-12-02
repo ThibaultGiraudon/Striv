@@ -11,31 +11,21 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    private var healthStore: HealthKitHelper = .shared
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+        NavigationStack {
+            Button("Tap") {
+                healthStore.getWorkouts() { result in
+                    switch result {
+                    case .success(let workouts):
+                        print(workouts)
+                        print(workouts.count)
+                    case .failure(let error):
+                        print(error.localizedDescription)
                     }
                 }
             }
-        } detail: {
-            Text("Select an item")
         }
     }
 
