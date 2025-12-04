@@ -43,8 +43,8 @@ class HealthKitHelper {
                 if success {
                     self.isAuthorized = true
                 }
-                else {
-                    print(error?.localizedDescription)
+                else if let error {
+                    print(error.localizedDescription)
                 }
             }
         }
@@ -58,7 +58,7 @@ class HealthKitHelper {
         
         let predicate = HKQuery.predicateForWorkouts(with: .running)
         
-        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
         
         return try await withCheckedThrowingContinuation { continuation in
             let query = HKSampleQuery(

@@ -26,6 +26,7 @@ class WorkoutsViewModel: ObservableObject {
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     
                     let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()))
+                    self.workouts.append(workout)
                 } catch {
                     print(error.localizedDescription)
                     continue

@@ -12,14 +12,20 @@ import HealthKit
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
-    private var healthStore: HealthKitHelper = .shared
     @StateObject var workoutsVM: WorkoutsViewModel = .init()
 
     var body: some View {
         NavigationStack {
-            Button("Tap") {
-                Task {
-                    await workoutsVM.fetchWorkouts()
+            VStack {
+                RunsListView(workoutsVM: workoutsVM)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Download", systemImage: "arrow.down.circle") {
+                        Task {
+                            await workoutsVM.fetchWorkouts()
+                        }
+                    }
                 }
             }
         }
