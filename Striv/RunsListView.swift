@@ -12,7 +12,7 @@ struct RunsListView: View {
     var body: some View {
         List(workoutsVM.workouts) { workout in
             NavigationLink {
-                
+                RunDetailView(workout: workout)
             } label: {
                 RunRowView(workout: workout)
             }

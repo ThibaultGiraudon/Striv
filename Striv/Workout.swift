@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 typealias Workouts = [Workout]
 
@@ -20,6 +21,7 @@ struct Workout: Identifiable {
     var pace: Pace {
         Pace(pace:  Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
     }
+    var coordinates: [CLLocationCoordinate2D]
     
     struct Duration {
         var hours: Int

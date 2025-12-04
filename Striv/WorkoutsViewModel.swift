@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import HealthKit
+import CoreLocation
 
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = []
@@ -22,10 +23,20 @@ class WorkoutsViewModel: ObservableObject {
                     let hr = try await HealthKitHelper.shared.fetchAverageHeartRate(for: hkWorkout)
                     let kcal = try await HealthKitHelper.shared.fetchActiveEnergy(for: hkWorkout)
                     let elevation = hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity
+                    let routes = try await HealthKitHelper.shared.fetchRoute(for: hkWorkout)
+                    
+                    var locations: [CLLocation] = []
+                    
+                    if let firstRoute = routes.first {
+                        locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+                    }
+                    
+                    let coordinates = locations.map { $0.coordinate }
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     
-                    let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()))
+                    
+                    let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()), coordinates: coordinates)
                     self.workouts.append(workout)
                 } catch {
                     print(error.localizedDescription)

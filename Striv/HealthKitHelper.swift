@@ -7,6 +7,7 @@
 
 import Foundation
 import HealthKit
+import CoreLocation
 
 class HealthKitHelper {
     private var healthStore: HKHealthStore?
@@ -25,7 +26,7 @@ class HealthKitHelper {
             
             self.healthStore = HKHealthStore()
             
-            var typesToRead: Set<HKObjectType> = [.workoutType(), .activitySummaryType()]
+            var typesToRead: Set<HKObjectType> = [.workoutType(), .activitySummaryType(), HKSeriesType.workoutRoute()]
             
             if let energy = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) {
                 typesToRead.insert(energy)
@@ -38,7 +39,7 @@ class HealthKitHelper {
             if let distance = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) {
                 typesToRead.insert(distance)
             }
-            
+                         
             healthStore?.requestAuthorization(toShare: [], read: typesToRead) { (success, error) in
                 if success {
                     self.isAuthorized = true
@@ -64,7 +65,7 @@ class HealthKitHelper {
             let query = HKSampleQuery(
                 sampleType: .workoutType(),
                 predicate: predicate,
-                limit: 0,
+                limit: 7,
                 sortDescriptors: [sortDescriptor]) { _, samples, error in
                     if let error = error {
                         continuation.resume(throwing: error)
@@ -168,4 +169,49 @@ class HealthKitHelper {
             healthStore.execute(query)
         }
     }
+    
+    func fetchRoute(for workout: HKWorkout) async throws -> [HKWorkoutRoute] {
+        guard let healthStore, self.isAuthorized == true else {
+            return []
+        }
+        
+        let routeType = HKSeriesType.workoutRoute()
+        let predicate = HKQuery.predicateForObjects(from: workout)
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let routeQuery = HKAnchoredObjectQuery(type: routeType, predicate: predicate, anchor: nil, limit: HKObjectQueryNoLimit) { query, samples, deletedObject, anchor, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                }
+                continuation.resume(returning: samples as? [HKWorkoutRoute] ?? [])
+            }
+            healthStore.execute(routeQuery)
+        }
+    }
+    
+    func fetchCoordinates(for route: HKWorkoutRoute) async throws -> [CLLocation] {
+        guard let healthStore, self.isAuthorized == true else {
+            return []
+        }
+        
+        var locations: [CLLocation] = []
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let routQuery = HKWorkoutRouteQuery(route: route) { _, locs, done, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                }
+                
+                if let locs {
+                    locations.append(contentsOf: locs)
+                }
+                
+                if done {
+                    continuation.resume(returning: locations)
+                }
+            }
+            healthStore.execute(routQuery)
+        }
+    }
+    
 }
