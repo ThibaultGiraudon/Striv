@@ -29,6 +29,7 @@ struct RouteMapView: View {
                     .stroke(.teal, lineWidth: 4)
             }
         }
+        .mapStyle(.standard(emphasis: .muted, pointsOfInterest: .excludingAll , showsTraffic: false))
     }
     
     private func centerMap(coords: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
@@ -39,7 +40,6 @@ struct RouteMapView: View {
         
         let latitude = (minLat + maxLat) / 2
         let longitude = (minLong + maxLong) / 2
-        // Add a minimum span to avoid zero-sized region when coords have tiny spread or single point
         let latDelta = max((maxLat - minLat) * 1.3, 0.005)
         let longDelta = max((maxLong - minLong) * 1.3, 0.005)
         

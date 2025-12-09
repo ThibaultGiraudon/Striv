@@ -65,7 +65,7 @@ class HealthKitHelper {
             let query = HKSampleQuery(
                 sampleType: .workoutType(),
                 predicate: predicate,
-                limit: 7,
+                limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sortDescriptor]) { _, samples, error in
                     if let error = error {
                         continuation.resume(throwing: error)
