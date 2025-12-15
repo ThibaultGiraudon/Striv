@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CE7AB6622EE986790078BEC3 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = CE7AB6612EE986790078BEC3 /* FirebaseAI */; };
+		CE7AB6642EE986790078BEC3 /* FirebaseAILogic in Frameworks */ = {isa = PBXBuildFile; productRef = CE7AB6632EE986790078BEC3 /* FirebaseAILogic */; };
+		CE7AB6662EE986F40078BEC3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE7AB6652EE986F40078BEC3 /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		CE7AB5E22EDF30370078BEC3 /* Striv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Striv.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE7AB6652EE986F40078BEC3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +43,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE7AB6642EE986790078BEC3 /* FirebaseAILogic in Frameworks */,
+				CE7AB6622EE986790078BEC3 /* FirebaseAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +54,7 @@
 		CE7AB5D92EDF30370078BEC3 = {
 			isa = PBXGroup;
 			children = (
+				CE7AB6652EE986F40078BEC3 /* GoogleService-Info.plist */,
 				CE7AB5E42EDF30370078BEC3 /* Striv */,
 				CE7AB5E32EDF30370078BEC3 /* Products */,
 			);
@@ -78,6 +88,8 @@
 			);
 			name = Striv;
 			packageProductDependencies = (
+				CE7AB6612EE986790078BEC3 /* FirebaseAI */,
+				CE7AB6632EE986790078BEC3 /* FirebaseAILogic */,
 			);
 			productName = Striv;
 			productReference = CE7AB5E22EDF30370078BEC3 /* Striv.app */;
@@ -107,6 +119,9 @@
 			);
 			mainGroup = CE7AB5D92EDF30370078BEC3;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CE7AB6602EE986790078BEC3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CE7AB5E32EDF30370078BEC3 /* Products */;
 			projectDirPath = "";
@@ -122,6 +137,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE7AB6662EE986F40078BEC3 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,6 +367,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CE7AB6602EE986790078BEC3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CE7AB6612EE986790078BEC3 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE7AB6602EE986790078BEC3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		CE7AB6632EE986790078BEC3 /* FirebaseAILogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE7AB6602EE986790078BEC3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAILogic;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CE7AB5DA2EDF30370078BEC3 /* Project object */;
 }

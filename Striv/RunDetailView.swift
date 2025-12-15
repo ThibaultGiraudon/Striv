@@ -35,9 +35,12 @@ extension Date {
     }
 }
 
+//TODO: Add gemini to analyse run
+
 struct RunDetailView: View {
     var workout: Workout
     @State private var statViewHeight = 400.0
+    @StateObject private var workoutsVM: WorkoutsViewModel = .init()
     
     var title: String {
         let hour = workout.date.hour
@@ -73,7 +76,7 @@ struct RunDetailView: View {
                             Text("\((workout.distance ?? 0) / 1000, specifier: "%.2f")km")
                                 .font(.switzer(size: 66, weight: .bold))
                                 .italic()
-                                .frame(height: 100)
+                                .frame(height: geo.size.height * 1/8)
                                 .padding(.bottom)
                             VStack {
                                 RoundedRectangle(cornerRadius: 5)
@@ -91,9 +94,11 @@ struct RunDetailView: View {
                                     }
                                 ScrollView {
                                     statRow(systemImage: "clock", title: "Time", value: "\(workout.duration.hours):\(workout.duration.minutes):\(workout.duration.seconds)")
-                                    statRow(systemImage: "figure.run", title: "Avg Pace", value: "\(workout.pace.minutes)'\(workout.pace.seconds)\"")
+                                    statRow(systemImage: "figure.run", title: "Avg Pace", value: "\(workout.pace.minutes)'\(workout.pace.seconds < 10 ? "0" : "")\(workout.pace.seconds)\"")
                                     statRow(systemImage: "flame", title: "Calories", value: workout.kcal)
                                     statRow(systemImage: "mountain.2", title: "Elevation gained", value: workout.elevation)
+                                    statRow(systemImage: "powerplug.portrait", title: "Power", value: workout.power)
+                                    statRow(systemImage: "figure.run", title: "Cadence", value: workout.cadence)
                                 }
                             }
                             .frame(height: statViewHeight * 3/4)
@@ -108,11 +113,20 @@ struct RunDetailView: View {
         }
         .navigationTitle(workout.date.toString(format: "dd MMM. YYYY"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Analyse", systemImage: "apple.intelligence") {
+                    Task {
+                        await workoutsVM.askGemini(input: workout.analysePrompt)
+                    }
+                }
+            }
+        }
     }
     
     @ViewBuilder
     func statRow(systemImage: String, title: String, value: StatDisplayable?) -> some View{
-        if let value {
+        if let value, value.statText != "0" {
             HStack {
                 Image(systemName: systemImage)
                     .aspectRatio(contentMode: .fit)
@@ -130,6 +144,6 @@ struct RunDetailView: View {
 
 #Preview {
     NavigationStack {
-        RunDetailView(workout: Workout(date: .now, distance: 12129, duration: .init(4333), hr: 171, kcal: 949, elevation: 275, coordinates: []))
+        RunDetailView(workout: Workout(date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221, coordinates: []))
     }
 }

@@ -9,9 +9,23 @@ import Foundation
 import Combine
 import HealthKit
 import CoreLocation
+import FirebaseAILogic
 
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = []
+    private let ai = FirebaseAI.firebaseAI(backend: .googleAI())
+
+    // Create a `GenerativeModel` instance with a model that supports your use case
+    private var model: GenerativeModel { ai.generativeModel(modelName: "gemini-2.5-flash") }
+    
+    func askGemini(input: String) async {
+        do {
+            let response = try await model.generateContent(input)
+            print(response.text ?? "No text in response.")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
     
     func fetchWorkouts() async {
         do {
