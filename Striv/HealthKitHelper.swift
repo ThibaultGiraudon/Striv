@@ -39,6 +39,14 @@ class HealthKitHelper {
             if let distance = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) {
                 typesToRead.insert(distance)
             }
+            
+            if let power = HKQuantityType.quantityType(forIdentifier: .runningPower) {
+                typesToRead.insert(power)
+            }
+            
+            if let cadence = HKQuantityType.quantityType(forIdentifier: .stepCount) {
+                typesToRead.insert(cadence)
+            }
                          
             healthStore?.requestAuthorization(toShare: [], read: typesToRead) { (success, error) in
                 if success {
@@ -162,6 +170,66 @@ class HealthKitHelper {
                 
                 if let avg = result?.sumQuantity() {
                     continuation.resume(returning: avg.doubleValue(for: HKUnit.meter()))
+                } else {
+                    continuation.resume(returning: nil)
+                }
+            }
+            healthStore.execute(query)
+        }
+    }
+    
+    func fetchPower(for workout: HKWorkout) async throws -> Double? {
+        
+        guard let healthStore, self.isAuthorized == true else {
+            return nil
+        }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let distanceType = HKQuantityType.quantityType(forIdentifier: .runningPower)!
+            let predicate = HKQuery.predicateForObjects(from: workout)
+            
+            let query = HKStatisticsQuery(
+                quantityType: distanceType,
+                quantitySamplePredicate: predicate,
+                options: .discreteAverage
+            ) { _, result, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                if let avg = result?.averageQuantity() {
+                    continuation.resume(returning: avg.doubleValue(for: HKUnit.watt()))
+                } else {
+                    continuation.resume(returning: nil)
+                }
+            }
+            healthStore.execute(query)
+        }
+    }
+    
+    func fetchCadence(for workout: HKWorkout) async throws -> Double? {
+        
+        guard let healthStore, self.isAuthorized == true else {
+            return nil
+        }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let distanceType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+            let predicate = HKQuery.predicateForObjects(from: workout)
+            
+            let query = HKStatisticsQuery(
+                quantityType: distanceType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, result, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                if let avg = result?.sumQuantity() {
+                    continuation.resume(returning: avg.doubleValue(for: HKUnit.count()))
                 } else {
                     continuation.resume(returning: nil)
                 }

@@ -18,6 +18,8 @@ struct Workout: Identifiable {
     var hr: Double?
     var kcal: Double?
     var elevation: Double?
+    var cadence: Double?
+    var power: Double?
     var pace: Pace {
         Pace(pace:  Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
     }
