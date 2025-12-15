@@ -18,13 +18,17 @@ class WorkoutsViewModel: ObservableObject {
     // Create a `GenerativeModel` instance with a model that supports your use case
     private var model: GenerativeModel { ai.generativeModel(modelName: "gemini-2.5-flash") }
     
-    func askGemini(input: String) async {
+    func askGemini(for workout: Workout) async -> String {
         do {
-            let response = try await model.generateContent(input)
-            print(response.text ?? "No text in response.")
+            let response = try await model.generateContent(workout.analysePrompt)
+            if let index = workouts.firstIndex(where: { $0.id == workout.id }) {
+                workouts[index].analyse = response.text ?? ""
+            }
+            return response.text ?? ""
         } catch {
             print(error.localizedDescription)
         }
+        return ""
     }
     
     func fetchWorkouts() async {
@@ -51,7 +55,6 @@ class WorkoutsViewModel: ObservableObject {
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     let cadence = (stepCount ?? 0) / (duration / 60)
-                    
                     
                     let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()), cadence: cadence, power: power, coordinates: coordinates)
                     self.workouts.append(workout)

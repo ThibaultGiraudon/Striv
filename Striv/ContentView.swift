@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import HealthKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext

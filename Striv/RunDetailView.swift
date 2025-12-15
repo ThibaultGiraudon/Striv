@@ -40,7 +40,9 @@ extension Date {
 struct RunDetailView: View {
     var workout: Workout
     @State private var statViewHeight = 400.0
-    @StateObject private var workoutsVM: WorkoutsViewModel = .init()
+    @ObservedObject var workoutsVM: WorkoutsViewModel
+    @State private var isShowingAnalyse: Bool = false
+    @State private var analyse: String = ""
     
     var title: String {
         let hour = workout.date.hour
@@ -95,6 +97,7 @@ struct RunDetailView: View {
                                 ScrollView {
                                     statRow(systemImage: "clock", title: "Time", value: "\(workout.duration.hours):\(workout.duration.minutes):\(workout.duration.seconds)")
                                     statRow(systemImage: "figure.run", title: "Avg Pace", value: "\(workout.pace.minutes)'\(workout.pace.seconds < 10 ? "0" : "")\(workout.pace.seconds)\"")
+                                    statRow(systemImage: "suit.heart", title: "Heart rate", value: workout.hr)
                                     statRow(systemImage: "flame", title: "Calories", value: workout.kcal)
                                     statRow(systemImage: "mountain.2", title: "Elevation gained", value: workout.elevation)
                                     statRow(systemImage: "powerplug.portrait", title: "Power", value: workout.power)
@@ -106,18 +109,29 @@ struct RunDetailView: View {
                             .font(.title2)
                         }
                     }
+                    
                 }
                 .foregroundStyle(.primaryText)
                 .padding()
+                AnalyseView(response: analyse)
+                .offset(y: isShowingAnalyse ? 0 : -1000)
             }
         }
         .navigationTitle(workout.date.toString(format: "dd MMM. YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Analyse", systemImage: "apple.intelligence") {
+                Button("Analyse", systemImage: isShowingAnalyse ? "xmark" : "apple.intelligence") {
                     Task {
-                        await workoutsVM.askGemini(input: workout.analysePrompt)
+                        withAnimation {
+                            isShowingAnalyse.toggle()
+                        }
+                        if workout.analyse.isEmpty {
+                            analyse = await workoutsVM.askGemini(for: workout)
+                        }
+                        else {
+                            analyse = workout.analyse
+                        }
                     }
                 }
             }
@@ -144,6 +158,6 @@ struct RunDetailView: View {
 
 #Preview {
     NavigationStack {
-        RunDetailView(workout: Workout(date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221, coordinates: []))
+        RunDetailView(workout: Workout(date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221, coordinates: []), workoutsVM: .init())
     }
 }

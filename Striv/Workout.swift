@@ -87,6 +87,8 @@ struct Workout: Identifiable {
 
         return prompts.joined(separator: "\n")
     }
+    
+    var analyse: String = ""
 
     
     struct Duration {
