@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AnalyseView: View {
     var response: Analyse?
+    var error: WorkoutsViewModel.AIError?
     var body: some View {
         ZStack {
             Rectangle()
@@ -30,6 +31,8 @@ struct AnalyseView: View {
                     }
                     .padding()
                 }
+            } else if let error {
+                ContentUnavailableView(error.title, systemImage: error.icon, description: Text(error.description))
             } else {
                 ProgressView()
             }

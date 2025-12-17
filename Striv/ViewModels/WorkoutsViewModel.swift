@@ -10,52 +10,38 @@ import Combine
 import HealthKit
 import CoreLocation
 import FirebaseAILogic
+import Network
+
+protocol ReachabilityUC {
+    func execute() -> Bool
+}
+
+class NetworkMonitor: ReachabilityUC {
+    
+    private let monitor: NWPathMonitor
+    private let queue: DispatchQueue
+    private var isConnected = false
+
+    init() {
+        monitor = NWPathMonitor()
+        queue = DispatchQueue.global(qos: .background)
+        monitor.pathUpdateHandler = { [weak self] path in
+            self?.isConnected = path.status == .satisfied
+        }
+        monitor.start(queue: self.queue)
+    }
+    
+    func execute() -> Bool {
+        isConnected
+    }
+}
 
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = []
-    private let ai = FirebaseAI.firebaseAI(backend: .googleAI())
-
-    // Create a `GenerativeModel` instance with a model that supports your use case
-    private var model: GenerativeModel { ai.generativeModel(modelName: "gemini-2.5-flash-lite") }
-    
-    func askGemini(for workout: Workout) async -> Analyse? {
-        do {
-            let response = try await model.generateContent(workout.analysePrompt)
-            
-            
-            
-            let data = response.text?.data(using: .utf8)
-            
-            guard let data else {
-                print("Failed to get data")
-                return nil
-            }
-                        
-            if let jsonSerialize = try JSONSerialization.jsonObject(with: data) as? Dictionary<String, Any> {
-                print(jsonSerialize)
-                guard let summary = jsonSerialize["summary"] as? String,
-                      let workedOn = jsonSerialize["workedOn"] as? [String],
-                      let watchOn = jsonSerialize["watchPoints"] as? [String],
-                      let nextAdvice = jsonSerialize["nextAdvice"] as? String else {
-                    print("Missing key")
-                    return nil
-                }
-                let analyse = Analyse(sections: [
-                    .init(title: "Résumé", items: [summary]),
-                    .init(title: "Ce que cette séance a travaillé", items: workedOn),
-                    .init(title: "Points de vigilance", items: watchOn),
-                    .init(title: "Conseil clé pour la prochaine séance", items: [nextAdvice])
-                ])
-                return analyse
-            } else {
-                print("Failed to serialize data")
-            }
-            
-        } catch {
-            print(error.localizedDescription)
-        }
-        return nil
-    }
+    @Published var error: AIError?
+    private let aiRepository: AIRepository = .init()
+    private var isConnected: Bool = false
+    private let networkMonitor = NetworkMonitor()
     
     func fetchWorkouts() async {
         do {
@@ -91,6 +77,65 @@ class WorkoutsViewModel: ObservableObject {
             }
         } catch {
             print(error.localizedDescription)
+        }
+    }
+    
+    func getWorkoutAnalyse(for workout: Workout) async -> Analyse? {
+        self.error = nil
+        do {
+            if networkMonitor.execute() {
+                return try await self.aiRepository.askGemini(with: workout.analysePrompt)
+            } else {
+                self.error = .connection
+            }
+        } catch {
+            if error as? GenerateContentError != nil {
+                self.error = .internalAI
+            } else {
+                self.error = .invalid
+            }
+        }
+        return nil
+    }
+}
+
+extension WorkoutsViewModel {
+    enum AIError: Error, LocalizedError, Hashable {
+        case internalAI
+        case invalid
+        case connection
+        
+        var title: String {
+            switch self {
+            case .internalAI:
+                "Service error."
+            case .invalid:
+                "Internal error."
+            case .connection:
+                "No internet connection."
+            }
+        }
+        
+        var description: String {
+            switch self {
+            case .internalAI:
+                "The service is currently unable to process your request."
+            case .invalid:
+                "We failed to process your request"
+            case .connection:
+                "Please check your connection and try again."
+            }
+        }
+        
+        var icon: String {
+            switch self {
+            case .internalAI:
+                "wrench.and.screwdriver"
+            case .invalid:
+                "externaldrive.trianglebadge.exclamationmark"
+            case .connection:
+                "wifi.slash"
+            }
         }
     }
 }

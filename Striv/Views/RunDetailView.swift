@@ -35,8 +35,6 @@ extension Date {
     }
 }
 
-//TODO: Add gemini to analyse run
-
 struct RunDetailView: View {
     var workout: Workout
     @State private var statViewHeight = 400.0
@@ -113,7 +111,7 @@ struct RunDetailView: View {
                 }
                 .foregroundStyle(.primaryText)
                 .padding()
-                AnalyseView(response: analyse)
+                AnalyseView(response: analyse, error: workoutsVM.error)
                     .offset(y: isShowingAnalyse ? 0 : -1000)
             }
         }
@@ -127,7 +125,7 @@ struct RunDetailView: View {
                             isShowingAnalyse.toggle()
                         }
                         if workout.analyse.sections.isEmpty {
-                            analyse = await workoutsVM.askGemini(for: workout)
+                            analyse = await workoutsVM.getWorkoutAnalyse(for: workout)
                         }
                         else {
                             analyse = workout.analyse
