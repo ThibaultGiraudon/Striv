@@ -42,7 +42,7 @@ struct RunDetailView: View {
     @State private var statViewHeight = 400.0
     @ObservedObject var workoutsVM: WorkoutsViewModel
     @State private var isShowingAnalyse: Bool = false
-    @State private var analyse: String = ""
+    @State private var analyse: Analyse?
     
     var title: String {
         let hour = workout.date.hour
@@ -114,19 +114,19 @@ struct RunDetailView: View {
                 .foregroundStyle(.primaryText)
                 .padding()
                 AnalyseView(response: analyse)
-                .offset(y: isShowingAnalyse ? 0 : -1000)
+                    .offset(y: isShowingAnalyse ? 0 : -1000)
             }
         }
         .navigationTitle(workout.date.toString(format: "dd MMM. YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) { 
                 Button("Analyse", systemImage: isShowingAnalyse ? "xmark" : "apple.intelligence") {
                     Task {
                         withAnimation {
                             isShowingAnalyse.toggle()
                         }
-                        if workout.analyse.isEmpty {
+                        if workout.analyse.sections.isEmpty {
                             analyse = await workoutsVM.askGemini(for: workout)
                         }
                         else {

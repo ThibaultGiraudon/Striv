@@ -16,19 +16,45 @@ class WorkoutsViewModel: ObservableObject {
     private let ai = FirebaseAI.firebaseAI(backend: .googleAI())
 
     // Create a `GenerativeModel` instance with a model that supports your use case
-    private var model: GenerativeModel { ai.generativeModel(modelName: "gemini-2.5-flash") }
+    private var model: GenerativeModel { ai.generativeModel(modelName: "gemini-2.5-flash-lite") }
     
-    func askGemini(for workout: Workout) async -> String {
+    func askGemini(for workout: Workout) async -> Analyse? {
         do {
             let response = try await model.generateContent(workout.analysePrompt)
-            if let index = workouts.firstIndex(where: { $0.id == workout.id }) {
-                workouts[index].analyse = response.text ?? ""
+            
+            
+            
+            let data = response.text?.data(using: .utf8)
+            
+            guard let data else {
+                print("Failed to get data")
+                return nil
             }
-            return response.text ?? ""
+                        
+            if let jsonSerialize = try JSONSerialization.jsonObject(with: data) as? Dictionary<String, Any> {
+                print(jsonSerialize)
+                guard let summary = jsonSerialize["summary"] as? String,
+                      let workedOn = jsonSerialize["workedOn"] as? [String],
+                      let watchOn = jsonSerialize["watchPoints"] as? [String],
+                      let nextAdvice = jsonSerialize["nextAdvice"] as? String else {
+                    print("Missing key")
+                    return nil
+                }
+                let analyse = Analyse(sections: [
+                    .init(title: "Résumé", items: [summary]),
+                    .init(title: "Ce que cette séance a travaillé", items: workedOn),
+                    .init(title: "Points de vigilance", items: watchOn),
+                    .init(title: "Conseil clé pour la prochaine séance", items: [nextAdvice])
+                ])
+                return analyse
+            } else {
+                print("Failed to serialize data")
+            }
+            
         } catch {
             print(error.localizedDescription)
         }
-        return ""
+        return nil
     }
     
     func fetchWorkouts() async {

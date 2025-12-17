@@ -10,6 +10,16 @@ import CoreLocation
 
 typealias Workouts = [Workout]
 
+struct Analyse {
+    var sections: [AnalyseSection]
+    
+    struct AnalyseSection: Identifiable, Hashable {
+        let id = UUID()
+        var title: String
+        var items: [String]
+    }
+}
+
 struct Workout: Identifiable {
     let id = UUID()
     var date: Date
@@ -46,20 +56,15 @@ struct Workout: Identifiable {
         - Pas de généralités sur “comment préparer un marathon”
         - Pas plus de 4 bullet points par section
 
-        Structure OBLIGATOIRE :
-
-        ### Résumé
-        (2 phrases maximum)
-
-        ### Ce que cette séance a travaillé
-        (2 à 4 points courts)
-
-        ### Points de vigilance
-        (1 à 2 points maximum)
-
-        ### Conseil clé pour la prochaine séance
-        (1 phrase concrète et actionnable)
-
+        Réponds en suivant EXACTEMENT et UNIQUEMENT ce format:
+        {
+            "summary": "",
+            "workedOn": ["", "", ...],
+            "watchPoints": ["", "", ...],
+            "nextAdvice": ""
+        }
+        
+        Ne rajoute et n'enlève rien, la réponse doit contenir uniquement ce modèle et ne doit PAS être formatté en Markdown ou en JSON.
         """)
 
         prompts.append("Objectif: Marathon")
@@ -88,7 +93,7 @@ struct Workout: Identifiable {
         return prompts.joined(separator: "\n")
     }
     
-    var analyse: String = ""
+    var analyse: Analyse = Analyse(sections: [])
 
     
     struct Duration {
