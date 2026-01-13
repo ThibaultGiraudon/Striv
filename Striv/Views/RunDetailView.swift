@@ -77,21 +77,19 @@ struct RunDetailView: View {
                                 .font(.switzer(size: 66, weight: .bold))
                                 .italic()
                                 .frame(height: geo.size.height * 1/8)
-                                .padding(.bottom)
+                            AltitudeView(altitudes: workout.altitudes)
+                                .frame(height: geo.size.height * 1/8)
                             VStack {
                                 RoundedRectangle(cornerRadius: 5)
                                     .frame(width: 40, height: 5)
                                     .padding(.top)
-                                    .gesture(
+                                    .highPriorityGesture(
                                         DragGesture()
                                             .onChanged({ value in
                                                 let newHeight = statViewHeight - value.translation.height
                                                 statViewHeight = min(max(newHeight, 100), geo.size.height)
                                             })
                                     )
-                                    .onTapGesture {
-                                        print("Tapped")
-                                    }
                                 ScrollView {
                                     statRow(systemImage: "clock", title: "Time", value: "\(workout.duration.hours):\(workout.duration.minutes):\(workout.duration.seconds)")
                                     statRow(systemImage: "figure.run", title: "Avg Pace", value: "\(workout.pace.minutes)'\(workout.pace.seconds < 10 ? "0" : "")\(workout.pace.seconds)\"")
@@ -102,7 +100,7 @@ struct RunDetailView: View {
                                     statRow(systemImage: "figure.run", title: "Cadence", value: workout.cadence)
                                 }
                             }
-                            .frame(height: statViewHeight * 3/4)
+                            .frame(height: statViewHeight * 1/2)
                             .glassEffect(in: .rect(cornerRadius: 16.0))
                             .font(.title2)
                         }
@@ -156,6 +154,6 @@ struct RunDetailView: View {
 
 #Preview {
     NavigationStack {
-        RunDetailView(workout: Workout(date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221, coordinates: []), workoutsVM: .init())
+        RunDetailView(workout: Workout(date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221, coordinates: [], altitudes: []), workoutsVM: .init())
     }
 }

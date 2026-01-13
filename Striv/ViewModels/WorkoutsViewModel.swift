@@ -63,15 +63,16 @@ class WorkoutsViewModel: ObservableObject {
                         locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
                     }
                     
+                    let altitudes = locations.filter { $0.verticalAccuracy > 0 }.map { $0.altitude }
                     let coordinates = locations.map { $0.coordinate }
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     let cadence = (stepCount ?? 0) / (duration / 60)
                     
-                    let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()), cadence: cadence, power: power, coordinates: coordinates)
+                    let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()), cadence: cadence, power: power, coordinates: coordinates, altitudes: altitudes)
                     self.workouts.append(workout)
                 } catch {
-                    print(error.localizedDescription)
+//                    print(error.localizedDescription)
                     continue
                 }
             }

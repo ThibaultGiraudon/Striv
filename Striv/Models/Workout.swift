@@ -34,6 +34,7 @@ struct Workout: Identifiable {
         Pace(pace:  Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
     }
     var coordinates: [CLLocationCoordinate2D]
+    var altitudes: [CLLocationDistance]
     
     var analysePrompt: String {
         var prompts: [String] = []

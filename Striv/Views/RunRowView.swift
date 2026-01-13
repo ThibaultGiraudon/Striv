@@ -46,5 +46,5 @@ struct RunRowView: View {
 }
 
 #Preview {
-    RunRowView(workout: Workout(date: .now, distance: 12129, duration: .init(4333), hr: 171, kcal: 949, elevation: 275, coordinates: []))
+    RunRowView(workout: Workout(date: .now, distance: 12129, duration: .init(4333), hr: 171, kcal: 949, elevation: 275, coordinates: [], altitudes: []))
 }
