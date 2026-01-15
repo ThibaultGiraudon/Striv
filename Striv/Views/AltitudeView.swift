@@ -19,11 +19,12 @@ struct AltitudeView: View {
     }
     var body: some View {
         Chart {
-            ForEach(altitudes.indices, id: \.self) { index in
+            let downSample = downsampleAltitudes(altitudes: altitudes)
+            ForEach(downSample.indices, id: \.self) { index in
                 AreaMark(
                     x: .value("Distance", index),
                     yStart: .value("Min", min),
-                    yEnd: .value("Altitude", altitudes[index])
+                    yEnd: .value("Altitude", downSample[index])
                 )
             }
         }
@@ -31,6 +32,25 @@ struct AltitudeView: View {
         .chartLegend(.hidden)
         .chartYAxis(.hidden)
         .chartXAxis(.hidden)
+    }
+    
+    func downsampleAltitudes(
+        altitudes: [Double],
+        maxDisplayPoints: Int = 300
+    ) -> [Double] {
+        guard altitudes.count > maxDisplayPoints else {
+            return altitudes
+        }
+
+        let windowSize = Int(ceil(
+            Double(altitudes.count) / Double(maxDisplayPoints)
+        ))
+
+        return stride(from: 0, to: altitudes.count, by: windowSize).map { start in
+            let end = Swift.min(start + windowSize, altitudes.count)
+            let window = altitudes[start..<end]
+            return window.reduce(0, +) / Double(window.count)
+        }
     }
 }
 
