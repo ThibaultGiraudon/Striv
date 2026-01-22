@@ -33,6 +33,20 @@ extension Date {
     var hour: Int {
         Calendar.current.component(.hour, from: self)
     }
+    
+    var week: Int {
+        Calendar.current.component(.weekOfYear, from: self)
+    }
+    
+    var year: Int {
+        Calendar.current.component(.year, from: self)
+    }
+    
+    var firstDayOfWeek: Date {
+        let components = Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
+        
+        return Calendar.current.date(from: components)!
+    }
 }
 
 struct RunDetailView: View {

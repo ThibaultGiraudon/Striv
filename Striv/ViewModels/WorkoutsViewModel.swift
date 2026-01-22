@@ -39,6 +39,50 @@ class NetworkMonitor: ReachabilityUC {
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = []
     @Published var error: AIError?
+    
+//    var distanceTotal: Int {
+//        var total: Double = 0
+//        
+//        for workout in workouts {
+//            total += workout.distance ?? 0
+//        }
+//        
+//        return Int(total)
+//    }
+//    
+//    var durationTotal: Duration {
+//        var total: Int = 0
+//        
+//        for workout in workouts {
+//            total += workout.duration.totalSeconds
+//        }
+//        
+//        return Duration(total)
+//    }
+//    
+//    var elevationTotal: Double {
+//        var total: Double = 0
+//        
+//        for workout in workouts {
+//            total += workout.elevation ?? 0
+//        }
+//        
+//        return total
+//    }
+    
+    var distancePerWeek: [Date: Double] {
+        var distances: [Date: Double] = [:]
+        
+        for workout in workouts {
+            let weekStart = workout.date.firstDayOfWeek
+            let distance = (workout.distance ?? 0) / 1000
+            
+            distances[weekStart, default: 0] += distance
+        }
+        
+        return distances
+    }
+    
     private let aiRepository: AIRepository = .init()
     private var isConnected: Bool = false
     private let networkMonitor = NetworkMonitor()
@@ -72,7 +116,7 @@ class WorkoutsViewModel: ObservableObject {
                     let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()), cadence: cadence, power: power, coordinates: coordinates, altitudes: altitudes)
                     self.workouts.append(workout)
                 } catch {
-//                    print(error.localizedDescription)
+                    print(error.localizedDescription)
                     continue
                 }
             }

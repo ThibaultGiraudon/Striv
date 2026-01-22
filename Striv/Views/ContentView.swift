@@ -14,17 +14,16 @@ struct ContentView: View {
     @StateObject var workoutsVM: WorkoutsViewModel = .init()
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                RunsListView(workoutsVM: workoutsVM)
+        TabView {
+            Tab("Home", systemImage: "house") {
+                NavigationStack {
+                    HomeView(workoutsVM: workoutsVM)
+                }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Download", systemImage: "arrow.down.circle") {
-                        Task {
-                            await workoutsVM.fetchWorkouts()
-                        }
-                    }
+
+            Tab("Runs", systemImage: "figure.run") {
+                NavigationStack {
+                    RunsListView(workoutsVM: workoutsVM)
                 }
             }
         }

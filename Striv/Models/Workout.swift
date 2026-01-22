@@ -95,21 +95,6 @@ struct Workout: Identifiable {
     }
     
     var analyse: Analyse = Analyse(sections: [])
-
-    
-    struct Duration {
-        var hours: Int
-        var minutes: Int
-        var seconds: Int
-        var totalSeconds: Int
-        
-        init(_ time: Int) {
-            self.hours = time / 3600
-            self.minutes = (time % 3600) / 60
-            self.seconds = time % 60
-            self.totalSeconds = time
-        }
-    }
     
     struct Pace {
         var minutes: Int

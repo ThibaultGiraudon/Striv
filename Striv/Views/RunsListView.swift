@@ -17,6 +17,16 @@ struct RunsListView: View {
                 RunRowView(workout: workout)
             }
         }
+        .navigationTitle("All runs")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Download", systemImage: "arrow.down.circle") {
+                    Task {
+                        await workoutsVM.fetchWorkouts()
+                    }
+                }
+            }
+        }
     }
 }
 
