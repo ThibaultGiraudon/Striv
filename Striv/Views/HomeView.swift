@@ -21,43 +21,33 @@ struct HomeView: View {
     var body: some View {
         VStack {
             Chart {
-                ForEach(workoutsVM.distancePerWeek.filter { dateRange.contains($0.key)}.sorted(by: >), id: \.key) { (date, distance) in
+                ForEach(workoutsVM.weeklyStats, id: \.self) { weekStat in
                     LineMark(
-                        x: .value("Week", date, unit: .weekOfYear),
-                        y: .value("Distance", distance)
+                        x: .value("Week", weekStat.startOfWeek),
+                        y: .value("Distance", weekStat.distance)
                     )
                     .foregroundStyle(.teal)
-                AreaMark(
-                        x: .value("Week", date, unit: .weekOfYear),
-                        y: .value("Distance", distance)
+                    
+                    AreaMark(
+                        x: .value("Week", weekStat.startOfWeek),
+                        y: .value("Distance", weekStat.distance)
                     )
-                .foregroundStyle(LinearGradient(colors: [.teal, .clear], startPoint: .top, endPoint: .bottom))
-                
+                    .foregroundStyle(LinearGradient(colors: [.teal, .clear], startPoint: .top, endPoint: .bottom))
+                    
                 }
             }
-            .gesture(
-                DragGesture()
-                    .onEnded { value in
-                        if value.translation.width < 0 {
-                            endDate = endDate.addingTimeInterval(86400 * 7 * 4)
-                        } else if value.translation.width > 0 {
-                            endDate = endDate.addingTimeInterval(86400 * -7 * 4)
-                        }
-                    }
-            )
+            .chartScrollableAxes(.horizontal)
+            .frame(height: 400)
         }
         .navigationTitle("Home")
-        .onAppear {
-            print(workoutsVM.distancePerWeek)
-        }
     }
 }
 
 #Preview {
     var workoutsVM = WorkoutsViewModel()
     workoutsVM.workouts = [
-        Workout(date: .now, distance: 12.7, duration: .init(3600), coordinates: [], altitudes: []),
-        Workout(date: Date().addingTimeInterval(-604800), distance: 21.8, duration: .init(3600), coordinates: [], altitudes: []),
+        Workout(date: .now, distance: 12700, duration: .init(3600), coordinates: [], altitudes: []),
+        Workout(date: Date().addingTimeInterval(-604800 * 2), distance: 21800, duration: .init(3600), coordinates: [], altitudes: []),
     ]
     return HomeView(workoutsVM: workoutsVM)
 }

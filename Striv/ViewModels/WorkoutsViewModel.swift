@@ -36,6 +36,18 @@ class NetworkMonitor: ReachabilityUC {
     }
 }
 
+struct WeeklyStat: Identifiable, Hashable {
+    var id = UUID()
+    let startOfWeek: Date
+    var endOfWeek: Date {
+        startOfWeek.addingTimeInterval(3600 * 24 * 6)
+    }
+    var label: String {
+        startOfWeek.toString(format: "d MMM") + "-" + endOfWeek.toString(format: "d MMM")
+    }
+    let distance: Double
+}
+
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = []
     @Published var error: AIError?
@@ -70,17 +82,38 @@ class WorkoutsViewModel: ObservableObject {
 //        return total
 //    }
     
-    var distancePerWeek: [Date: Double] {
-        var distances: [Date: Double] = [:]
+    var weeklyStats: [WeeklyStat] {
+        guard let firstWeek = workouts
+            .min(by: { $0.date < $1.date })?
+            .date
+            .firstDayOfWeek else {
+            return []
+        }
+
+        var weeksStats: [WeeklyStat] = []
         
-        for workout in workouts {
-            let weekStart = workout.date.firstDayOfWeek
-            let distance = (workout.distance ?? 0) / 1000
-            
-            distances[weekStart, default: 0] += distance
+        let grouped = Dictionary(grouping: workouts) {
+            $0.date.firstDayOfWeek
         }
         
-        return distances
+        var currentWeek = Date().firstDayOfWeek
+        
+        while firstWeek <= currentWeek {
+            let startOfWeek = currentWeek.firstDayOfWeek
+            
+            var distance: Double = 0
+            
+            if let workouts = grouped[startOfWeek] {
+                distance = workouts.reduce(0) {
+                    $0 + (($1.distance ?? 0) / 1000)
+                }
+            }
+            weeksStats.append(.init(startOfWeek: startOfWeek, distance: distance))
+            
+            currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentWeek)!
+        }
+        
+        return weeksStats.sorted(by: { $0.startOfWeek < $1.startOfWeek })
     }
     
     private let aiRepository: AIRepository = .init()
