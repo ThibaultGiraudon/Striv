@@ -7,11 +7,15 @@
 
 import Foundation
     
-struct Duration {
+struct Duration: Equatable, Hashable {
     var hours: Int
     var minutes: Int
     var seconds: Int
     var totalSeconds: Int
+    
+    var label: String {
+        String(format: "%d:%02d:%02d", hours, minutes, seconds)
+    }
     
     init(_ time: Int) {
         self.hours = time / 3600

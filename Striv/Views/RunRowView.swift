@@ -33,7 +33,7 @@ struct RunRowView: View {
                 .foregroundStyle(.primaryText)
             HStack {
                 Image(systemName: "clock")
-                Text("\(workout.duration.hours):\(workout.duration.minutes):\(workout.duration.seconds)")
+                Text(workout.duration.label)
                 Spacer()
                 Image(systemName: "figure.run")
                     .foregroundStyle(.teal)
