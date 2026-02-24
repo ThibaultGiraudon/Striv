@@ -45,42 +45,50 @@ struct WeeklyStat: Identifiable, Hashable {
     var label: String {
         startOfWeek.toString(format: "d MMM") + "-" + endOfWeek.toString(format: "d MMM")
     }
+    
     let distance: Double
+    let count: Int
+    let duration: Duration
+    let elevation: Double
+}
+
+struct GlobalStats {
+    let totalDistance: Double
+    let totalDuration: Duration
+    let totalElevation: Double
+    let count: Int
 }
 
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = []
     @Published var error: AIError?
     
-//    var distanceTotal: Int {
-//        var total: Double = 0
-//        
-//        for workout in workouts {
-//            total += workout.distance ?? 0
-//        }
-//        
-//        return Int(total)
-//    }
-//    
-//    var durationTotal: Duration {
-//        var total: Int = 0
-//        
-//        for workout in workouts {
-//            total += workout.duration.totalSeconds
-//        }
-//        
-//        return Duration(total)
-//    }
-//    
-//    var elevationTotal: Double {
-//        var total: Double = 0
-//        
-//        for workout in workouts {
-//            total += workout.elevation ?? 0
-//        }
-//        
-//        return total
-//    }
+    var globalStats: GlobalStats {
+        .init(
+            totalDistance: workouts.reduce(0) { $0 + ($1.distance ?? 0)} / 1000,
+            totalDuration: .init(workouts.reduce(0) { $0 + ($1.duration.totalSeconds)}),
+            totalElevation: workouts.reduce(0) { $0 + ($1.elevation ?? 0)},
+            count: workouts.count
+        )
+    }
+    
+    var lastFourWeeksStats: GlobalStats {
+        .init(
+            totalDistance: weeklyStats.suffix(4).reduce(0) { $0 + ($1.distance)},
+            totalDuration: .init(weeklyStats.suffix(4).reduce(0) { $0 + ($1.duration.totalSeconds)}),
+            totalElevation: weeklyStats.suffix(4).reduce(0) { $0 + ($1.elevation)},
+            count: weeklyStats.suffix(4).reduce(0) { $0 + $1.count }
+        )
+    }
+    
+    var currentWeekStats: GlobalStats {
+        .init(
+            totalDistance: weeklyStats.last?.distance ?? 0,
+            totalDuration: weeklyStats.last?.duration ?? .init(0),
+            totalElevation: weeklyStats.last?.elevation ?? 0,
+            count: weeklyStats.last?.count ?? 0
+        )
+    }
     
     var weeklyStats: [WeeklyStat] {
         guard let firstWeek = workouts
@@ -102,13 +110,33 @@ class WorkoutsViewModel: ObservableObject {
             let startOfWeek = currentWeek.firstDayOfWeek
             
             var distance: Double = 0
+            var duration: Int = 0
+            var elevation: Double = 0
             
             if let workouts = grouped[startOfWeek] {
                 distance = workouts.reduce(0) {
                     $0 + (($1.distance ?? 0) / 1000)
                 }
+                
+                duration = workouts.reduce(0) {
+                    $0 + $1.duration.totalSeconds
+                }
+                
+                elevation = workouts.reduce(0) {
+                    $0 + ($1.elevation ?? 0)
+                }
             }
-            weeksStats.append(.init(startOfWeek: startOfWeek, distance: distance))
+            
+            
+            weeksStats.append(
+                .init(
+                    startOfWeek: startOfWeek,
+                    distance: distance,
+                    count: grouped[startOfWeek]?.count ?? 0,
+                    duration: .init(duration),
+                    elevation: elevation
+                )
+            )
             
             currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentWeek)!
         }

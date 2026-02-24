@@ -15,9 +15,9 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            Tab("Home", systemImage: "house") {
+            Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
                 NavigationStack {
-                    HomeView(workoutsVM: workoutsVM)
+                    AllStatsView(workoutsVM: workoutsVM)
                 }
             }
 
