@@ -110,8 +110,8 @@ struct RunDetailView: View {
                                 .frame(height: geo.size.height * 1/8)
                             
                             ScrollView {
-                                statRow(systemImage: "clock", title: "Time", value: "\(workout.duration.hours):\(workout.duration.minutes):\(workout.duration.seconds)")
-                                statRow(systemImage: "figure.run", title: "Avg Pace", value: "\(workout.pace.minutes)'\(workout.pace.seconds < 10 ? "0" : "")\(workout.pace.seconds)\"")
+                                statRow(systemImage: "clock", title: "Time", value: workout.duration.label)
+                                statRow(systemImage: "figure.run", title: "Avg Pace", value: workout.pace.label)
                                 statRow(systemImage: "suit.heart", title: "Heart rate", value: workout.hr)
                                 statRow(systemImage: "flame", title: "Calories", value: workout.kcal)
                                 statRow(systemImage: "mountain.2", title: "Elevation gained", value: workout.elevation)
