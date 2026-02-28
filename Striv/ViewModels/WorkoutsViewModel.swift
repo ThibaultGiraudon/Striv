@@ -60,24 +60,53 @@ struct GlobalStats {
 }
 
 class WorkoutsViewModel: ObservableObject {
-    @Published var workouts: Workouts = []
+    @Published var workouts: Workouts = [] {
+        didSet {
+            weeklyStats = self.computedWeeklyStats()
+        }
+    }
     @Published var error: AIError?
+    @Published private(set) var weeklyStats: [WeeklyStat] = []
     
     var globalStats: GlobalStats {
-        .init(
-            totalDistance: workouts.reduce(0) { $0 + ($1.distance ?? 0)} / 1000,
-            totalDuration: .init(workouts.reduce(0) { $0 + ($1.duration.totalSeconds)}),
-            totalElevation: workouts.reduce(0) { $0 + ($1.elevation ?? 0)},
+        
+        var distance: Double = 0
+        var duration: Int = 0
+        var elevation: Double = 0
+        
+        for workout in self.workouts {
+            distance += (workout.distance ?? 0) / 1000
+            duration += workout.duration.totalSeconds
+            elevation += workout.elevation ?? 0
+        }
+        
+        return .init(
+            totalDistance: distance,
+            totalDuration: .init(duration),
+            totalElevation: elevation,
             count: workouts.count
         )
     }
     
     var lastFourWeeksStats: GlobalStats {
-        .init(
-            totalDistance: weeklyStats.suffix(4).reduce(0) { $0 + ($1.distance)},
-            totalDuration: .init(weeklyStats.suffix(4).reduce(0) { $0 + ($1.duration.totalSeconds)}),
-            totalElevation: weeklyStats.suffix(4).reduce(0) { $0 + ($1.elevation)},
-            count: weeklyStats.suffix(4).reduce(0) { $0 + $1.count }
+        
+        var distance: Double = 0
+        var duration: Int = 0
+        var elevation: Double = 0
+        var count: Int = 0
+        
+        for weekStat in self.weeklyStats.suffix(4) {
+            distance += weekStat.distance
+            duration += weekStat.duration.totalSeconds
+            elevation += weekStat.elevation
+            count += weekStat.count
+        }
+        
+        return .init(
+            totalDistance: distance,
+            totalDuration: .init(duration),
+            totalElevation: elevation,
+            count: count
         )
     }
     
@@ -90,7 +119,41 @@ class WorkoutsViewModel: ObservableObject {
         )
     }
     
-    var weeklyStats: [WeeklyStat] {
+    var currentStreak: Int {
+        var streak: Int = 0
+        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        
+        for week in sortedWeeks {
+            if week.count > 0 {
+                streak += 1
+            } else {
+                return streak
+            }
+        }
+        
+        return streak
+    }
+    
+    var longestStreak: Int {
+        var longestStreak: Int = 0
+        var currentStreak: Int = 0
+        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        
+        for week in sortedWeeks {
+            if week.count > 0 {
+                currentStreak += 1
+            } else {
+                if currentStreak >= longestStreak {
+                    longestStreak = currentStreak
+                }
+                currentStreak = 0
+            }
+        }
+        
+        return longestStreak > currentStreak ? longestStreak : currentStreak
+    }
+    
+    func computedWeeklyStats() -> [WeeklyStat] {
         guard let firstWeek = workouts
             .min(by: { $0.date < $1.date })?
             .date

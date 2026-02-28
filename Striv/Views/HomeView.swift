@@ -16,6 +16,51 @@ struct AllStatsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
+                
+                HStack {
+                    VStack {
+                        ZStack(alignment: .bottom) {
+                            Image(systemName: "flame")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 75)
+                                .foregroundStyle(.red)
+                            Image(systemName: "flame.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 75)
+                                .foregroundStyle(.red)
+                            Text("\(workoutsVM.currentStreak)")
+                                .foregroundStyle(Color.background)
+                                .font(.largeTitle.bold())
+                                .padding(.bottom, 5)
+                        }
+                        Text("Current Streak")
+                            .foregroundStyle(.red)
+                            .bold()
+                    }
+                    VStack {
+                        ZStack(alignment: .bottom) {
+                            Image(systemName: "flame")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 75)
+                                .foregroundStyle(Color.primaryText)
+                            Image(systemName: "flame.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 75)
+                                .foregroundStyle(Color.primaryText)
+                            Text("\(workoutsVM.longestStreak)")
+                                .foregroundStyle(Color.background)
+                                .font(.largeTitle.bold())
+                                .padding(.bottom, 5)
+                        }
+                        Text("Longest Streak")
+                            .bold()
+                    }
+                }
+                
                 StatsView(title: "All time", stats: workoutsVM.globalStats)
                 StatsView(title: "Last 4 weeks", stats: workoutsVM.lastFourWeeksStats)
                 StatsView(title: "Current week", stats: workoutsVM.currentWeekStats)
@@ -39,6 +84,9 @@ struct AllStatsView: View {
                 .chartScrollableAxes(.horizontal)
                 .chartScrollPosition(initialX: Date.now)
                 .frame(height: 400)
+                
+                CalendarView(workouts: $workoutsVM.workouts)
+                
             }
             .padding()
         }
