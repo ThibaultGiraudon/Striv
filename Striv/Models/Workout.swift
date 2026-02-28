@@ -100,6 +100,10 @@ struct Workout: Identifiable {
         var minutes: Int
         var seconds: Int
         
+        var label: String {
+            String(format: "%02d\'%02d\"/km", minutes, seconds)
+        }
+        
         init(pace: Double) {
             self.minutes = Int(pace / 1)
             self.seconds = Int(pace.truncatingRemainder(dividingBy: 1) * 60)

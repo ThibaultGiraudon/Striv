@@ -37,7 +37,7 @@ struct RunRowView: View {
                 Spacer()
                 Image(systemName: "figure.run")
                     .foregroundStyle(.teal)
-                Text("\(workout.pace.minutes)\'\(workout.pace.seconds)\"/km")
+                Text(workout.pace.label)
             }
             .foregroundStyle(.secondary)
         }
