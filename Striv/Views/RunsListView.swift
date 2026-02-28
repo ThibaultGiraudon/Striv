@@ -22,7 +22,7 @@ struct RunsListView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Download", systemImage: "arrow.down.circle") {
                     Task {
-                        await workoutsVM.fetchWorkouts()
+                        await workoutsVM.fetchWorkoutsSummary()
                     }
                 }
             }

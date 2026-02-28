@@ -21,7 +21,7 @@ struct Analyse {
 }
 
 struct Workout: Identifiable {
-    let id = UUID()
+    let id: UUID
     var date: Date
     var distance: Double?
     var duration: Duration
@@ -33,8 +33,8 @@ struct Workout: Identifiable {
     var pace: Pace {
         Pace(pace:  Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
     }
-    var coordinates: [CLLocationCoordinate2D]
-    var altitudes: [CLLocationDistance]
+    var coordinates: [CLLocationCoordinate2D] = []
+    var altitudes: [CLLocationDistance] = []
     
     var analysePrompt: String {
         var prompts: [String] = []

@@ -75,7 +75,7 @@ struct CalendarView: View {
 
 #Preview {
     @Previewable @State var workouts: Workouts = [
-        .init(date: .now, duration: .init(3681), coordinates: [], altitudes: [])
+        .init(id: UUID(), date: .now, duration: .init(3681), coordinates: [], altitudes: [])
     ]
     CalendarView(workouts: $workouts)
 }

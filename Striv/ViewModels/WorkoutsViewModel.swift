@@ -211,43 +211,102 @@ class WorkoutsViewModel: ObservableObject {
     private var isConnected: Bool = false
     private let networkMonitor = NetworkMonitor()
     
-    func fetchWorkouts() async {
+    func fetchWorkoutsSummary() async {
         do {
             let hkWorkouts = try await HealthKitHelper.shared.getWorkouts()
             
-            for hkWorkout in hkWorkouts {
-                do {
-                    let distance = try await HealthKitHelper.shared.fetchDistance(for: hkWorkout)
-                    let hr = try await HealthKitHelper.shared.fetchAverageHeartRate(for: hkWorkout)
-                    let kcal = try await HealthKitHelper.shared.fetchActiveEnergy(for: hkWorkout)
-                    let power = try await HealthKitHelper.shared.fetchPower(for: hkWorkout)
-                    let stepCount = try await HealthKitHelper.shared.fetchCadence(for: hkWorkout)
-                    let elevation = hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity
-                    let routes = try await HealthKitHelper.shared.fetchRoute(for: hkWorkout)
-                    
-                    var locations: [CLLocation] = []
-                    
-                    if let firstRoute = routes.first {
-                        locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+            var newWorkouts: [Workout] = []
+            
+            try await withThrowingTaskGroup(of: Workout?.self) { group in
+                
+                for hkWorkout in hkWorkouts {
+                    group.addTask {
+                        do {
+                            async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
+                            
+                            let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
+                            
+                            return await Workout(
+                                id: hkWorkout.uuid,
+                                date: hkWorkout.startDate,
+                                distance: try await distance,
+                                duration: .init(Int(duration)),
+                                elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
+                            )
+                            
+                        } catch {
+                            return nil
+                        }
                     }
-                    
-                    let altitudes = locations.filter { $0.verticalAccuracy > 0 }.map { $0.altitude }
-                    let coordinates = locations.map { $0.coordinate }
-                    
-                    let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
-                    let cadence = (stepCount ?? 0) / (duration / 60)
-                    
-                    let workout = Workout(date: hkWorkout.startDate, distance: distance, duration: .init(Int(duration)), hr: hr, kcal: kcal, elevation: elevation?.doubleValue(for: .meter()), cadence: cadence, power: power, coordinates: coordinates, altitudes: altitudes)
-                    self.workouts.append(workout)
-                } catch {
-                    print(error.localizedDescription)
-                    continue
+                }
+                
+                for try await workout in group {
+                    if let workout {
+                        newWorkouts.append(workout)
+                    }
                 }
             }
+            
+            await MainActor.run {
+                self.workouts = newWorkouts.sorted(by: {$0.date > $1.date})
+            }
+            
         } catch {
             print(error.localizedDescription)
         }
     }
+    
+    func fetchWorkoutDetail(for workout: Workout) async -> Workout {
+        guard let index = self.workouts.firstIndex(where: {$0.id == workout.id}) else {
+            return workout
+        }
+        
+        var newWorkout = workout
+        
+        do {
+            async let hr = HealthKitHelper.shared.fetchAverageHeartRate(with: workout.id)
+            async let kcal = HealthKitHelper.shared.fetchActiveEnergy(with: workout.id)
+            async let power = HealthKitHelper.shared.fetchPower(with: workout.id)
+            async let stepCount = HealthKitHelper.shared.fetchCadence(with: workout.id)
+            async let routes = HealthKitHelper.shared.fetchRoute(with: workout.id)
+            
+            let resolvedRoutes = try await routes
+            
+            var locations: [CLLocation] = []
+            if let firstRoute = resolvedRoutes.first {
+                locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+            }
+            
+            let minutes = max(Double(newWorkout.duration.totalSeconds) / 60, 1)
+            let cadence = (try await stepCount ?? 0) / minutes
+            
+            newWorkout.hr = try await hr
+            newWorkout.kcal = try await kcal
+            newWorkout.power = try await power
+            newWorkout.cadence = cadence
+            newWorkout.coordinates = locations.map { $0.coordinate }
+            newWorkout.altitudes = locations.map { $0.altitude }
+            
+            self.workouts[index] = newWorkout
+            return newWorkout
+        } catch {
+            print(error.localizedDescription)
+        }
+        return workout
+    }
+    
+    func fetchWorkoutDetailIfNeeded(for workout: Workout) async -> Workout {
+        guard let index = self.workouts.firstIndex(where: { $0.id == workout.id }) else {
+            return workout
+        }
+
+        if workouts[index].hr != nil {
+            return workouts[index]
+        }
+
+        return await fetchWorkoutDetail(for: workout)
+    }
+    
     
     func getWorkoutAnalyse(for workout: Workout) async -> Analyse? {
         self.error = nil

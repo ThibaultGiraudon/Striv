@@ -88,6 +88,44 @@ class HealthKitHelper {
         
     }
     
+    func getWorkout(with id: UUID) async throws -> HKWorkout {
+        guard let healthStore, self.isAuthorized == true else {
+            throw URLError(.unknown) // TODO: create custom error
+        }
+        
+        let predicate = HKQuery.predicateForObject(with: id)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: .workoutType(),
+                predicate: predicate,
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, error in
+
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                guard let workout = samples?.first as? HKWorkout else {
+                    continuation.resume(throwing: NSError())
+                    return
+                }
+
+                continuation.resume(returning: workout)
+            }
+
+            healthStore.execute(query)
+        }
+    }
+    
+    func fetchActiveEnergy(with id: UUID) async throws -> Double? {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchActiveEnergy(for: hkWorkout)
+    }
+    
     func fetchActiveEnergy(for workout: HKWorkout) async throws -> Double? {
         
         guard let healthStore, self.isAuthorized == true else {
@@ -116,6 +154,12 @@ class HealthKitHelper {
             }
             healthStore.execute(query)
         }
+    }
+    
+    func fetchAverageHeartRate(with id: UUID) async throws -> Double? {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchAverageHeartRate(for: hkWorkout)
     }
     
     func fetchAverageHeartRate(for workout: HKWorkout) async throws -> Double? {
@@ -148,6 +192,12 @@ class HealthKitHelper {
         }
     }
     
+    func fetchDistance(with id: UUID) async throws -> Double? {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchDistance(for: hkWorkout)
+    }
+    
     func fetchDistance(for workout: HKWorkout) async throws -> Double? {
         
         guard let healthStore, self.isAuthorized == true else {
@@ -176,6 +226,12 @@ class HealthKitHelper {
             }
             healthStore.execute(query)
         }
+    }
+    
+    func fetchPower(with id: UUID) async throws -> Double? {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchPower(for: hkWorkout)
     }
     
     func fetchPower(for workout: HKWorkout) async throws -> Double? {
@@ -208,6 +264,12 @@ class HealthKitHelper {
         }
     }
     
+    func fetchCadence(with id: UUID) async throws -> Double? {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchCadence(for: hkWorkout)
+    }
+    
     func fetchCadence(for workout: HKWorkout) async throws -> Double? {
         
         guard let healthStore, self.isAuthorized == true else {
@@ -236,6 +298,12 @@ class HealthKitHelper {
             }
             healthStore.execute(query)
         }
+    }
+    
+    func fetchRoute(with id: UUID) async throws -> [HKWorkoutRoute] {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchRoute(for: hkWorkout)
     }
     
     func fetchRoute(for workout: HKWorkout) async throws -> [HKWorkoutRoute] {

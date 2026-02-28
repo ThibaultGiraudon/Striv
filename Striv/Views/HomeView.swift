@@ -99,8 +99,8 @@ struct AllStatsView: View {
 #Preview {
     var workoutsVM = WorkoutsViewModel()
     workoutsVM.workouts = [
-        Workout(date: .now, distance: 12700, duration: .init(3600), coordinates: [], altitudes: []),
-        Workout(date: Date().addingTimeInterval(-604800 * 2), distance: 21800, duration: .init(3600), coordinates: [], altitudes: []),
+        Workout(id: UUID(), date: .now, distance: 12700, duration: .init(3600), coordinates: [], altitudes: []),
+        Workout(id: UUID(), date: Date().addingTimeInterval(-604800 * 2), distance: 21800, duration: .init(3600), coordinates: [], altitudes: []),
     ]
     return  NavigationStack { AllStatsView(workoutsVM: workoutsVM) }
 }
