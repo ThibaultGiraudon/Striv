@@ -7,62 +7,6 @@
 
 import SwiftUI
 
-protocol StatDisplayable {
-    var statText: String { get }
-}
-
-extension String: StatDisplayable {
-    var statText: String {
-        self
-    }
-}
-
-extension Double: StatDisplayable {
-    var statText: String {
-        String(format: "%.0f", self)
-    }
-}
-
-extension Int: StatDisplayable {
-    var statText: String {
-        String(describing: self)
-    }
-}
-
-extension Date {
-    var hour: Int {
-        Calendar.current.component(.hour, from: self)
-    }
-    
-    var day: Int {
-        Calendar.current.component(.day, from: self)
-    }
-    
-    var week: Int {
-        Calendar.current.component(.weekOfYear, from: self)
-    }
-    
-    var month: Int {
-        Calendar.current.component(.month, from: self)
-    }
-    
-    var year: Int {
-        Calendar.current.component(.year, from: self)
-    }
-    
-    var stripped: Date {
-        let components = Calendar.current.dateComponents([.day, .month, .year], from: self)
-        
-        return Calendar.current.date(from: components)!
-    }
-    
-    var firstDayOfWeek: Date {
-        let components = Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
-        
-        return Calendar.current.date(from: components)!
-    }
-}
-
 struct RunDetailView: View {
     @State var workout: Workout
     @State private var statViewHeight = 400.0

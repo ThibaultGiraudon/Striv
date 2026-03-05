@@ -10,7 +10,7 @@ import CoreLocation
 
 typealias Workouts = [Workout]
 
-struct Analyse {
+struct Analyse: Equatable {
     var sections: [AnalyseSection]
     
     struct AnalyseSection: Identifiable, Hashable {
@@ -20,7 +20,7 @@ struct Analyse {
     }
 }
 
-struct Workout: Identifiable {
+struct Workout: Identifiable, Equatable {
     let id: UUID
     var date: Date
     var distance: Double?
@@ -96,7 +96,7 @@ struct Workout: Identifiable {
     
     var analyse: Analyse = Analyse(sections: [])
     
-    struct Pace {
+    struct Pace: Equatable {
         var minutes: Int
         var seconds: Int
         
@@ -109,4 +109,9 @@ struct Workout: Identifiable {
             self.seconds = Int(pace.truncatingRemainder(dividingBy: 1) * 60)
         }
     }
+    
+    static func == (lhs: Workout, rhs: Workout) -> Bool {
+        lhs.id == rhs.id
+    }
 }
+

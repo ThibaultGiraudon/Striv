@@ -11,6 +11,7 @@ import Charts
 
 struct AllStatsView: View {
     @ObservedObject var workoutsVM: WorkoutsViewModel
+    @StateObject private var dashboardVM = DashboardViewModel()
     
     @State var endDate: Date = .now
     var body: some View {
@@ -30,7 +31,7 @@ struct AllStatsView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(height: 75)
                                 .foregroundStyle(.red)
-                            Text("\(workoutsVM.currentStreak)")
+                            Text("\(dashboardVM.stats.currentStreak)")
                                 .foregroundStyle(Color.background)
                                 .font(.largeTitle.bold())
                                 .padding(.bottom, 5)
@@ -51,7 +52,7 @@ struct AllStatsView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(height: 75)
                                 .foregroundStyle(Color.primaryText)
-                            Text("\(workoutsVM.longestStreak)")
+                            Text("\(dashboardVM.stats.longestStreak)")
                                 .foregroundStyle(Color.background)
                                 .font(.largeTitle.bold())
                                 .padding(.bottom, 5)
@@ -61,12 +62,12 @@ struct AllStatsView: View {
                     }
                 }
                 
-                StatsView(title: "All time", stats: workoutsVM.globalStats)
-                StatsView(title: "Last 4 weeks", stats: workoutsVM.lastFourWeeksStats)
-                StatsView(title: "Current week", stats: workoutsVM.currentWeekStats)
+                StatsView(title: "All time", stats: dashboardVM.stats.global)
+                StatsView(title: "Last 4 weeks", stats: dashboardVM.stats.lastFourWeeks)
+                StatsView(title: "Current week", stats: dashboardVM.stats.currentWeek)
                 
                 Chart {
-                    ForEach(workoutsVM.weeklyStats, id: \.self) { weekStat in
+                    ForEach(dashboardVM.stats.weekly, id: \.self) { weekStat in
                         LineMark(
                             x: .value("Week", weekStat.startOfWeek),
                             y: .value("Distance", weekStat.distance)
@@ -89,6 +90,12 @@ struct AllStatsView: View {
                 
             }
             .padding()
+            .onChange(of: workoutsVM.workouts) { workouts in
+                dashboardVM.load(with: workouts)
+            }
+            .task {
+                dashboardVM.load(with: workoutsVM.workouts)
+            }
         }
         .scrollIndicators(.hidden)
         .navigationTitle("Stats")

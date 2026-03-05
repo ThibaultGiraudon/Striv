@@ -10,204 +10,15 @@ import Combine
 import HealthKit
 import CoreLocation
 import FirebaseAILogic
-import Network
 
-protocol ReachabilityUC {
-    func execute() -> Bool
-}
-
-class NetworkMonitor: ReachabilityUC {
-    
-    private let monitor: NWPathMonitor
-    private let queue: DispatchQueue
-    private var isConnected = false
-
-    init() {
-        monitor = NWPathMonitor()
-        queue = DispatchQueue.global(qos: .background)
-        monitor.pathUpdateHandler = { [weak self] path in
-            self?.isConnected = path.status == .satisfied
-        }
-        monitor.start(queue: self.queue)
-    }
-    
-    func execute() -> Bool {
-        isConnected
-    }
-}
-
-struct WeeklyStat: Identifiable, Hashable {
-    var id = UUID()
-    let startOfWeek: Date
-    var endOfWeek: Date {
-        startOfWeek.addingTimeInterval(3600 * 24 * 6)
-    }
-    var label: String {
-        startOfWeek.toString(format: "d MMM") + "-" + endOfWeek.toString(format: "d MMM")
-    }
-    
-    let distance: Double
-    let count: Int
-    let duration: Duration
-    let elevation: Double
-}
-
-struct GlobalStats {
-    let totalDistance: Double
-    let totalDuration: Duration
-    let totalElevation: Double
-    let count: Int
-}
-
+@MainActor
 class WorkoutsViewModel: ObservableObject {
-    @Published var workouts: Workouts = [] {
-        didSet {
-            weeklyStats = self.computedWeeklyStats()
-        }
-    }
+    @Published var workouts: Workouts = [] 
     @Published var error: AIError?
     @Published private(set) var weeklyStats: [WeeklyStat] = []
     
-    var globalStats: GlobalStats {
-        
-        var distance: Double = 0
-        var duration: Int = 0
-        var elevation: Double = 0
-        
-        for workout in self.workouts {
-            distance += (workout.distance ?? 0) / 1000
-            duration += workout.duration.totalSeconds
-            elevation += workout.elevation ?? 0
-        }
-        
-        return .init(
-            totalDistance: distance,
-            totalDuration: .init(duration),
-            totalElevation: elevation,
-            count: workouts.count
-        )
-    }
-    
-    var lastFourWeeksStats: GlobalStats {
-        
-        var distance: Double = 0
-        var duration: Int = 0
-        var elevation: Double = 0
-        var count: Int = 0
-        
-        for weekStat in self.weeklyStats.suffix(4) {
-            distance += weekStat.distance
-            duration += weekStat.duration.totalSeconds
-            elevation += weekStat.elevation
-            count += weekStat.count
-        }
-        
-        return .init(
-            totalDistance: distance,
-            totalDuration: .init(duration),
-            totalElevation: elevation,
-            count: count
-        )
-    }
-    
-    var currentWeekStats: GlobalStats {
-        .init(
-            totalDistance: weeklyStats.last?.distance ?? 0,
-            totalDuration: weeklyStats.last?.duration ?? .init(0),
-            totalElevation: weeklyStats.last?.elevation ?? 0,
-            count: weeklyStats.last?.count ?? 0
-        )
-    }
-    
-    var currentStreak: Int {
-        var streak: Int = 0
-        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
-        
-        for week in sortedWeeks {
-            if week.count > 0 {
-                streak += 1
-            } else {
-                return streak
-            }
-        }
-        
-        return streak
-    }
-    
-    var longestStreak: Int {
-        var longestStreak: Int = 0
-        var currentStreak: Int = 0
-        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
-        
-        for week in sortedWeeks {
-            if week.count > 0 {
-                currentStreak += 1
-            } else {
-                if currentStreak >= longestStreak {
-                    longestStreak = currentStreak
-                }
-                currentStreak = 0
-            }
-        }
-        
-        return longestStreak > currentStreak ? longestStreak : currentStreak
-    }
-    
-    func computedWeeklyStats() -> [WeeklyStat] {
-        guard let firstWeek = workouts
-            .min(by: { $0.date < $1.date })?
-            .date
-            .firstDayOfWeek else {
-            return []
-        }
-
-        var weeksStats: [WeeklyStat] = []
-        
-        let grouped = Dictionary(grouping: workouts) {
-            $0.date.firstDayOfWeek
-        }
-        
-        var currentWeek = Date().firstDayOfWeek
-        
-        while firstWeek <= currentWeek {
-            let startOfWeek = currentWeek.firstDayOfWeek
-            
-            var distance: Double = 0
-            var duration: Int = 0
-            var elevation: Double = 0
-            
-            if let workouts = grouped[startOfWeek] {
-                distance = workouts.reduce(0) {
-                    $0 + (($1.distance ?? 0) / 1000)
-                }
-                
-                duration = workouts.reduce(0) {
-                    $0 + $1.duration.totalSeconds
-                }
-                
-                elevation = workouts.reduce(0) {
-                    $0 + ($1.elevation ?? 0)
-                }
-            }
-            
-            
-            weeksStats.append(
-                .init(
-                    startOfWeek: startOfWeek,
-                    distance: distance,
-                    count: grouped[startOfWeek]?.count ?? 0,
-                    duration: .init(duration),
-                    elevation: elevation
-                )
-            )
-            
-            currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentWeek)!
-        }
-        
-        return weeksStats.sorted(by: { $0.startOfWeek < $1.startOfWeek })
-    }
-    
     private let aiRepository: AIRepository = .init()
+    
     private var isConnected: Bool = false
     private let networkMonitor = NetworkMonitor()
     
@@ -285,7 +96,7 @@ class WorkoutsViewModel: ObservableObject {
             newWorkout.power = try await power
             newWorkout.cadence = cadence
             newWorkout.coordinates = locations.map { $0.coordinate }
-            newWorkout.altitudes = locations.map { $0.altitude }
+            newWorkout.altitudes = locations.map { $0.altitude }.downSample()
             
             self.workouts[index] = newWorkout
             return newWorkout
@@ -300,7 +111,7 @@ class WorkoutsViewModel: ObservableObject {
             return workout
         }
 
-        if workouts[index].hr != nil {
+        if workouts[index].cadence != nil {
             return workouts[index]
         }
 
