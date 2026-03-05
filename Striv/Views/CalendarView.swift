@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CalendarView: View {
     @State private var date: Date = .now
-    @Binding var workouts: Workouts
+    @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
+    
     var body: some View {
         VStack {
             LazyVGrid(columns: Array(repeating: .init(), count: 7)) {
@@ -74,8 +76,5 @@ struct CalendarView: View {
 }
 
 #Preview {
-    @Previewable @State var workouts: Workouts = [
-        .init(id: UUID(), date: .now, duration: .init(3681), coordinates: [], altitudes: [])
-    ]
-    CalendarView(workouts: $workouts)
+    CalendarView()
 }

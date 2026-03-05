@@ -37,7 +37,7 @@ struct RunDetailView: View {
     var body: some View {
         VStack {
             ZStack {
-                RouteMapView(coordinates: workout.coordinates)
+                RouteMapView(coordinates: workout.coordinates2d)
                     .disabled(isShowingStats)
                 VStack(alignment: .leading) {
                     Text(workout.date.toString(format: "EEEE,"))
@@ -90,8 +90,10 @@ struct RunDetailView: View {
                         withAnimation {
                             isShowingAnalyse.toggle()
                         }
-                        if workout.analyse.sections.isEmpty {
-                            analyse = await analyseVM.analyse(workout)
+                        if workout.analyse == nil {
+                            let analyseRaw = await analyseVM.analyse(workout)
+                            workout.analyseRaw = analyseRaw
+                            analyse = workout.analyse
                         }
                         else {
                             analyse = workout.analyse

@@ -9,8 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Environment(\.modelContext) var modelContext
     @StateObject var workoutsVM: WorkoutsViewModel = .init()
 
     var body: some View {
@@ -27,25 +26,16 @@ struct ContentView: View {
                 }
             }
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+        .onAppear {
+            workoutsVM.setContext(context: modelContext)
         }
     }
 }
 
 #Preview {
+    @Previewable @Environment(\.modelContext) var modelContext
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Workout.self, inMemory: true)
+        .modelContainer(for: Duration.self, inMemory: true)
+        .modelContainer(for: Coordinate.self, inMemory: true)
 }

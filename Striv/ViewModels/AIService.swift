@@ -17,7 +17,7 @@ final class AIService {
         self.networkMonitor = networkMonitor
     }
     
-    func analyze(_ workout: Workout) async throws -> Analyse {
+    func analyze(_ workout: Workout) async throws -> String {
         guard networkMonitor.execute() else {
             throw AIError.connection
         }

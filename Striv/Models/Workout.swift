@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import SwiftData
 
 typealias Workouts = [Workout]
 
@@ -20,8 +21,22 @@ struct Analyse: Equatable {
     }
 }
 
-struct Workout: Identifiable, Equatable {
-    let id: UUID
+@Model
+final class Coordinate {
+    var latitude: Double
+    var longitude: Double
+    var timestamp: Date
+
+    init(latitude: Double, longitude: Double, timestamp: Date) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.timestamp = timestamp
+    }
+}
+
+@Model
+class Workout: Identifiable, Equatable {
+    @Attribute(.unique) var id: UUID
     var date: Date
     var distance: Double?
     var duration: Duration
@@ -33,8 +48,13 @@ struct Workout: Identifiable, Equatable {
     var pace: Pace {
         Pace(pace:  Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
     }
-    var coordinates: [CLLocationCoordinate2D] = []
-    var altitudes: [CLLocationDistance] = []
+    var coordinates: [Coordinate] = []
+    var coordinates2d: [CLLocationCoordinate2D] {
+        coordinates
+            .sorted { $0.timestamp > $1.timestamp }
+            .map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
+    }
+    var altitudes: [Double] = []
     
     var analysePrompt: String {
         var prompts: [String] = []
@@ -94,7 +114,46 @@ struct Workout: Identifiable, Equatable {
         return prompts.joined(separator: "\n")
     }
     
-    var analyse: Analyse = Analyse(sections: [])
+    var analyse: Analyse? {
+        
+        guard let data = analyseRaw?.data(using: .utf8) else {
+            return nil
+        }
+        
+        if let jsonSerialize = try? JSONSerialization.jsonObject(with: data) as? Dictionary<String, Any> {
+            guard let summary = jsonSerialize["summary"] as? String,
+                  let workedOn = jsonSerialize["workedOn"] as? [String],
+                  let watchOn = jsonSerialize["watchPoints"] as? [String],
+                  let nextAdvice = jsonSerialize["nextAdvice"] as? String else {
+                return nil
+            }
+            let analyse = Analyse(sections: [
+                .init(title: "Résumé", items: [summary]),
+                .init(title: "Ce que cette séance a travaillé", items: workedOn),
+                .init(title: "Points de vigilance", items: watchOn),
+                .init(title: "Conseil clé pour la prochaine séance", items: [nextAdvice])
+            ])
+            return analyse
+        }
+        
+        return nil
+    }
+    var analyseRaw: String?
+    
+    init(id: UUID, date: Date, distance: Double? = nil, duration: Duration, hr: Double? = nil, kcal: Double? = nil, elevation: Double? = nil, cadence: Double? = nil, power: Double? = nil, coordinates: [Coordinate] = [], altitudes: [Double] = [], analyseRaw: String? = nil) {
+        self.id = id
+        self.date = date
+        self.distance = distance
+        self.duration = duration
+        self.hr = hr
+        self.kcal = kcal
+        self.elevation = elevation
+        self.cadence = cadence
+        self.power = power
+        self.coordinates = coordinates
+        self.altitudes = altitudes
+        self.analyseRaw = analyseRaw
+    }
     
     struct Pace: Equatable {
         var minutes: Int
