@@ -9,51 +9,42 @@ import Foundation
 import Combine
 import HealthKit
 import CoreLocation
-import FirebaseAILogic
+import SwiftData
+import _SwiftData_SwiftUI
 
-@MainActor
+//@MainActor
 class WorkoutsViewModel: ObservableObject {
-    @Published var workouts: Workouts = [] 
+    private var context: ModelContext?
+    
+    func setContext(context: ModelContext) {
+        self.context = context
+    }
     
     func fetchWorkoutsSummary() async {
         do {
+            guard let context else { return }
             let hkWorkouts = try await HealthKitHelper.shared.getWorkouts()
-            
-            var newWorkouts: [Workout] = []
-            
-            try await withThrowingTaskGroup(of: Workout?.self) { group in
-                
-                for hkWorkout in hkWorkouts {
-                    group.addTask {
-                        do {
-                            async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
                             
-                            let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
-                            
-                            return await Workout(
-                                id: hkWorkout.uuid,
-                                date: hkWorkout.startDate,
-                                distance: try await distance,
-                                duration: .init(Int(duration)),
-                                elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
-                            )
-                            
-                        } catch {
-                            return nil
-                        }
-                    }
-                }
-                
-                for try await workout in group {
-                    if let workout {
-                        newWorkouts.append(workout)
-                    }
+            for hkWorkout in hkWorkouts {
+                do {
+                    async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
+                    
+                    let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
+                    
+                    let workout = Workout(
+                        id: hkWorkout.uuid,
+                        date: hkWorkout.startDate,
+                        distance: try await distance,
+                        duration: .init(Int(duration)),
+                        elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
+                    )
+                    context.insert(workout)
+                } catch {
+                    continue
                 }
             }
             
-            await MainActor.run {
-                self.workouts = newWorkouts.sorted(by: {$0.date > $1.date})
-            }
+            try context.save()
             
         } catch {
             print(error.localizedDescription)
@@ -61,11 +52,9 @@ class WorkoutsViewModel: ObservableObject {
     }
     
     func fetchWorkoutDetail(for workout: Workout) async -> Workout {
-        guard let index = self.workouts.firstIndex(where: {$0.id == workout.id}) else {
-            return workout
-        }
+        guard let context else { return workout }
         
-        var newWorkout = workout
+        let newWorkout = workout
         
         do {
             async let hr = HealthKitHelper.shared.fetchAverageHeartRate(with: workout.id)
@@ -88,10 +77,12 @@ class WorkoutsViewModel: ObservableObject {
             newWorkout.kcal = try await kcal
             newWorkout.power = try await power
             newWorkout.cadence = cadence
-            newWorkout.coordinates = locations.map { $0.coordinate }
+            newWorkout.coordinates = locations
+                .sorted { $0.timestamp < $1.timestamp }
+                .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
             newWorkout.altitudes = locations.map { $0.altitude }.downSample()
             
-            self.workouts[index] = newWorkout
+            try context.save()
             return newWorkout
         } catch {
             print(error.localizedDescription)
@@ -100,12 +91,9 @@ class WorkoutsViewModel: ObservableObject {
     }
     
     func fetchWorkoutDetailIfNeeded(for workout: Workout) async -> Workout {
-        guard let index = self.workouts.firstIndex(where: { $0.id == workout.id }) else {
-            return workout
-        }
 
-        if workouts[index].cadence != nil {
-            return workouts[index]
+        if workout.cadence != nil {
+            return workout
         }
 
         return await fetchWorkoutDetail(for: workout)

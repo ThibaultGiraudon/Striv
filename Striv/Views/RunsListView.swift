@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RunsListView: View {
     @ObservedObject var workoutsVM: WorkoutsViewModel
+    @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     var body: some View {
-        List(workoutsVM.workouts) { workout in
+        List(workouts) { workout in
             NavigationLink {
                 RunDetailView(workout: workout, workoutsVM: workoutsVM)
             } label: {

@@ -17,7 +17,7 @@ final class AnalyseViewModel: ObservableObject {
     }
     
     @MainActor
-    func analyse(_ workout: Workout) async -> Analyse? {
+    func analyse(_ workout: Workout) async -> String? {
         do {
             return try await self.aiService.analyze(workout)
         } catch let aiError as AIError {

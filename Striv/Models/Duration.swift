@@ -6,8 +6,10 @@
 //
 
 import Foundation
-    
-struct Duration: Equatable, Hashable {
+import SwiftData
+  
+@Model
+final class Duration: Equatable, Hashable {
     var hours: Int
     var minutes: Int
     var seconds: Int

@@ -7,9 +7,11 @@
 
 import SwiftUI
 import Charts
+import SwiftData
 
 
 struct AllStatsView: View {
+    @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @ObservedObject var workoutsVM: WorkoutsViewModel
     @StateObject private var dashboardVM = DashboardViewModel()
     
@@ -86,15 +88,15 @@ struct AllStatsView: View {
                 .chartScrollPosition(initialX: Date.now)
                 .frame(height: 400)
                 
-                CalendarView(workouts: $workoutsVM.workouts)
+                CalendarView()
                 
             }
             .padding()
-            .onChange(of: workoutsVM.workouts) { _, workouts in
+            .onChange(of: workouts) { _, workouts in
                 dashboardVM.load(with: workouts)
             }
             .task {
-                dashboardVM.load(with: workoutsVM.workouts)
+                dashboardVM.load(with: workouts)
             }
         }
         .scrollIndicators(.hidden)
@@ -104,10 +106,7 @@ struct AllStatsView: View {
 }
 
 #Preview {
-    let workoutsVM = WorkoutsViewModel()
-    workoutsVM.workouts = [
-        Workout(id: UUID(), date: .now, distance: 12700, duration: .init(3600), coordinates: [], altitudes: []),
-        Workout(id: UUID(), date: Date().addingTimeInterval(-604800 * 2), distance: 21800, duration: .init(3600), coordinates: [], altitudes: []),
-    ]
-    return  NavigationStack { AllStatsView(workoutsVM: workoutsVM) }
+    NavigationStack {
+        AllStatsView(workoutsVM: .init())
+    }
 }
