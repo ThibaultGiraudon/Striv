@@ -90,7 +90,7 @@ struct AllStatsView: View {
                 
             }
             .padding()
-            .onChange(of: workoutsVM.workouts) { workouts in
+            .onChange(of: workoutsVM.workouts) { _, workouts in
                 dashboardVM.load(with: workouts)
             }
             .task {
@@ -104,7 +104,7 @@ struct AllStatsView: View {
 }
 
 #Preview {
-    var workoutsVM = WorkoutsViewModel()
+    let workoutsVM = WorkoutsViewModel()
     workoutsVM.workouts = [
         Workout(id: UUID(), date: .now, distance: 12700, duration: .init(3600), coordinates: [], altitudes: []),
         Workout(id: UUID(), date: Date().addingTimeInterval(-604800 * 2), distance: 21800, duration: .init(3600), coordinates: [], altitudes: []),

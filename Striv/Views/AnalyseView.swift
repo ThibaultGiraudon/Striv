@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AnalyseView: View {
     var response: Analyse?
-    var error: WorkoutsViewModel.AIError?
+    var error: AIError?
     var body: some View {
         ZStack {
             Rectangle()

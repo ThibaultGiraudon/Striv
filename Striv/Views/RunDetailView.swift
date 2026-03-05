@@ -9,8 +9,10 @@ import SwiftUI
 
 struct RunDetailView: View {
     @State var workout: Workout
-    @State private var statViewHeight = 400.0
     @ObservedObject var workoutsVM: WorkoutsViewModel
+    
+    @StateObject private var analyseVM = AnalyseViewModel()
+    @State private var statViewHeight = 400.0
     @State private var isShowingAnalyse: Bool = false
     @State private var analyse: Analyse?
     @State private var isShowingStats: Bool = true
@@ -72,7 +74,7 @@ struct RunDetailView: View {
                 }
                 .foregroundStyle(.primaryText)
                 .padding()
-                AnalyseView(response: analyse, error: workoutsVM.error)
+                AnalyseView(response: analyse, error: analyseVM.error)
                     .offset(y: isShowingAnalyse ? 0 : -1000)
             }
             .task {
@@ -89,7 +91,7 @@ struct RunDetailView: View {
                             isShowingAnalyse.toggle()
                         }
                         if workout.analyse.sections.isEmpty {
-                            analyse = await workoutsVM.getWorkoutAnalyse(for: workout)
+                            analyse = await analyseVM.analyse(workout)
                         }
                         else {
                             analyse = workout.analyse

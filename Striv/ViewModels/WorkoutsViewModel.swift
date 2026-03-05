@@ -14,13 +14,6 @@ import FirebaseAILogic
 @MainActor
 class WorkoutsViewModel: ObservableObject {
     @Published var workouts: Workouts = [] 
-    @Published var error: AIError?
-    @Published private(set) var weeklyStats: [WeeklyStat] = []
-    
-    private let aiRepository: AIRepository = .init()
-    
-    private var isConnected: Bool = false
-    private let networkMonitor = NetworkMonitor()
     
     func fetchWorkoutsSummary() async {
         do {
@@ -116,65 +109,5 @@ class WorkoutsViewModel: ObservableObject {
         }
 
         return await fetchWorkoutDetail(for: workout)
-    }
-    
-    
-    func getWorkoutAnalyse(for workout: Workout) async -> Analyse? {
-        self.error = nil
-        do {
-            if networkMonitor.execute() {
-                return try await self.aiRepository.askGemini(with: workout.analysePrompt)
-            } else {
-                self.error = .connection
-            }
-        } catch {
-            if error as? GenerateContentError != nil {
-                self.error = .internalAI
-            } else {
-                self.error = .invalid
-            }
-        }
-        return nil
-    }
-}
-
-extension WorkoutsViewModel {
-    enum AIError: Error, LocalizedError, Hashable {
-        case internalAI
-        case invalid
-        case connection
-        
-        var title: String {
-            switch self {
-            case .internalAI:
-                "Service error."
-            case .invalid:
-                "Internal error."
-            case .connection:
-                "No internet connection."
-            }
-        }
-        
-        var description: String {
-            switch self {
-            case .internalAI:
-                "The service is currently unable to process your request."
-            case .invalid:
-                "We failed to process your request"
-            case .connection:
-                "Please check your connection and try again."
-            }
-        }
-        
-        var icon: String {
-            switch self {
-            case .internalAI:
-                "wrench.and.screwdriver"
-            case .invalid:
-                "externaldrive.trianglebadge.exclamationmark"
-            case .connection:
-                "wifi.slash"
-            }
-        }
     }
 }

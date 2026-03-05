@@ -18,7 +18,7 @@ class AIRepository {
         let response = try await model.generateContent(input)
                 
         guard let data = response.text?.data(using: .utf8) else {
-            throw AIError.unknown
+            throw AIDecodeError.unknown
         }
                     
         if let jsonSerialize = try JSONSerialization.jsonObject(with: data) as? Dictionary<String, Any> {
@@ -26,7 +26,7 @@ class AIRepository {
                   let workedOn = jsonSerialize["workedOn"] as? [String],
                   let watchOn = jsonSerialize["watchPoints"] as? [String],
                   let nextAdvice = jsonSerialize["nextAdvice"] as? String else {
-                throw AIError.missingKey
+                throw AIDecodeError.missingKey
             }
             let analyse = Analyse(sections: [
                 .init(title: "Résumé", items: [summary]),
@@ -36,11 +36,11 @@ class AIRepository {
             ])
             return analyse
         }
-        throw AIError.wrongType
+        throw AIDecodeError.wrongType
     }
 }
 
-enum AIError: Swift.Error, LocalizedError, Hashable {
+enum AIDecodeError: Swift.Error, LocalizedError, Hashable {
     case wrongType
     case missingKey
     case unknown
