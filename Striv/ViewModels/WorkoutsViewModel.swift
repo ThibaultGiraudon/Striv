@@ -12,7 +12,6 @@ import CoreLocation
 import SwiftData
 import _SwiftData_SwiftUI
 
-//@MainActor
 class WorkoutsViewModel: ObservableObject {
     private var context: ModelContext?
     
@@ -23,8 +22,12 @@ class WorkoutsViewModel: ObservableObject {
     func fetchWorkoutsSummary() async {
         do {
             guard let context else { return }
-            let hkWorkouts = try await HealthKitHelper.shared.getWorkouts()
-                            
+            let (hkWorkouts, deletedIDs) = try await HealthKitHelper.shared.syncWorkouts()
+            
+            let savedWorkouts = getWorkouts()
+            
+            let workoutsIDs: [UUID] = savedWorkouts.map { $0.id }
+            
             for hkWorkout in hkWorkouts {
                 do {
                     async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
@@ -38,10 +41,21 @@ class WorkoutsViewModel: ObservableObject {
                         duration: .init(Int(duration)),
                         elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
                     )
-                    context.insert(workout)
+
+                    if !workoutsIDs.contains(hkWorkout.uuid) {
+                        context.insert(workout)
+                    }
                 } catch {
                     continue
                 }
+            }
+            
+            
+            for id in deletedIDs {
+                guard let workoutToDelete = savedWorkouts.first(where: { $0.id == id }) else {
+                    continue
+                }
+                context.delete(workoutToDelete)
             }
             
             try context.save()
@@ -49,6 +63,18 @@ class WorkoutsViewModel: ObservableObject {
         } catch {
             print(error.localizedDescription)
         }
+    }
+    
+    func getWorkouts() -> Workouts {
+        guard let context = context else { return [] }
+        let request = FetchDescriptor<Workout>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        do {
+            return try context.fetch(request)
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        return []
     }
     
     func fetchWorkoutDetail(for workout: Workout) async -> Workout {

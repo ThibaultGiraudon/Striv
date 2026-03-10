@@ -16,6 +16,8 @@ class HealthKitHelper {
     
     static var shared: HealthKitHelper = .init()
     
+    private let anchorKey = "healthkit.workout.anchor"
+    
     private init() {
         self.requestAuthorization()
     }
@@ -68,7 +70,7 @@ class HealthKitHelper {
         let predicate = HKQuery.predicateForWorkouts(with: .running)
         
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
-        
+                
         return try await withCheckedThrowingContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: .workoutType(),
@@ -85,7 +87,52 @@ class HealthKitHelper {
             }
             healthStore.execute(query)
         }
+    }
+    
+    func syncWorkouts() async throws -> ([HKWorkout], [UUID]) {
+        guard let healthStore, self.isAuthorized == true else {
+            return ([], [])
+        }
         
+        let anchor = self.getAnchor()
+        
+        let predicate = HKQuery.predicateForWorkouts(with: .running)
+                        
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKAnchoredObjectQuery(
+                type: .workoutType(),
+                predicate: predicate,
+                anchor: anchor,
+                limit: HKObjectQueryNoLimit) { _, samples, deleted, newAnchor, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    }
+                    
+                    if let newAnchor {
+                        try? self.saveAnchor(newAnchor)
+                    }
+                    
+                    if let samples = samples as? [HKWorkout], let deleted {
+                        continuation.resume(returning: (samples, deleted.map { $0.uuid }))
+                    }
+                }
+            healthStore.execute(query)
+        }
+    }
+    
+    func getAnchor() -> HKQueryAnchor? {
+        guard let anchorData = UserDefaults.standard.value(forKey: self.anchorKey) as? Data,
+              let anchor = try? NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: anchorData) else {
+            return nil
+        }
+        
+        return anchor
+    }
+    
+    func saveAnchor(_ anchor: HKQueryAnchor) throws {
+        let anchorData = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+        
+        UserDefaults.standard.set(anchorData, forKey: self.anchorKey)
     }
     
     func getWorkout(with id: UUID) async throws -> HKWorkout {

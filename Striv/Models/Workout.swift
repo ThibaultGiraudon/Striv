@@ -45,18 +45,18 @@ class Workout: Identifiable, Equatable {
     var elevation: Double?
     var cadence: Double?
     var power: Double?
-    var pace: Pace {
+    @Transient var pace: Pace {
         Pace(pace:  Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
     }
-    var coordinates: [Coordinate] = []
-    var coordinates2d: [CLLocationCoordinate2D] {
+    @Relationship var coordinates: [Coordinate]
+    @Transient var coordinates2d: [CLLocationCoordinate2D] {
         coordinates
             .sorted { $0.timestamp > $1.timestamp }
             .map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
     }
     var altitudes: [Double] = []
     
-    var analysePrompt: String {
+    @Transient var analysePrompt: String {
         var prompts: [String] = []
 
         prompts.append("""
@@ -114,7 +114,7 @@ class Workout: Identifiable, Equatable {
         return prompts.joined(separator: "\n")
     }
     
-    var analyse: Analyse? {
+    @Transient var analyse: Analyse? {
         
         guard let data = analyseRaw?.data(using: .utf8) else {
             return nil

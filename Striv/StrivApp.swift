@@ -19,26 +19,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct StrivApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Workout.self,
-            Duration.self,
-            Coordinate.self
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+    init() {
+    let fileManager = FileManager.default
+    if let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+        if !fileManager.fileExists(atPath: appSupport.path) {
+            do {
+                try fileManager.createDirectory(at: appSupport, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print(error)
+            }
         }
-    }()
+    }
+}
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: [Workout.self, Duration.self, Coordinate.self])
     }
 }
