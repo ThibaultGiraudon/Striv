@@ -11,10 +11,10 @@ struct RunDetailView: View {
     @State var workout: Workout
     @ObservedObject var workoutsVM: WorkoutsViewModel
     
-    @StateObject private var analyseVM = AnalyseViewModel()
+    @StateObject private var analyzeVM = AnalyzeViewModel()
     @State private var statViewHeight = 400.0
-    @State private var isShowingAnalyse: Bool = false
-    @State private var analyse: Analyse?
+    @State private var isShowingAnalyze: Bool = false
+    @State private var analyze: Analyze?
     @State private var isShowingStats: Bool = true
     
     var title: String {
@@ -74,8 +74,8 @@ struct RunDetailView: View {
                 }
                 .foregroundStyle(.primaryText)
                 .padding()
-                AnalyseView(response: analyse, error: analyseVM.error)
-                    .offset(y: isShowingAnalyse ? 0 : -1000)
+                AnalyzeView(response: analyze, error: analyzeVM.error)
+                    .offset(y: isShowingAnalyze ? 0 : -1000)
             }
             .task {
                 workout = await workoutsVM.fetchWorkoutDetailIfNeeded(for: workout)
@@ -85,18 +85,18 @@ struct RunDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Analyse", systemImage: isShowingAnalyse ? "xmark" : "apple.intelligence") {
+                Button("Analyze", systemImage: isShowingAnalyze ? "xmark" : "apple.intelligence") {
                     Task {
                         withAnimation {
-                            isShowingAnalyse.toggle()
+                            isShowingAnalyze.toggle()
                         }
-                        if workout.analyse == nil {
-                            let analyseRaw = await analyseVM.analyse(workout)
-                            workout.analyseRaw = analyseRaw
-                            analyse = workout.analyse
+                        if workout.analyze == nil {
+                            let analyzeRaw = await analyzeVM.analyze(workout)
+                            workout.analyzeRaw = analyzeRaw
+                            analyze = workout.analyze
                         }
                         else {
-                            analyse = workout.analyse
+                            analyze = workout.analyze
                         }
                     }
                 }

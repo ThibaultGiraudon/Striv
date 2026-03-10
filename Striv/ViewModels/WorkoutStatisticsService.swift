@@ -7,7 +7,33 @@
 
 import Foundation
 
+/// Service responsible for computing statistics from workouts.
+///
+/// This service aggregates workout data to produce metrics
+/// used across the application dashboard.
+///
+/// Responsibilities:
+/// - Compute global statistics
+/// - Generate weekly statistics
+/// - Calculate running streaks
+/// - Produce dashboard-ready metrics
+///
+/// The service is stateless and purely functional,
+/// which makes it easy to test.
 final class WorkoutStatisticsService {
+    
+    // MARK: - Stats
+    
+    /// Calculates all-time statistics from a collection of workouts.
+    ///
+    /// The following metrics are calculated:
+    /// - Total distance
+    /// - Total duration
+    /// - Total elevation climbed
+    /// - Number of runs
+    ///
+    /// - Parameter workouts: All workouts from which statistics are calculated.
+    /// - Returns: A `GlobalStats` containing aggregated statistics.
     func globalStats(for workouts: Workouts) -> GlobalStats {
         
         var distance: Double = 0
@@ -28,6 +54,18 @@ final class WorkoutStatisticsService {
         )
     }
     
+    /// Calculates aggregated statistics from weekly statistics.
+    ///
+    /// The following metrics are calculated:
+    /// - Total distance
+    /// - Total duration
+    /// - Total elevation climbed
+    /// - Number of runs
+    ///
+    /// - Parameter weeklyStats: An array of `WeeklyStat` representing
+    ///   statistics for each week.
+    /// - Returns: A `GlobalStats` representing the aggregated values
+    ///   across the provided weeks.
     func stats(for weeklyStats: [WeeklyStat]) -> GlobalStats {
         var distance: Double = 0
         var duration: Int = 0
@@ -49,48 +87,38 @@ final class WorkoutStatisticsService {
         )
     }
     
+    /// Calculates statistics for the last four weeks.
+    ///
+    /// - Parameter weeklyStats: An array of weekly statistics.
+    /// - Returns: A `GlobalStats` containing aggregated values
+    ///   for the last four weeks.
     func lastFourWeeksStats(for weeklyStats: [WeeklyStat]) -> GlobalStats {
         self.stats(for: weeklyStats.suffix(4))
     }
     
+    /// Calculates statistics for the current week.
+    ///
+    /// - Parameter weeklyStats: An array of weekly statistics.
+    /// - Returns: A `GlobalStats` containing aggregated values
+    ///   for the current week.
     func currentWeekStats(for weeklyStats: [WeeklyStat]) -> GlobalStats {
         self.stats(for: weeklyStats.suffix(1))
     }
     
-    func currentStreak(for weeklyStats: [WeeklyStat]) -> Int {
-        var streak: Int = 0
-        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
-        
-        for week in sortedWeeks {
-            if week.count > 0 {
-                streak += 1
-            } else {
-                return streak
-            }
-        }
-        
-        return streak
-    }
-    
-    func longestStreak(for weeklyStats: [WeeklyStat]) -> Int {
-        var longestStreak: Int = 0
-        var currentStreak: Int = 0
-        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
-        
-        for week in sortedWeeks {
-            if week.count > 0 {
-                currentStreak += 1
-            } else {
-                if currentStreak >= longestStreak {
-                    longestStreak = currentStreak
-                }
-                currentStreak = 0
-            }
-        }
-        
-        return longestStreak > currentStreak ? longestStreak : currentStreak
-    }
-    
+    /// Generates weekly statistics from a collection of workouts.
+    ///
+    /// Workouts are grouped by their start of week date.
+    /// For each week, the following metrics are computed:
+    /// - Total distance
+    /// - Total duration
+    /// - Total elevation
+    /// - Number of runs
+    ///
+    /// Weeks without workouts are also included with zero values
+    /// to ensure a continuous timeline.
+    ///
+    /// - Parameter workouts: The workouts used to compute weekly statistics.
+    /// - Returns: An array of `WeeklyStat` sorted chronologically.
     func weeklyStats(for workouts: Workouts) -> [WeeklyStat] {
         guard let firstWeek = workouts
             .min(by: { $0.date < $1.date })?
@@ -139,6 +167,65 @@ final class WorkoutStatisticsService {
         return weeksStats.sorted(by: { $0.startOfWeek < $1.startOfWeek })
     }
     
+    // MARK: - Streak
+    
+    /// Calculates the current running streak.
+    ///
+    /// The streak represents the number of consecutive weeks,
+    /// starting from the most recent week, that contain at least one run.
+    ///
+    /// - Parameter weeklyStats: Weekly statistics used to determine the streak.
+    /// - Returns: The number of consecutive active weeks.
+    func currentStreak(for weeklyStats: [WeeklyStat]) -> Int {
+        var streak: Int = 0
+        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        
+        for week in sortedWeeks {
+            if week.count > 0 {
+                streak += 1
+            } else {
+                return streak
+            }
+        }
+        
+        return streak
+    }
+    
+    /// Calculates the longest running streak.
+    ///
+    /// The longest streak represents the maximum number of
+    /// consecutive weeks containing at least one run.
+    ///
+    /// - Parameter weeklyStats: Weekly statistics used to compute the streak.
+    /// - Returns: The length of the longest streak in weeks.
+    func longestStreak(for weeklyStats: [WeeklyStat]) -> Int {
+        var longestStreak: Int = 0
+        var currentStreak: Int = 0
+        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        
+        for week in sortedWeeks {
+            if week.count > 0 {
+                currentStreak += 1
+            } else {
+                if currentStreak >= longestStreak {
+                    longestStreak = currentStreak
+                }
+                currentStreak = 0
+            }
+        }
+        
+        return longestStreak > currentStreak ? longestStreak : currentStreak
+    }
+    
+    // MARK: - Dashboard
+    
+    /// Computes all statistics required for the dashboard.
+    ///
+    /// This method aggregates workouts into weekly statistics,
+    /// calculates global statistics, recent statistics, and running streaks.
+    ///
+    /// - Parameter workouts: The workouts used to compute dashboard statistics.
+    /// - Returns: A `DashboardStats` containing all metrics used by the dashboard.
     func computeDashboardStats(from workouts: [Workout]) -> DashboardStats {
         let weeklyStats = self.weeklyStats(for: workouts)
         let globalStats = self.globalStats(for: workouts)

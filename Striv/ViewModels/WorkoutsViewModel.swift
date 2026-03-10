@@ -12,13 +12,37 @@ import CoreLocation
 import SwiftData
 import _SwiftData_SwiftUI
 
+/// ViewModel responsible for managing workout data.
+///
+/// `WorkoutsViewModel` synchronizes running workouts from HealthKit
+/// and persists them locally using SwiftData.
+/// It uses `HealthKitHelper` to fetch workout summaries and detailed metrics.
 class WorkoutsViewModel: ObservableObject {
+    
+    // MARK: - Depedencies
+    
+    /// The `ModelContext` used to persist workouts
     private var context: ModelContext?
     
+    // MARK: - Configuration
+    
+    /// Sets the `ModelContext` used to persist workouts in SwiftData.
+    ///
+    /// - Parameter context: A shared `ModelContext` used across the app
+    ///   to fetch and save workout data.
     func setContext(context: ModelContext) {
         self.context = context
     }
     
+    // MARK: - Fetching
+    
+    /// Synchronizes workout summaries with HealthKit.
+    ///
+    /// This method:
+    /// - Fetches new or updated workouts from HealthKit.
+    /// - Creates new `Workout` objects with essential summary data.
+    /// - Inserts workouts that are not yet stored locally.
+    /// - Removes workouts that were deleted from the Apple Health app.
     func fetchWorkoutsSummary() async {
         do {
             guard let context else { return }
@@ -65,18 +89,21 @@ class WorkoutsViewModel: ObservableObject {
         }
     }
     
-    func getWorkouts() -> Workouts {
-        guard let context = context else { return [] }
-        let request = FetchDescriptor<Workout>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-        do {
-            return try context.fetch(request)
-        } catch {
-            print(error.localizedDescription)
-        }
-        
-        return []
-    }
     
+    /// Fetches detailed metrics for a given workout.
+    ///
+    /// This method retrieves additional data from HealthKit including:
+    /// - Heart rate
+    /// - Active energy
+    /// - Running power
+    /// - Cadence
+    /// - Route coordinates
+    /// - Altitude samples
+    ///
+    /// The workout is then updated and persisted in SwiftData.
+    ///
+    /// - Parameter workout: The workout for which details should be fetched.
+    /// - Returns: The updated workout containing the fetched metrics.
     func fetchWorkoutDetail(for workout: Workout) async -> Workout {
         guard let context else { return workout }
         
@@ -116,6 +143,11 @@ class WorkoutsViewModel: ObservableObject {
         return workout
     }
     
+    /// Fetches workout details only if they are not already available.
+    ///
+    /// - Parameter workout: The workout to check.
+    /// - Returns: The original workout if details are already present,
+    ///   otherwise the workout updated with detailed metrics.
     func fetchWorkoutDetailIfNeeded(for workout: Workout) async -> Workout {
 
         if workout.cadence != nil {
@@ -123,5 +155,22 @@ class WorkoutsViewModel: ObservableObject {
         }
 
         return await fetchWorkoutDetail(for: workout)
+    }
+    
+    // MARK: - Private
+    
+    /// Fetches workouts stored in SwiftData.
+    ///
+    /// - Returns: An array of `Workout` objects sorted by most recent date.
+    private func getWorkouts() -> Workouts {
+        guard let context = context else { return [] }
+        let request = FetchDescriptor<Workout>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        do {
+            return try context.fetch(request)
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        return []
     }
 }

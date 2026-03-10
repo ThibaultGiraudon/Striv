@@ -1,5 +1,5 @@
 //
-//  AnalyseView.swift
+//  AnalyzeView.swift
 //  Striv
 //
 //  Created by Thibault Giraudon on 15/12/2025.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct AnalyseView: View {
-    var response: Analyse?
+struct AnalyzeView: View {
+    var response: Analyze?
     var error: AIError?
     var body: some View {
         ZStack {
@@ -41,7 +41,7 @@ struct AnalyseView: View {
 }
 
 #Preview {
-    AnalyseView(response: Analyse(sections: [
+    AnalyzeView(response: Analyze(sections: [
         .init(
             title: "Résumé",
             items: ["Cette sortie de 73 minutes et 12 km a combiné un travail d'endurance avec un dénivelé notable, sollicitant le système cardiovasculaire de manière intense."]),
