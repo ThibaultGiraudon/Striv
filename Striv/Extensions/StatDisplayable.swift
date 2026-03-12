@@ -21,6 +21,10 @@ extension Double: StatDisplayable {
     var statText: String {
         String(format: "%.0f", self)
     }
+    
+    func roundedText(to numbers: Int) -> String {
+        String(format: "%.\(numbers)f", self)
+    }
 }
 
 extension Int: StatDisplayable {
