@@ -20,6 +20,12 @@ struct ContentView: View {
                 }
             }
 
+            Tab("Challenges", systemImage: "trophy.fill") {
+                NavigationStack {
+                    ChallengesView()
+                }
+            }
+            
             Tab("Runs", systemImage: "figure.run") {
                 NavigationStack {
                     RunsListView(workoutsVM: workoutsVM)
