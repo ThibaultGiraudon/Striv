@@ -23,6 +23,9 @@ struct DashboardStats {
     /// Aggregated stats for each week, sorted chronologically.
     let weekly: [WeeklyStat]
     
+    /// Aggregated stats for each month, sorted chronologically.
+    let monthly: [MonthlyStat]
+    
     /// Global statistics covering all workouts.
     let global: GlobalStats
     
@@ -49,6 +52,7 @@ struct DashboardStats {
     ///   - longestStreak: Longest consecutive active weeks (default: 0)
     init(
         weekly: [WeeklyStat] = [],
+        monthly: [MonthlyStat] = [],
         global: GlobalStats = .init(),
         lastFourWeeks: GlobalStats = .init(),
         currentWeek: GlobalStats = .init(),
@@ -56,6 +60,7 @@ struct DashboardStats {
         longestStreak: Int = 0
     ) {
         self.weekly = weekly
+        self.monthly = monthly
         self.global = global
         self.lastFourWeeks = lastFourWeeks
         self.currentWeek = currentWeek

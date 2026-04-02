@@ -167,6 +167,82 @@ final class WorkoutStatisticsService {
         return weeksStats.sorted(by: { $0.startOfWeek < $1.startOfWeek })
     }
     
+    func monthlyStats(for workouts: Workouts) -> [MonthlyStat] {
+        guard let firstMonth = workouts
+            .min(by: { $0.date < $1.date })?
+            .date
+            .firstDayOfMonth else {
+            return []
+        }
+
+        var monthsStats: [MonthlyStat] = []
+
+        let grouped = Dictionary(grouping: workouts) {
+            $0.date.firstDayOfMonth
+        }
+
+        var currentMonth = Date().firstDayOfMonth
+
+        // Stock temporaire sans comparaison
+        var rawStats: [(date: Date, distance: Double, count: Int, duration: Int, elevation: Double)] = []
+
+        while firstMonth <= currentMonth {
+            let startOfMonth = currentMonth
+
+            var distance: Double = 0
+            var duration: Int = 0
+            var elevation: Double = 0
+
+            if let workouts = grouped[startOfMonth] {
+                distance = workouts.reduce(0) { $0 + (($1.distance ?? 0) / 1000) }
+                duration = workouts.reduce(0) { $0 + $1.duration.totalSeconds }
+                elevation = workouts.reduce(0) { $0 + ($1.elevation ?? 0) }
+            }
+
+            rawStats.append((
+                date: startOfMonth,
+                distance: distance,
+                count: grouped[startOfMonth]?.count ?? 0,
+                duration: duration,
+                elevation: elevation
+            ))
+
+            guard let previousMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentMonth) else { break }
+            currentMonth = previousMonth
+        }
+
+        // Trier du plus ancien au plus récent
+        rawStats.sort { $0.date < $1.date }
+
+        // Ajouter la comparaison m-1
+        for i in 0..<rawStats.count {
+            let current = rawStats[i]
+            
+            var change: Double? = nil
+            
+            if i > 0 {
+                let previous = rawStats[i - 1]
+                
+                if previous.distance > 0 {
+                    change = ((current.distance - previous.distance) / previous.distance) * 100
+                }
+            }
+
+            monthsStats.append(
+                MonthlyStat(
+                    startOfMonth: current.date,
+                    distance: current.distance,
+                    count: current.count,
+                    duration: TimeInterval(current.duration),
+                    elevation: current.elevation,
+                    distanceChange: change
+                )
+            )
+        }
+
+        return monthsStats
+    }
+    
     // MARK: - Streak
     
     /// Calculates the current running streak.
@@ -228,6 +304,7 @@ final class WorkoutStatisticsService {
     /// - Returns: A `DashboardStats` containing all metrics used by the dashboard.
     func computeDashboardStats(from workouts: [Workout]) -> DashboardStats {
         let weeklyStats = self.weeklyStats(for: workouts)
+        let monthlyStats = self.monthlyStats(for: workouts)
         let globalStats = self.globalStats(for: workouts)
         
         let lastFourWeeksStats = self.lastFourWeeksStats(for: weeklyStats)
@@ -237,6 +314,7 @@ final class WorkoutStatisticsService {
         
         return DashboardStats(
             weekly: weeklyStats,
+            monthly: monthlyStats,
             global: globalStats,
             lastFourWeeks: lastFourWeeksStats,
             currentWeek: currentWeekStats,

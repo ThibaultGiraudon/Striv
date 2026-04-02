@@ -39,4 +39,8 @@ extension Date {
         
         return Calendar.current.date(from: components)!
     }
+    
+    var firstDayOfMonth: Date {
+        Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: self))!
+    }
 }
