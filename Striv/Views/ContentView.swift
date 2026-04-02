@@ -11,22 +11,29 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
     @StateObject var workoutsVM: WorkoutsViewModel = .init()
+    @StateObject var dashboardVM: DashboardViewModel = .init()
 
     var body: some View {
         TabView {
-            Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
+            Tab("Accueil", systemImage: "house.fill") {
                 NavigationStack {
-                    AllStatsView(workoutsVM: workoutsVM)
+                    HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
                 }
             }
 
-            Tab("Challenges", systemImage: "trophy.fill") {
+            Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
                 NavigationStack {
-                    ChallengesView()
+                    AllStatsView(dashboardVM: dashboardVM)
                 }
             }
+
+//            Tab("Challenges", systemImage: "trophy.fill") {
+//                NavigationStack {
+//                    ChallengesView()
+//                }
+//            }
             
-            Tab("Runs", systemImage: "figure.run") {
+            Tab("Courses", systemImage: "figure.run") {
                 NavigationStack {
                     RunsListView(workoutsVM: workoutsVM)
                 }

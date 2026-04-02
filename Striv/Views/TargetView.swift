@@ -18,7 +18,7 @@ struct TargetView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("\(currentWeekDistance.roundedText(to: 1)) km")
-                .font(.system(size: 65).bold())
+                .font(.system(size: 50).bold())
             
             Text("Distance totale")
                 .font(.title)
@@ -29,7 +29,7 @@ struct TargetView: View {
                 Text("\(targetVM.distanceTarget) km")
                     .font(.title.bold())
                     .foregroundStyle(.primaryText)
-                    .padding(.horizontal, 30)
+                    .padding(.horizontal, 20)
                     .padding(.vertical, 5)
                     .background {
                         Capsule()
@@ -39,10 +39,9 @@ struct TargetView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 5)
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(LinearGradient(colors: [.gray, .teal], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.2))
+                .fill(LinearGradient(colors: [.gray, .teal], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.1))
         }
     }
 }

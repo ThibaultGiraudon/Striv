@@ -10,114 +10,79 @@ import Charts
 import SwiftData
 
 
-struct AllStatsView: View {
+struct HomeView: View {
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @ObservedObject var workoutsVM: WorkoutsViewModel
-    @StateObject private var dashboardVM = DashboardViewModel()
+    @ObservedObject var dashboardVM = DashboardViewModel()
     @StateObject private var targetVM = TargetViewModel()
     
-    @State var endDate: Date = .now
-    @State private var isShowingTargetSheet: Bool = false
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading) {
-                GeometryReader { geo in
-                    let width = geo.size.width
-                    ScrollView(.horizontal) {
-                        HStack {
-                            StreakView(currentStreak: dashboardVM.stats.currentStreak)
-                                .frame(width: width)
-                            
-                            TargetView(dashboardVM: dashboardVM, targetVM: targetVM)
-                                .frame(width: width)
-                            
-                            Button("Définir un objectif") {
-                                isShowingTargetSheet.toggle()
+                
+                Text("Ma progression")
+                    .font(.title.bold())
+                TargetView(dashboardVM: dashboardVM, targetVM: targetVM)
+                    .padding(.bottom)
+                
+                
+                RunProgressView(dashboardVM: dashboardVM)
+                    .padding(.bottom)
+                
+                Text("Cette semaine")
+                    .font(.title.bold())
+                StatsView(title: "", stats: dashboardVM.stats.currentWeek)
+                    .padding(.bottom)
+                
+                Text("Dernière course")
+                    .font(.title.bold())
+                if let lastRun = workouts.first {
+                    NavigationLink {
+                        RunDetailView(workout: lastRun, workoutsVM: workoutsVM)
+                    } label: {
+                        RunRowView(workout: lastRun)
+                            .foregroundStyle(.primaryText)
+                            .background {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.customPrimary)
                             }
-                            .font(.title3.bold())
-                            .tint(.teal)
-                            .buttonStyle(.borderedProminent)
-                            .buttonBorderShape(.capsule)
-                            .frame(width: width)
+                    }
+                } else {
+                    Button {
+                        Task {
+                            await workoutsVM.fetchWorkoutsSummary()
                         }
-                        .scrollTargetLayout()
-                        .padding()
-                    }
-                    .scrollTargetBehavior(.viewAligned)
-                }
-                .frame(height: 100)
-                    
-                StatsView(title: "All time", stats: dashboardVM.stats.global)
-                StatsView(title: "Last 4 weeks", stats: dashboardVM.stats.lastFourWeeks)
-                StatsView(title: "Current week", stats: dashboardVM.stats.currentWeek)
-                
-                Chart {
-                    ForEach(dashboardVM.stats.weekly, id: \.self) { weekStat in
-                        LineMark(
-                            x: .value("Week", weekStat.startOfWeek),
-                            y: .value("Distance", weekStat.distance)
-                        )
-                        .foregroundStyle(.teal)
-                        
-                        AreaMark(
-                            x: .value("Week", weekStat.startOfWeek),
-                            y: .value("Distance", weekStat.distance)
-                        )
-                        .foregroundStyle(LinearGradient(colors: [.teal, .clear], startPoint: .top, endPoint: .bottom))
-                        
+                    } label: {
+                            VStack(alignment: .center) {
+                                Text("Importer ma première course")
+                                    .font(.title2)
+                                Image(systemName: "arrow.down.circle")
+                            }
+                            .foregroundStyle(.primaryText)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
+                            .background {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(.customPrimary)
+                            }
                     }
                 }
-                .chartScrollableAxes(.horizontal)
-                .chartScrollPosition(initialX: Date.now)
-                .frame(height: 400)
-                
-                CalendarView()
-                
-            }
-            .padding()
-            .onChange(of: workouts) { _, workouts in
-                dashboardVM.load(with: workouts)
-            }
-            .task {
-                dashboardVM.load(with: workouts)
-            }
-            .sheet(isPresented: $isShowingTargetSheet) {
-                TargetFormView(targetVM: targetVM)
             }
         }
-        .scrollIndicators(.hidden)
-        .navigationTitle("Stats")
+        .padding()
+        .navigationTitle("Accueil")
         .background(Color.background)
-    }
-}
-
-struct CarouselView: View {
-    
-    let items = Array(1...10)
-    
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 20) {
-                ForEach(items, id: \.self) { item in
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.blue)
-                        .frame(width: 250, height: 300)
-                        .overlay(
-                            Text("\(item)")
-                                .font(.largeTitle)
-                                .foregroundColor(.white)
-                        )
-                }
-            }
-            .scrollTargetLayout()
+        .onChange(of: workouts) { _, workouts in
+            dashboardVM.load(with: workouts)
         }
-        .scrollTargetBehavior(.viewAligned)
-        .contentMargins(.horizontal, 40)
+        .task {
+            dashboardVM.load(with: workouts)
+        }
     }
 }
 
 #Preview {
     NavigationStack {
-        AllStatsView(workoutsVM: .init())
+        HomeView(workoutsVM: .init(), dashboardVM: .init())
     }
 }

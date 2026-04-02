@@ -15,12 +15,12 @@ struct StreakView: View {
                 Image(systemName: "flame")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(height: 75)
+                    .frame(height: 60)
                     .foregroundStyle(.red)
                 Image(systemName: "flame.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(height: 75)
+                    .frame(height: 60)
                     .foregroundStyle(.red)
                 Text("\(currentStreak)")
                     .foregroundStyle(Color.background)
@@ -35,12 +35,13 @@ struct StreakView: View {
                     .font(.title2)
             }
             .foregroundStyle(Color.primaryText)
+            Spacer()
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
+        .padding(20)
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(.red.opacity(0.3))
+                .fill(.red.opacity(0.1))
         }
     }
     
