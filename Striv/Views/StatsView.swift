@@ -11,38 +11,29 @@ struct StatsView: View {
     var title: String
     var stats: GlobalStats
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(title)
-                .font(.title2)
-            VStack(spacing: 10) {
-                statLabel(
-                    title: "Number of run",
-                    value: "\(stats.count)")
-                statLabel(
-                    title: "Distance",
-                    value: stats.totalDistance)
-                statLabel(
-                    title: "Time",
-                    value: stats.totalDuration.label)
-                statLabel(
-                    title: "Elevation",
-                    value: stats.totalElevation)
-            }
-            .font(.title2)
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+        LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
+            statLabel(title: "Courses", value: "\(stats.count)")
+            statLabel(title: "Temps", value: "\(stats.totalDuration.hours) h")
+            statLabel(title: "Dénivelé", value: "\(stats.totalElevation.roundedText(to: 0)) m")
+            statLabel(title: "Moyenne", value: "\(stats.count > 0 ? (stats.totalDistance / Double(stats.count)).roundedText(to: 1) : "0") km")
         }
     }
     
     @ViewBuilder
-    func statLabel(title: String, value: StatDisplayable) -> some View {
+    func statLabel(title: String, value: String) -> some View {
         HStack {
-            Text(title)
+            VStack(alignment: .leading, spacing: 15) {
+                Text(title)
+                    .font(.title)
+                Text(value)
+                    .font(.largeTitle.bold())
+            }
             Spacer()
-            Text(value.statText)
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.customPrimary)
         }
     }
 }
