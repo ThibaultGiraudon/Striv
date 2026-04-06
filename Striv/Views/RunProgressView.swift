@@ -7,10 +7,16 @@
 
 import SwiftUI
 
+// TODO: ajouter un écran de détail et d'explication
+
 struct RunProgressView: View {
     @ObservedObject var dashboardVM: DashboardViewModel
     var progression: Double {
-        self.dashboardVM.stats.monthly.first?.distanceChange ?? 0
+        let monthlyStats = self.dashboardVM.stats.monthly
+        guard monthlyStats.count > 2 else {
+            return 0
+        }
+        return monthlyStats[monthlyStats.count - 2].distanceChange ?? 0
     }
     var body: some View {
         HStack(alignment: .bottom) {

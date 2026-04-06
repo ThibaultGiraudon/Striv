@@ -183,7 +183,6 @@ final class WorkoutStatisticsService {
 
         var currentMonth = Date().firstDayOfMonth
 
-        // Stock temporaire sans comparaison
         var rawStats: [(date: Date, distance: Double, count: Int, duration: Int, elevation: Double)] = []
 
         while firstMonth <= currentMonth {
@@ -211,11 +210,9 @@ final class WorkoutStatisticsService {
             currentMonth = previousMonth
         }
 
-        // Trier du plus ancien au plus récent
         rawStats.sort { $0.date < $1.date }
 
-        // Ajouter la comparaison m-1
-        for i in 0..<rawStats.count {
+        for i in 1..<rawStats.count {
             let current = rawStats[i]
             
             var change: Double? = nil

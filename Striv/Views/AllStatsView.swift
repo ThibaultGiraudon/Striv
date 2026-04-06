@@ -8,12 +8,17 @@
 import SwiftUI
 import SwiftData
 
+// TODO: ajouter calendrier
+
 struct AllStatsView: View {
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @ObservedObject var dashboardVM: DashboardViewModel
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .center) {
+                Text("Statistiques")
+                    .foregroundStyle(.primaryText)
+                    .font(.title.bold())
                 HStack(alignment: .bottom) {
                     Text(dashboardVM.stats.global.totalDistance.roundedText(to: 0))
                         .font(.system(size: 70).bold())

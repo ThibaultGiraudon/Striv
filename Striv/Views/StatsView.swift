@@ -13,7 +13,7 @@ struct StatsView: View {
     var body: some View {
         LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
             statLabel(title: "Courses", value: "\(stats.count)")
-            statLabel(title: "Temps", value: "\(stats.totalDuration.hours) h")
+            statLabel(title: "Temps", value: "\(stats.totalDuration.hours) h \(stats.totalDuration.hours < 100 ? "\(stats.totalDuration.minutes)" : "")")
             statLabel(title: "Dénivelé", value: "\(stats.totalElevation.roundedText(to: 0)) m")
             statLabel(title: "Moyenne", value: "\(stats.count > 0 ? (stats.totalDistance / Double(stats.count)).roundedText(to: 1) : "0") km")
         }
@@ -26,7 +26,7 @@ struct StatsView: View {
                 Text(title)
                     .font(.title)
                 Text(value)
-                    .font(.largeTitle.bold())
+                    .font(.title.bold())
             }
             Spacer()
         }

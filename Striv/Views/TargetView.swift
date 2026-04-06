@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+// TODO: naviguer vers formulaire en cliquant
+
 struct TargetView: View {
     @ObservedObject var dashboardVM: DashboardViewModel
     @ObservedObject var targetVM: TargetViewModel
@@ -41,7 +43,7 @@ struct TargetView: View {
         .frame(maxWidth: .infinity)
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(LinearGradient(colors: [.gray, .teal], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.1))
+                .fill(LinearGradient(colors: [.teal, .teal], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.1))
         }
     }
 }

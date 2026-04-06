@@ -26,8 +26,8 @@ struct HomeView: View {
                     .padding(.bottom)
                 
                 
-                RunProgressView(dashboardVM: dashboardVM)
-                    .padding(.bottom)
+//                RunProgressView(dashboardVM: dashboardVM)
+//                    .padding(.bottom)
                 
                 Text("Cette semaine")
                     .font(.title.bold())
