@@ -12,6 +12,7 @@ struct ContentView: View {
     @Environment(\.modelContext) var modelContext
     @StateObject var workoutsVM: WorkoutsViewModel = .init()
     @StateObject var dashboardVM: DashboardViewModel = .init()
+    @StateObject var runnerProfileVM: RunnerProfileViewModel = .init()
 
     var body: some View {
         TabView {
@@ -24,6 +25,12 @@ struct ContentView: View {
             Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
                 NavigationStack {
                     AllStatsView(dashboardVM: dashboardVM)
+                }
+            }
+            
+            Tab("Objectif", systemImage: "trophy.fill") {
+                NavigationStack {
+                    DefineGoalView(runnerProfileVM: runnerProfileVM)
                 }
             }
 
@@ -41,6 +48,8 @@ struct ContentView: View {
         }
         .onAppear {
             workoutsVM.setContext(context: modelContext)
+            runnerProfileVM.setContext(context: modelContext)
+            runnerProfileVM.createProfileIfNeeded()
         }
     }
 }
