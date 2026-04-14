@@ -79,9 +79,6 @@ class Workout: Identifiable, Equatable {
     func analyzePrompt(with profile: RunnerProfile) -> String {
         var prompts: [String] = []
         
-        // TODO: ajouter formulaire pour définir un objecif (temps/allure ou distance) avec enum pour différencié
-        // TODO: mettre temps/allure max pour être réaliste ?
-        
         prompts.append("""
         Tu es un coach de course à pied.
 

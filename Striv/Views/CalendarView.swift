@@ -26,6 +26,7 @@ struct CalendarView: View {
                             if workoutExist(for: day) {
                                 Circle()
                                     .foregroundStyle(Color.primaryText)
+                                    .frame(width: 30, height: 30)
                             }
                         }
                         .padding(.vertical, 10)
@@ -50,7 +51,11 @@ struct CalendarView: View {
             }
             
         }
-        .background(Color.background)
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.customPrimary)
+        }
         .foregroundStyle(Color.primaryText)
     }
     

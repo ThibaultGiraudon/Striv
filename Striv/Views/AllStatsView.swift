@@ -8,8 +8,6 @@
 import SwiftUI
 import SwiftData
 
-// TODO: ajouter calendrier
-
 struct AllStatsView: View {
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @ObservedObject var dashboardVM: DashboardViewModel
@@ -37,6 +35,9 @@ struct AllStatsView: View {
                     .padding(.bottom, 10)
                 
                 RunChartsView(dashboardVM: dashboardVM)
+                    .padding(.bottom, 10)
+                
+                CalendarView()
             }
         }
         .padding()
