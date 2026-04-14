@@ -6,8 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RunDetailView: View {
+    @Query private var profiles: [RunnerProfile]
+    var profile: RunnerProfile {
+        self.profiles.first ?? RunnerProfile(goal: .init(type: .distance, distance: .preset(.marathon)))
+    }
     @State var workout: Workout
     @ObservedObject var workoutsVM: WorkoutsViewModel
     
@@ -90,14 +95,14 @@ struct RunDetailView: View {
                         withAnimation {
                             isShowingAnalyze.toggle()
                         }
-                        if workout.analyze == nil {
-                            let analyzeRaw = await analyzeVM.analyze(workout)
+//                        if workout.analyze == nil {
+                            let analyzeRaw = await analyzeVM.analyze(workout, with: profile)
                             workout.analyzeRaw = analyzeRaw
                             analyze = workout.analyze
-                        }
-                        else {
-                            analyze = workout.analyze
-                        }
+//                        }
+//                        else {
+//                            analyze = workout.analyze
+//                        }
                     }
                 }
             }

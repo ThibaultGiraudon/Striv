@@ -76,14 +76,14 @@ class Workout: Identifiable, Equatable {
     }
     
     /// Generates the AI prompt to analyze this workout.
-    @Transient var analyzePrompt: String {
+    func analyzePrompt(with profile: RunnerProfile) -> String {
         var prompts: [String] = []
         
         // TODO: ajouter formulaire pour définir un objecif (temps/allure ou distance) avec enum pour différencié
         // TODO: mettre temps/allure max pour être réaliste ?
         
         prompts.append("""
-        Tu es un coach de course à pied spécialisé dans la préparation marathon.
+        Tu es un coach de course à pied.
 
         Analyse UNIQUEMENT cette séance de course, pas un plan d’entraînement global.
         Base-toi strictement sur les données fournies.
@@ -91,13 +91,23 @@ class Workout: Identifiable, Equatable {
 
         Objectif de l’analyse :
         - Aider le coureur à comprendre CE QUE cette séance a travaillé
+        - Évaluer si l’objectif défini par le coureur est atteint ou non
         - Identifier 1 ou 2 points clés d’amélioration
         - Donner UN conseil clair pour la prochaine séance
+
+        Règles d’évaluation de l’objectif :
+        - Compare la performance réelle avec l’objectif utilisateur
+        - Si l’objectif est atteint → considère-le comme réussi
+        - Si l’objectif est incohérent avec la performance ou les données → considère-le comme IRRÉALISTE / NON ATTEIGNABLE à l'instant T
+
+        IMPORTANT :
+        Tu ne dois PAS ajouter de champ spécifique pour l’objectif.
+        Tu dois intégrer le verdict directement dans le champ "summary".
 
         Contraintes de réponse :
         - Maximum 180 mots
         - Ton clair, direct et bienveillant
-        - Pas de généralités sur “comment préparer un marathon”
+        - Pas de généralités sur l’entraînement global
         - Pas plus de 4 bullet points par section
 
         Réponds en suivant EXACTEMENT et UNIQUEMENT ce format:
@@ -107,10 +117,11 @@ class Workout: Identifiable, Equatable {
             "watchPoints": ["", "", ...],
             "nextAdvice": ""
         }
-        
-        Ne rajoute et n'enlève rien, la réponse doit contenir uniquement ce modèle et ne doit PAS être formatté en Markdown ou en JSON.
+
+        Ne rajoute et n'enlève rien, la réponse doit être strictement conforme et sans Markdown.
         """)
-        prompts.append("Objectif: Marathon")
+        
+        prompts.append(profile.goalDescription())
         prompts.append("Date: \(date)")
         prompts.append("Durée: \(duration.totalSeconds) secondes")
         

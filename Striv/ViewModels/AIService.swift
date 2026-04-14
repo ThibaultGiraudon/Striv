@@ -55,13 +55,13 @@ final class AIService {
     /// - Throws: `AIError.connection` if no network is available,
     ///   `AIError.internalAI` if the AI provider fails,
     ///   or `AIError.invalid` for any unexpected error.
-    func analyze(_ workout: Workout) async throws -> String {
+    func analyze(_ workout: Workout, with profile: RunnerProfile) async throws -> String {
         guard networkMonitor.execute() else {
             throw AIError.connection
         }
 
         do {
-            return try await aiRepository.askGemini(with: workout.analyzePrompt)
+            return try await aiRepository.askGemini(with: workout.analyzePrompt(with: profile))
         } catch is GenerateContentError {
             throw AIError.internalAI
         } catch {

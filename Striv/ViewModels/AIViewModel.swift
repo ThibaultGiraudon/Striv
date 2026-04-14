@@ -46,9 +46,9 @@ final class AnalyzeViewModel: ObservableObject {
     /// - Returns: A textual analysis of the workout if the operation
     ///   succeeds, otherwise `nil`.
     @MainActor
-    func analyze(_ workout: Workout) async -> String? {
+    func analyze(_ workout: Workout, with profile: RunnerProfile) async -> String? {
         do {
-            return try await self.aiService.analyze(workout)
+            return try await self.aiService.analyze(workout, with: profile)
         } catch let aiError as AIError {
             self.error = aiError
         } catch {
