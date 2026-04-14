@@ -15,6 +15,7 @@ struct CustomProgressView: View {
         GeometryReader { geo in
             let width = geo.size.width
             Capsule()
+                .foregroundStyle(.quinary)
                 .glassEffect()
             
             Capsule()

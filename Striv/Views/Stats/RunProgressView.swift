@@ -18,6 +18,7 @@ struct RunProgressView: View {
         }
         return monthlyStats[monthlyStats.count - 2].distanceChange ?? 0
     }
+    
     var body: some View {
         HStack(alignment: .bottom) {
             Text(" \(progression >= 0 ? "+ " : "")\(progression.roundedText(to: 0)) %")

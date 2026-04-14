@@ -35,12 +35,14 @@ struct TargetView: View {
                     .padding(.vertical, 5)
                     .background {
                         Capsule()
+                            .foregroundStyle(.quinary)
                             .glassEffect()
                     }
             }
         }
         .padding()
         .frame(maxWidth: .infinity)
+        .foregroundStyle(.primaryText)
         .background {
             RoundedRectangle(cornerRadius: 16)
                 .fill(LinearGradient(colors: [.teal, .teal], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.1))

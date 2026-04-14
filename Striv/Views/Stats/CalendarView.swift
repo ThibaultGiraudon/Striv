@@ -8,8 +8,6 @@
 import SwiftUI
 import SwiftData
 
-// TODO: définir taille fix Circle sinon taille diff selon chiffre ou nombre
-
 struct CalendarView: View {
     @State private var date: Date = .now
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts

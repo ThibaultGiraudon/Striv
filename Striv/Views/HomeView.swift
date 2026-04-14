@@ -22,8 +22,12 @@ struct HomeView: View {
                 
                 Text("Ma progression")
                     .font(.title.bold())
-                TargetView(dashboardVM: dashboardVM, targetVM: targetVM)
-                    .padding(.bottom)
+                NavigationLink {
+                    TargetFormView(targetVM: targetVM)
+                } label: {
+                    TargetView(dashboardVM: dashboardVM, targetVM: targetVM)
+                        .padding(.bottom)
+                }
                 
                 
 //                RunProgressView(dashboardVM: dashboardVM)

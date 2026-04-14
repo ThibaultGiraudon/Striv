@@ -100,7 +100,6 @@ struct DefineGoalView: View {
             }
         }
         .onAppear {
-            print(profiles)
             if let profile = profiles.first {
                 let goal = profile.goal
                 self.distanceType = goal.distance
