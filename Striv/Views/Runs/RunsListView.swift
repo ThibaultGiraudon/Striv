@@ -18,6 +18,7 @@ struct RunsListView: View {
             } label: {
                 RunRowView(workout: workout)
             }
+            .listRowBackground(Color.customPrimary)
         }
         .navigationTitle("All runs")
         .toolbar {
@@ -29,6 +30,8 @@ struct RunsListView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.background)
     }
 }
 
