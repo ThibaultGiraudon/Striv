@@ -36,6 +36,17 @@ final class Duration: Equatable, Hashable {
         String(format: "%d:%02d:%02d", hours, minutes, seconds)
     }
     
+    var longLabel: String {
+        let formatted: String
+
+        if hours > 0 {
+            formatted = String(format: "%02dh%02dmin%02d", hours, minutes, seconds)
+        } else {
+            formatted = String(format: "%02dmin%02d", minutes, seconds)
+        }
+        return formatted
+    }
+    
     /// Initializes a `Duration` from a total number of seconds.
     ///
     /// - Parameter time: Total time in seconds.

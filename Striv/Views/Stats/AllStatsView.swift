@@ -8,6 +8,9 @@
 import SwiftUI
 import SwiftData
 
+// TODO: add all PRs
+// TODO: add widgets
+
 struct AllStatsView: View {
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @ObservedObject var dashboardVM: DashboardViewModel

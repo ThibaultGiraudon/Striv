@@ -16,6 +16,7 @@ struct DefineGoalView: View {
     @State private var distanceType: DistanceType = .preset(.marathon)
     @State private var customDistance: Double = 0.0
     @State private var time: Double = 180
+    @State private var prs: [PresetDistance: PRResult] = [:]
 
     var body: some View {
         ScrollView {
@@ -29,7 +30,6 @@ struct DefineGoalView: View {
                     .padding(.vertical)
                 
                 SegmentedPicker(items: DistanceType.allCases, title: { $0.title }, selection: $distanceType, size: 10)
-                    .padding(.bottom)
                 
                 Button {
                     distanceType = .custom(customDistance)
@@ -45,6 +45,7 @@ struct DefineGoalView: View {
                             distanceType.title == "Distance personnalisée" ? .teal : .customPrimary
                         )
                 }
+                .padding(.bottom)
                 
                 if distanceType.title == "Distance personnalisée" {
                     CustomTextField("Distance en m", systemName: "flag.checkered", value: $customDistance)
@@ -74,32 +75,49 @@ struct DefineGoalView: View {
                         .foregroundStyle(.yellow)
                 }
                 .frame(maxWidth: .infinity)
+                
+                if let preset = PresetDistance.allCases.first(where: {$0.meters == distanceType.meters}), let pr = self.prs[preset] {
+                    HStack {
+                        Image(systemName: "lightbulb.max")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 60)
+                            .foregroundStyle(.yellow)
+                        Text("Ton record personnel sur \(distanceType.title) est de \(Duration(Int(pr.time)).longLabel)")
+                            .multilineTextAlignment(.leading)
+                        Spacer()
+                    }
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.customPrimary)
+                    }
+                    
+                    Button {
+                        if !runnerProfileVM.save(Goal(type: goalType, distance: distanceType, targetTime: Int(time)), for: profiles.first) {
+                            print("Fail to save goal")
+                        }
+                    } label: {
+                        Text("Enregistrer")
+                            .font(.title.bold())
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(.teal)
+                            }
+                    }
+                }
             }
             
         }
         .padding()
         .background(Color.background)
-        .overlay(alignment: .bottom) {
-            Button {
-                if !runnerProfileVM.save(Goal(type: goalType, distance: distanceType, targetTime: Int(time)), for: profiles.first) {
-                    print("Fail to save goal")
-                }
-            } label: {
-                Text("Enregistrer")
-                    .font(.title.bold())
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(.teal)
-                    }
-                    .padding()
-            }
-        }
         .onAppear {
             if let profile = profiles.first {
                 let goal = profile.goal
+                self.prs = profile.prs
                 self.distanceType = goal.distance
                 self.customDistance = goal.distance.meters
                 self.time = Double(goal.targetTime ?? 180)
