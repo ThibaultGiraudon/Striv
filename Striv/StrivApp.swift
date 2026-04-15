@@ -38,6 +38,6 @@ struct StrivApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Workout.self, Duration.self, Coordinate.self, RunnerProfile.self])
+        .modelContainer(for: [Workout.self, Duration.self, Coordinate.self, RunnerProfile.self, RunSample.self])
     }
 }

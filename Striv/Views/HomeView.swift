@@ -72,9 +72,10 @@ struct HomeView: View {
                     }
                 }
             }
+            .padding(.top)
         }
-        .padding()
         .navigationTitle("Accueil")
+        .padding(.horizontal)
         .background(Color.background)
         .onChange(of: workouts) { _, workouts in
             dashboardVM.load(with: workouts)

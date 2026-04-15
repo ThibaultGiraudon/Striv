@@ -16,41 +16,20 @@ struct DefineGoalView: View {
     @State private var distanceType: DistanceType = .preset(.marathon)
     @State private var customDistance: Double = 0.0
     @State private var time: Double = 180
-    var timeBounds: (min: Int, max: Int) {
-        let km = distanceType.meters / 1000
-        let minPace: Double = 150 + km
-        let maxPace: Double = 600
-        
-        return (Int((minPace * km))/60, Int((maxPace * km))/60)
-    }
-    var formatTime: String {
-        let h = Int(time) / 60
-        let m = Int(time) % 60
-        
-        if h > 0 {
-            return "\(h)h\(m<10 ? "0" : "")\(m)"
-        } else {
-            return "\(m) min"
-        }
-    }
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(alignment: .leading) {
                 Text("Définir objectif")
                     .font(.title.bold())
-                Picker("Type d'objectif", selection: $goalType) {
-                    ForEach(GoalType.allCases, id: \.self) { goalType in
-                        Text(goalType.rawValue)
-                    }
-                }
-                .pickerStyle(.segmented)
+                Text("Choisi ton objectif de course.")
                 
-                Picker("", selection: $distanceType) {
-                    ForEach(PresetDistance.allCases, id: \.self) { preset in
-                        Text(preset.title).tag(DistanceType.preset(preset))
-                    }
-                }
-                .pickerStyle(.segmented)
+                SegmentedPicker(items: GoalType.allCases, title: { $0.rawValue }, selection: $goalType, size: 10)
+                    .font(.title2)
+                    .padding(.vertical)
+                
+                SegmentedPicker(items: DistanceType.allCases, title: { $0.title }, selection: $distanceType, size: 10)
+                    .padding(.bottom)
                 
                 Button {
                     distanceType = .custom(customDistance)
@@ -59,11 +38,11 @@ struct DefineGoalView: View {
                         .foregroundStyle(.white)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(5)
+                .padding(10)
                 .background {
                     Capsule()
                         .fill(
-                            distanceType.title == "Distance personnalisée" ? .tertiary : .quinary
+                            distanceType.title == "Distance personnalisée" ? .teal : .customPrimary
                         )
                 }
                 
@@ -74,8 +53,27 @@ struct DefineGoalView: View {
                         }
                 }
                 
-                Slider(value: $time, in: Double(timeBounds.min)...Double(timeBounds.max))
-                Text(formatTime)
+                VStack(alignment: .center) {
+                    Text(formatTime)
+                        .font(.system(size: 50).bold())
+                    Text("Objectif pour \(Int(distanceType.meters / 1000)) km")
+                    Slider(value: $time, in: Double(timeBounds.min)...Double(timeBounds.max))
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding()
+                .background {
+                    RoundedRectangle(cornerRadius: 16)
+                        .foregroundStyle(Color.customPrimary)
+                }
+                HStack {
+                    cardView(systemImage: "bolt.fill", title: pace.shortLabel, legend: "Allure cible")
+                        .foregroundStyle(.yellow)
+                    cardView(systemImage: progression.image, title: progression.state, legend: "actuellement")
+                        .foregroundStyle(progression.color)
+                    cardView(systemImage: "star.fill", title: progression.label, legend: progression.feedback)
+                        .foregroundStyle(.yellow)
+                }
+                .frame(maxWidth: .infinity)
             }
             
         }
@@ -107,6 +105,80 @@ struct DefineGoalView: View {
                 self.time = Double(goal.targetTime ?? 180)
             }
         }
+        .onChange(of: distanceType) {
+            self.time = Double(self.timeBounds.max / 2)
+        }
+    }
+    
+    var timeBounds: (min: Int, max: Int) {
+        let km = distanceType.meters / 1000
+        let minPace: Double = 150 + km
+        let maxPace: Double = 600
+        
+        return (Int((minPace * km))/60, Int((maxPace * km))/60)
+    }
+    
+    var formatTime: String {
+        let h = Int(time) / 60
+        let m = Int(time) % 60
+        
+        if h > 0 {
+            return "\(h)h\(m<10 ? "0" : "")\(m)"
+        } else {
+            return "\(m) min"
+        }
+    }
+    
+    var pace: Workout.Pace {
+        return Workout.Pace(pace: time / (distanceType.meters / 1000))
+    }
+    
+    var progression: (label: String, feedback: String, state: String, color: Color, image: String) {
+        guard let profile = profiles.first else { return ("-", "Non defini", "-", .gray, "minus.circle") }
+        
+        guard let preset = PresetDistance.allCases.first(where: {$0.meters == distanceType.meters}) else {
+            return ("-", "Non defini", "-", .gray, "minus.circle")
+        }
+        
+        guard let pr = profile.prs[preset] else { return ("-", "Non defini", "-", .gray, "minus.circle") }
+                
+        let progression = ((pr.time - (time * 60)) / pr.time) * 100
+        let label = String(format: "%@%.0f%%", progression >= 0 ? "+" : "", progression)
+        
+        var feedback: String = ""
+        var state: String = ""
+        var color: Color = .green
+        var image: String = "minus.circle"
+        
+        switch progression {
+        case ...0:
+            feedback = "Défi atteint"
+            state = "Validé"
+            color = .green
+            image = "checkmark.circle"
+        case 0..<10:
+            feedback = "Défi atteignable"
+            state = "Rapidement"
+            color = .green
+            image = "checkmark.circle"
+        case 10..<20:
+            feedback = "Défi modéré"
+            state = "Réaliste"
+            color = .yellow
+            image = "checkmark.circle"
+        case 20..<30:
+            feedback = "Défi ambitieux"
+            state = "Challengeant"
+            color = .orange
+            image = "minus.circle"
+        default:
+            feedback = "Défi exigeant"
+            state = "Difficile"
+            color = .red
+            image = "xmark.circle"
+        }
+        
+        return (label, feedback, state, color, image)
     }
     
     @ViewBuilder
@@ -118,6 +190,26 @@ struct DefineGoalView: View {
             Spacer()
             TextField("", value: value, format: .number)
                 .multilineTextAlignment(.trailing)
+        }
+    }
+    
+    @ViewBuilder
+    func cardView(systemImage: String, title: String, legend: String) -> some View {
+        VStack {
+            Image(systemName: systemImage)
+                .font(.title2)
+            Text(title)
+                .font(.title3.bold())
+                .foregroundStyle(.primaryText)
+            Text(legend)
+                .font(.caption)
+                .foregroundStyle(.primaryText)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.customPrimary)
         }
     }
 }

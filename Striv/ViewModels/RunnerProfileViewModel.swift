@@ -16,22 +16,22 @@ class RunnerProfileViewModel: ObservableObject {
         self.context = context
     }
     
-    func profileExist() -> Bool {
-        guard let context else { return false }
+    func profileExist() -> RunnerProfile? {
+        guard let context else { return nil }
         
         let descriptor = FetchDescriptor<RunnerProfile>()
         do {
-            return try context.fetch(descriptor).first != nil
+            return try context.fetch(descriptor).first
         } catch {
-            return false
+            return nil
         }
     }
     
     func createProfileIfNeeded() {
-        guard let context else { return }
-        if profileExist() {
+        guard let context, profileExist() == nil else {
             return
         }
+
         let profile = RunnerProfile(goal: .init(type: .distance, distance: .preset(.tenK)))
         
         do {
@@ -44,13 +44,38 @@ class RunnerProfileViewModel: ObservableObject {
     
     func save(_ goal: Goal, for profile: RunnerProfile?) -> Bool {
         guard let context, let profile else {
-
             return false
         }
         
         do {
             profile.goal = goal
             
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+            return false
+        }
+        return true
+    }
+    
+    func updatePRs(_ prs: [PRResult]) -> Bool {
+        guard let context, let profile = profileExist() else {
+            return false
+        }
+        
+        var currentsPRs = profile.prs
+        
+        do {
+            for pr in prs {
+                if let current = currentsPRs[pr.prDistance] {
+                    if pr.time < current.time {
+                        currentsPRs[pr.prDistance] = pr
+                    }
+                } else {
+                    currentsPRs[pr.prDistance] = pr
+                }
+            }
+            profile.encodePRs(with: currentsPRs)
             try context.save()
         } catch {
             print(error.localizedDescription)

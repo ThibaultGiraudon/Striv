@@ -48,6 +48,7 @@ struct ContentView: View {
         }
         .onAppear {
             workoutsVM.setContext(context: modelContext)
+            workoutsVM.setRunnerProfileVM(runnerProfileVM)
             runnerProfileVM.setContext(context: modelContext)
             runnerProfileVM.createProfileIfNeeded()
         }

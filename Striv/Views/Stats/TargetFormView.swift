@@ -12,6 +12,7 @@ struct TargetFormView: View {
     @State private var distance: Double = 20.0
     @ObservedObject var targetVM: TargetViewModel
     var body: some View {
+        VStack {
             VStack(alignment: .leading) {
                 Text("Objectif de distance hebdomadaire")
                     .font(.title.bold())
@@ -41,15 +42,21 @@ struct TargetFormView: View {
                         Spacer()
                         Text("150 km")
                     }
-                    
-                    Spacer()
-                    
-                    Text(feedbackText)
-                        .multilineTextAlignment(.center)
-                    
-                    Spacer()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
+                .padding()
+                .background {
+                    RoundedRectangle(cornerRadius: 16)
+                        .foregroundStyle(Color.customPrimary)
+                }
+                
+                Spacer()
+                
+                Text(feedbackText)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
+                
+                Spacer()
                 
                 Button {
                     targetVM.setDistanceTarget(to: Int(distance.rounded(.down)))
@@ -65,8 +72,8 @@ struct TargetFormView: View {
                                 .fill(.teal)
                         }
                 }
-                
             }
+        }
         .padding()
         .background(Color.background)
         .foregroundStyle(.primaryText)

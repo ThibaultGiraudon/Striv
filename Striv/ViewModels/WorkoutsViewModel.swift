@@ -24,6 +24,8 @@ class WorkoutsViewModel: ObservableObject {
     /// The `ModelContext` used to persist workouts
     private var context: ModelContext?
     
+    private var runnerProfileVM: RunnerProfileViewModel?
+    
     // MARK: - Configuration
     
     /// Sets the `ModelContext` used to persist workouts in SwiftData.
@@ -32,6 +34,10 @@ class WorkoutsViewModel: ObservableObject {
     ///   to fetch and save workout data.
     func setContext(context: ModelContext) {
         self.context = context
+    }
+    
+    func setRunnerProfileVM(_ profileVM: RunnerProfileViewModel) {
+        self.runnerProfileVM = profileVM
     }
     
     // MARK: - Fetching
@@ -45,16 +51,26 @@ class WorkoutsViewModel: ObservableObject {
     /// - Removes workouts that were deleted from the Apple Health app.
     func fetchWorkoutsSummary() async {
         do {
-            guard let context else { return }
+            guard let context, let runnerProfileVM else { return }
             let (hkWorkouts, deletedIDs) = try await HealthKitHelper.shared.syncWorkouts()
             
             let savedWorkouts = getWorkouts()
+            
+             var newWorkouts: [Workout] = []
             
             let workoutsIDs: [UUID] = savedWorkouts.map { $0.id }
             
             for hkWorkout in hkWorkouts {
                 do {
                     async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
+                    async let routes = HealthKitHelper.shared.fetchRoute(with: hkWorkout.uuid)
+                    
+                    let resolvedRoutes = try await routes
+                    
+                    var locations: [CLLocation] = []
+                    if let firstRoute = resolvedRoutes.first {
+                        locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+                    }
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     
@@ -65,9 +81,14 @@ class WorkoutsViewModel: ObservableObject {
                         duration: .init(Int(duration)),
                         elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
                     )
+                    workout.coordinates = locations
+                        .sorted { $0.timestamp < $1.timestamp }
+                        .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
+                    workout.altitudes = locations.map { $0.altitude }.downSample()
 
                     if !workoutsIDs.contains(hkWorkout.uuid) {
                         context.insert(workout)
+                        newWorkouts.append(workout)
                     }
                 } catch {
                     continue
@@ -83,6 +104,10 @@ class WorkoutsViewModel: ObservableObject {
             }
             
             try context.save()
+            
+            let prs = computePRs(with: newWorkouts)
+            
+//            _ = runnerProfileVM.updatePRs(prs)
             
         } catch {
             print(error.localizedDescription)
@@ -114,14 +139,14 @@ class WorkoutsViewModel: ObservableObject {
             async let kcal = HealthKitHelper.shared.fetchActiveEnergy(with: workout.id)
             async let power = HealthKitHelper.shared.fetchPower(with: workout.id)
             async let stepCount = HealthKitHelper.shared.fetchCadence(with: workout.id)
-            async let routes = HealthKitHelper.shared.fetchRoute(with: workout.id)
+//            async let routes = HealthKitHelper.shared.fetchRoute(with: workout.id)
             
-            let resolvedRoutes = try await routes
+//            let resolvedRoutes = try await routes
             
-            var locations: [CLLocation] = []
-            if let firstRoute = resolvedRoutes.first {
-                locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
-            }
+//            var locations: [CLLocation] = []
+//            if let firstRoute = resolvedRoutes.first {
+//                locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+//            }
             
             let minutes = max(Double(newWorkout.duration.totalSeconds) / 60, 1)
             let cadence = (try await stepCount ?? 0) / minutes
@@ -130,10 +155,10 @@ class WorkoutsViewModel: ObservableObject {
             newWorkout.kcal = try await kcal
             newWorkout.power = try await power
             newWorkout.cadence = cadence
-            newWorkout.coordinates = locations
-                .sorted { $0.timestamp < $1.timestamp }
-                .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
-            newWorkout.altitudes = locations.map { $0.altitude }.downSample()
+//            newWorkout.coordinates = locations
+//                .sorted { $0.timestamp < $1.timestamp }
+//                .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
+//            newWorkout.altitudes = locations.map { $0.altitude }.downSample()
             
             try context.save()
             return newWorkout
@@ -155,6 +180,66 @@ class WorkoutsViewModel: ObservableObject {
         }
 
         return await fetchWorkoutDetail(for: workout)
+    }
+    
+    func bestTime(for targetDistance: Double, in samples: [RunSample]) -> TimeInterval? {
+        var best: TimeInterval?
+        var start = 0
+
+        for end in 0..<samples.count {
+            while samples[end].distance - samples[start].distance > targetDistance {
+                start += 1
+            }
+
+            let currentDistance = samples[end].distance - samples[start].distance
+
+            if currentDistance >= targetDistance - 5 {
+                let time = samples[end].time - samples[start].time
+                if time > 10 {
+                    best = min(best ?? time, time)
+                }
+            }
+        }
+
+        return best
+    }
+    
+    func computePRs(with workouts: [Workout]) -> [PRResult] {
+
+        var results: [PRResult] = []
+
+        for target in PresetDistance.allCases {
+            var bestResult: PRResult?
+
+            for workout in workouts {
+                let samples = workout.samples
+                guard samples.count > 100 else { continue }
+                guard (workout.distance ?? 0) > target.meters else { continue }
+
+                if let time = bestTime(for: target.meters, in: samples) {
+                    let candidate = PRResult(
+                        distance: target.meters,
+                        time: time,
+                        workoutId: workout.id,
+                        date: workout.date,
+                        prDistance: target
+                    )
+
+                    if bestResult == nil || time < bestResult!.time {
+                        bestResult = candidate
+                    }
+                }
+            }
+
+            if let bestResult {
+                results.append(bestResult)
+            }
+        }
+        if let runnerProfileVM {
+            print(results)
+            _ = runnerProfileVM.updatePRs(results)
+        }
+        return results
     }
     
     // MARK: - Private

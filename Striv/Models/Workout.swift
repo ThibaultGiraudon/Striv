@@ -155,6 +155,39 @@ class Workout: Identifiable, Equatable {
         ])
     }
     
+    @Transient var samples: [RunSample] {
+        let sorted = coordinates.sorted { $0.timestamp < $1.timestamp }
+        guard sorted.count > 1 else { return [] }
+
+        var result: [RunSample] = []
+        var totalDistance: Double = 0
+        let startDate = sorted.first!.timestamp
+
+        for i in 1..<sorted.count {
+            let prev = sorted[i - 1]
+            let current = sorted[i]
+
+            let prevLoc = CLLocation(latitude: prev.latitude, longitude: prev.longitude)
+            let currentLoc = CLLocation(latitude: current.latitude, longitude: current.longitude)
+
+            guard currentLoc.horizontalAccuracy < 20 else { continue }
+
+            let delta = currentLoc.distance(from: prevLoc)
+            
+            guard delta > 1 else { continue }
+
+            totalDistance += delta
+
+            let time = current.timestamp.timeIntervalSince(startDate)
+
+            result.append(
+                RunSample(distance: totalDistance, time: time)
+            )
+        }
+
+        return result
+    }
+    
     // MARK: - Initializer
     
     /// Creates a new `Workout`.
@@ -198,6 +231,7 @@ class Workout: Identifiable, Equatable {
         var seconds: Int
         
         var label: String { String(format: "%02d'%02d\"/km", minutes, seconds) }
+        var shortLabel: String { String(format: "%02d'%02d\"", minutes, seconds) }
         
         init(pace: Double) {
             self.minutes = Int(pace / 1)
@@ -206,3 +240,13 @@ class Workout: Identifiable, Equatable {
     }
 }
 
+@Model
+class RunSample {
+    var distance: Double
+    var time: TimeInterval
+    
+    init(distance: Double, time: TimeInterval) {
+        self.distance = distance
+        self.time = time
+    }
+}
