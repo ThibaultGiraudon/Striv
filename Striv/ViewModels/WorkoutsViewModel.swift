@@ -107,7 +107,7 @@ class WorkoutsViewModel: ObservableObject {
             
             let prs = computePRs(with: newWorkouts)
             
-//            _ = runnerProfileVM.updatePRs(prs)
+            _ = runnerProfileVM.updatePRs(prs)
             
         } catch {
             print(error.localizedDescription)

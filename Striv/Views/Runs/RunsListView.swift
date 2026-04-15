@@ -29,12 +29,6 @@ struct RunsListView: View {
                     }
                 }
             }
-            
-            ToolbarItem(placement: .topBarLeading) {
-                Button("CPT", systemImage: "trophy.fill") {
-                    let prs = workoutsVM.computePRs(with: workouts)
-                }
-            }
         }
         .scrollContentBackground(.hidden)
         .background(Color.background)

@@ -16,6 +16,7 @@ struct RunChartsView: View {
         VStack(alignment: .leading) {
             Text("Distance hebdomadaire")
                 .font(.title)
+                .padding(.bottom)
             
             if let selectedWeek {
                 VStack(alignment: .leading) {

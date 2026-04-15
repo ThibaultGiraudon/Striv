@@ -8,7 +8,6 @@
 import SwiftUI
 import SwiftData
 
-// TODO: add all PRs
 // TODO: add widgets
 
 struct AllStatsView: View {
@@ -35,6 +34,9 @@ struct AllStatsView: View {
                     .padding(.bottom, 10)
                 
                 StatsView(title: "", stats: dashboardVM.stats.global)
+                    .padding(.bottom, 10)
+                
+                PRsView()
                     .padding(.bottom, 10)
                 
                 RunChartsView(dashboardVM: dashboardVM)

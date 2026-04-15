@@ -87,7 +87,7 @@ class RunnerProfile {
     
     var goal: Goal
     
-    /*private*/ var prsData: Data?
+    private var prsData: Data?
     
     @Transient
     var prs: [PresetDistance: PRResult] {
