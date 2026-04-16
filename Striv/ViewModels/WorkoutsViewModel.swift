@@ -139,14 +139,6 @@ class WorkoutsViewModel: ObservableObject {
             async let kcal = HealthKitHelper.shared.fetchActiveEnergy(with: workout.id)
             async let power = HealthKitHelper.shared.fetchPower(with: workout.id)
             async let stepCount = HealthKitHelper.shared.fetchCadence(with: workout.id)
-//            async let routes = HealthKitHelper.shared.fetchRoute(with: workout.id)
-            
-//            let resolvedRoutes = try await routes
-            
-//            var locations: [CLLocation] = []
-//            if let firstRoute = resolvedRoutes.first {
-//                locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
-//            }
             
             let minutes = max(Double(newWorkout.duration.totalSeconds) / 60, 1)
             let cadence = (try await stepCount ?? 0) / minutes
@@ -155,10 +147,6 @@ class WorkoutsViewModel: ObservableObject {
             newWorkout.kcal = try await kcal
             newWorkout.power = try await power
             newWorkout.cadence = cadence
-//            newWorkout.coordinates = locations
-//                .sorted { $0.timestamp < $1.timestamp }
-//                .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
-//            newWorkout.altitudes = locations.map { $0.altitude }.downSample()
             
             try context.save()
             return newWorkout

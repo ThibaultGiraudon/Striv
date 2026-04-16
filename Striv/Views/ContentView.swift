@@ -13,6 +13,7 @@ struct ContentView: View {
     @StateObject var workoutsVM: WorkoutsViewModel = .init()
     @StateObject var dashboardVM: DashboardViewModel = .init()
     @StateObject var runnerProfileVM: RunnerProfileViewModel = .init()
+    @StateObject var targetVM: TargetViewModel = .init()
 
     var body: some View {
         TabView {
@@ -42,7 +43,7 @@ struct ContentView: View {
             
             Tab("Courses", systemImage: "figure.run") {
                 NavigationStack {
-                    RunsListView(workoutsVM: workoutsVM)
+                    RunsListView(workoutsVM: workoutsVM, targetVM: targetVM, dashboardVM: dashboardVM)
                 }
             }
         }

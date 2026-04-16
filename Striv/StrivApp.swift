@@ -17,27 +17,54 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
+import SwiftUI
+import SwiftData
+
 @main
 struct StrivApp: App {
+    
+    let container: ModelContainer
+    
     init() {
-    let fileManager = FileManager.default
-    if let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-        if !fileManager.fileExists(atPath: appSupport.path) {
-            do {
-                try fileManager.createDirectory(at: appSupport, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                print(error)
+        do {
+            guard let groupURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: "group.striv"
+            ) else {
+                fatalError("App Group introuvable")
             }
+            
+            let supportURL = groupURL
+                .appendingPathComponent("Library/Application Support", isDirectory: true)
+            
+            try FileManager.default.createDirectory(
+                at: supportURL,
+                withIntermediateDirectories: true
+            )
+            
+            let storeURL = supportURL.appendingPathComponent("default.store")
+            
+            let config = ModelConfiguration(url: storeURL)
+            
+            container = try ModelContainer(
+                for: Workout.self,
+                Duration.self,
+                Coordinate.self,
+                RunnerProfile.self,
+                RunSample.self,
+                configurations: config
+            )
+            
+        } catch {
+            fatalError("SwiftData init failed: \(error)")
         }
     }
-}
-
+    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Workout.self, Duration.self, Coordinate.self, RunnerProfile.self, RunSample.self])
+        .modelContainer(container)
     }
 }
