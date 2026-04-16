@@ -14,6 +14,10 @@ struct ContentView: View {
     @StateObject var dashboardVM: DashboardViewModel = .init()
     @StateObject var runnerProfileVM: RunnerProfileViewModel = .init()
     @StateObject var targetVM: TargetViewModel = .init()
+    
+    @State private var didRun: Bool = false
+    
+    @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
 
     var body: some View {
         TabView {
@@ -48,10 +52,16 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            guard !didRun else { return }
+            didRun = true
             workoutsVM.setContext(context: modelContext)
             workoutsVM.setRunnerProfileVM(runnerProfileVM)
             runnerProfileVM.setContext(context: modelContext)
             runnerProfileVM.createProfileIfNeeded()
+            Task {
+                let snapshot = workouts
+                await workoutsVM.processNewWorkout(snapshot)
+            }
         }
     }
 }

@@ -12,12 +12,28 @@ import CoreLocation
 import SwiftData
 import _SwiftData_SwiftUI
 
+
+
+struct PRprocessingState: Codable {
+    var processedWorkoutIDs: Set<UUID>
+}
+
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
+        }
+    }
+}
+
 /// ViewModel responsible for managing workout data.
 ///
 /// `WorkoutsViewModel` synchronizes running workouts from HealthKit
 /// and persists them locally using SwiftData.
 /// It uses `HealthKitHelper` to fetch workout summaries and detailed metrics.
 class WorkoutsViewModel: ObservableObject {
+    
+    private var stateKey: String = "striv.state.key"
     
     // MARK: - Depedencies
     
@@ -51,26 +67,18 @@ class WorkoutsViewModel: ObservableObject {
     /// - Removes workouts that were deleted from the Apple Health app.
     func fetchWorkoutsSummary() async {
         do {
-            guard let context, let runnerProfileVM else { return }
+            guard let context else { return }
             let (hkWorkouts, deletedIDs) = try await HealthKitHelper.shared.syncWorkouts()
             
             let savedWorkouts = getWorkouts()
             
-             var newWorkouts: [Workout] = []
+            var newWorkouts: [Workout] = []
             
             let workoutsIDs: [UUID] = savedWorkouts.map { $0.id }
             
             for hkWorkout in hkWorkouts {
                 do {
                     async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
-                    async let routes = HealthKitHelper.shared.fetchRoute(with: hkWorkout.uuid)
-                    
-                    let resolvedRoutes = try await routes
-                    
-                    var locations: [CLLocation] = []
-                    if let firstRoute = resolvedRoutes.first {
-                        locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
-                    }
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     
@@ -81,11 +89,7 @@ class WorkoutsViewModel: ObservableObject {
                         duration: .init(Int(duration)),
                         elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
                     )
-                    workout.coordinates = locations
-                        .sorted { $0.timestamp < $1.timestamp }
-                        .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
-                    workout.altitudes = locations.map { $0.altitude }.downSample()
-
+                    
                     if !workoutsIDs.contains(hkWorkout.uuid) {
                         context.insert(workout)
                         newWorkouts.append(workout)
@@ -95,6 +99,7 @@ class WorkoutsViewModel: ObservableObject {
                 }
             }
             
+            await self.processNewWorkout(newWorkouts)
             
             for id in deletedIDs {
                 guard let workoutToDelete = savedWorkouts.first(where: { $0.id == id }) else {
@@ -105,14 +110,105 @@ class WorkoutsViewModel: ObservableObject {
             
             try context.save()
             
-            let prs = computePRs(with: newWorkouts)
-            
-            _ = runnerProfileVM.updatePRs(prs)
-            
         } catch {
             print(error.localizedDescription)
         }
     }
+    
+    func fetchWorkoutRoutes(for workout: Workout) async{
+        guard let context else { return }
+        
+        guard workout.coordinates.isEmpty else { return }
+        
+        do {
+            async let routes = HealthKitHelper.shared.fetchRoute(with: workout.id)
+            
+            let resolvedRoutes = try await routes
+            
+            var locations: [CLLocation] = []
+            if let firstRoute = resolvedRoutes.first {
+                locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+            }
+            
+            workout.coordinates = locations
+                .sorted { $0.timestamp < $1.timestamp }
+                .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
+            workout.altitudes = locations.map { $0.altitude }.downSample()
+            
+            try context.save()
+            
+        } catch {
+            print(error)
+        }
+    }
+    
+    func processNewWorkout(_ workouts: [Workout]) async {
+        await Task.detached(priority: .background) {
+            await self.process(workouts)
+        }.value
+    }
+    
+    private func process(_ workouts: [Workout]) async {
+        var state = self.getState()
+        
+        let unprocessed = workouts.filter {
+            !state.processedWorkoutIDs.contains($0.id)
+        }
+        
+        let batchSize = 5
+        
+        for batch in unprocessed.chunked(into: batchSize) {
+            
+            await processBatch(batch, state: &state)
+            
+            do {
+                try self.saveState(state)
+            } catch {
+                print("Failed to save state: \(error.localizedDescription)")
+            }
+            // laisse iOS respirer
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+    }
+    
+    func processBatch(_ batch: [Workout], state: inout PRprocessingState) async {
+
+        for workout in batch {
+
+            await fetchWorkoutRoutes(for: workout)
+
+            let prs = computePRs(for: workout)
+
+            _ = runnerProfileVM?.updatePRs(prs)
+            
+            state.processedWorkoutIDs.insert(workout.id)
+        }
+    }
+    
+    // MARK: - Anchor
+    
+    /// Retrieves the previously stored HealthKit query anchor.
+    ///
+    /// - Returns: The saved `HKQueryAnchor`, or `nil` if none exists.
+    private func getState() -> PRprocessingState {
+        guard let stateData = UserDefaults.standard.value(forKey: self.stateKey) as? Data,
+              let state = try? JSONDecoder().decode(PRprocessingState.self, from: stateData) else {
+            return PRprocessingState(processedWorkoutIDs: [])
+        }
+        
+        return state
+    }
+    
+    /// Persists a HealthKit query anchor in `UserDefaults`.
+    ///
+    /// - Parameter anchor: The anchor to save.
+    /// - Throws: An error if the anchor cannot be archived.
+    private func saveState(_ state: PRprocessingState) throws {
+        let stateData = try JSONEncoder().encode(state)
+        
+        UserDefaults.standard.set(stateData, forKey: self.stateKey)
+    }
+    
     
     
     /// Fetches detailed metrics for a given workout.
@@ -192,30 +288,27 @@ class WorkoutsViewModel: ObservableObject {
         return best
     }
     
-    func computePRs(with workouts: [Workout]) -> [PRResult] {
+    func computePRs(for workout: Workout) -> [PRResult] {
 
         var results: [PRResult] = []
 
         for target in PresetDistance.allCases {
             var bestResult: PRResult?
+            let samples = workout.samples
+            guard samples.count > 100 else { continue }
+            guard (workout.distance ?? 0) > target.meters else { continue }
 
-            for workout in workouts {
-                let samples = workout.samples
-                guard samples.count > 100 else { continue }
-                guard (workout.distance ?? 0) > target.meters else { continue }
+            if let time = bestTime(for: target.meters, in: samples) {
+                let candidate = PRResult(
+                    distance: target.meters,
+                    time: time,
+                    workoutId: workout.id,
+                    date: workout.date,
+                    prDistance: target
+                )
 
-                if let time = bestTime(for: target.meters, in: samples) {
-                    let candidate = PRResult(
-                        distance: target.meters,
-                        time: time,
-                        workoutId: workout.id,
-                        date: workout.date,
-                        prDistance: target
-                    )
-
-                    if bestResult == nil || time < bestResult!.time {
-                        bestResult = candidate
-                    }
+                if bestResult == nil || time < bestResult!.time {
+                    bestResult = candidate
                 }
             }
 
@@ -223,10 +316,7 @@ class WorkoutsViewModel: ObservableObject {
                 results.append(bestResult)
             }
         }
-        if let runnerProfileVM {
-            print(results)
-            _ = runnerProfileVM.updatePRs(results)
-        }
+        
         return results
     }
     
