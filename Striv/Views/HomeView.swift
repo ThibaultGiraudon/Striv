@@ -15,6 +15,7 @@ struct HomeView: View {
     @ObservedObject var workoutsVM: WorkoutsViewModel
     @ObservedObject var dashboardVM = DashboardViewModel()
     @StateObject private var targetVM = TargetViewModel()
+    @StateObject private var nextRaceVM = NextRaceViewModel()
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -30,8 +31,14 @@ struct HomeView: View {
                 }
                 
                 
-//                RunProgressView(dashboardVM: dashboardVM)
-//                    .padding(.bottom)
+                Text("Prochaine course")
+                    .font(.title.bold())
+                NavigationLink {
+                    NextRaceFormView(nextRaceVM: nextRaceVM)
+                } label: {
+                    NextRaceView(nextRaceVM: nextRaceVM)
+                        .padding(.bottom)
+                }
                 
                 Text("Cette semaine")
                     .font(.title.bold())
