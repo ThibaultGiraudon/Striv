@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-// TODO: naviguer vers formulaire en cliquant
-
 struct TargetView: View {
     @ObservedObject var dashboardVM: DashboardViewModel
     @ObservedObject var targetVM: TargetViewModel

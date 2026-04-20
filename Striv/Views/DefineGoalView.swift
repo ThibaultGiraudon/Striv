@@ -12,12 +12,8 @@ struct DefineGoalView: View {
     @ObservedObject var runnerProfileVM: RunnerProfileViewModel
     
     @Query private var profiles: [RunnerProfile]
-    @State private var goalType: GoalType = .time
-    @State private var distanceType: DistanceType = .preset(.marathon)
-    @State private var customDistance: Double = 0.0
-    @State private var time: Double = 180
-    @State private var prs: [PresetDistance: PRResult] = [:]
-
+    @StateObject private var defineGoalVM = DefineGoalViewModel()
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
@@ -25,14 +21,14 @@ struct DefineGoalView: View {
                     .font(.title.bold())
                 Text("Choisi ton objectif de course.")
                 
-                SegmentedPicker(items: GoalType.allCases, title: { $0.rawValue }, selection: $goalType, size: 10)
+                SegmentedPicker(items: GoalType.allCases, title: { $0.rawValue }, selection: $defineGoalVM.goalType, size: 10)
                     .font(.title2)
                     .padding(.vertical)
                 
-                SegmentedPicker(items: DistanceType.allCases, title: { $0.title }, selection: $distanceType, size: 10)
+                SegmentedPicker(items: DistanceType.allCases, title: { $0.title }, selection: $defineGoalVM.distanceType, size: 10)
                 
                 Button {
-                    distanceType = .custom(customDistance)
+                    defineGoalVM.distanceType = .custom(defineGoalVM.customDistance)
                 } label: {
                     Text("Distance personnalisée")
                         .foregroundStyle(.white)
@@ -42,23 +38,23 @@ struct DefineGoalView: View {
                 .background {
                     Capsule()
                         .fill(
-                            distanceType.title == "Distance personnalisée" ? .teal : .customPrimary
+                            defineGoalVM.distanceType.title == "Distance personnalisée" ? .teal : .customPrimary
                         )
                 }
                 .padding(.bottom)
                 
-                if distanceType.title == "Distance personnalisée" {
-                    CustomTextField("Distance en m", systemName: "flag.checkered", value: $customDistance)
+                if defineGoalVM.distanceType.title == "Distance personnalisée" {
+                    CustomTextField("Distance en m", systemName: "flag.checkered", value: $defineGoalVM.customDistance)
                         .onSubmit {
-                            distanceType = .custom(customDistance)
+                            defineGoalVM.distanceType = .custom(defineGoalVM.customDistance)
                         }
                 }
                 
                 VStack(alignment: .center) {
-                    Text(formatTime)
+                    Text(defineGoalVM.formatTime)
                         .font(.system(size: 50).bold())
-                    Text("Objectif pour \(Int(distanceType.meters / 1000)) km")
-                    Slider(value: $time, in: Double(timeBounds.min)...Double(timeBounds.max))
+                    Text("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km")
+                    Slider(value: $defineGoalVM.time, in: Double(defineGoalVM.timeBounds.min)...Double(defineGoalVM.timeBounds.max))
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding()
@@ -67,23 +63,23 @@ struct DefineGoalView: View {
                         .foregroundStyle(Color.customPrimary)
                 }
                 HStack {
-                    cardView(systemImage: "bolt.fill", title: pace.shortLabel, legend: "Allure cible")
+                    cardView(systemImage: "bolt.fill", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
                         .foregroundStyle(.yellow)
-                    cardView(systemImage: progression.image, title: progression.state, legend: "actuellement")
-                        .foregroundStyle(progression.color)
-                    cardView(systemImage: "star.fill", title: progression.label, legend: progression.feedback)
+                    cardView(systemImage: defineGoalVM.progression.image, title: defineGoalVM.progression.state, legend: "actuellement")
+                        .foregroundStyle(defineGoalVM.progression.color)
+                    cardView(systemImage: "star.fill", title: defineGoalVM.progression.label, legend: defineGoalVM.progression.feedback)
                         .foregroundStyle(.yellow)
                 }
                 .frame(maxWidth: .infinity)
                 
-                if let preset = PresetDistance.allCases.first(where: {$0.meters == distanceType.meters}), let pr = self.prs[preset] {
+                if let preset = PresetDistance.allCases.first(where: {$0.meters == defineGoalVM.distanceType.meters}), let pr = defineGoalVM.prs[preset] {
                     HStack {
                         Image(systemName: "lightbulb.max")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(height: 60)
                             .foregroundStyle(.yellow)
-                        Text("Ton record personnel sur \(distanceType.title) est de \(Duration(Int(pr.time)).longLabel)")
+                        Text("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).longLabel)")
                             .multilineTextAlignment(.leading)
                         Spacer()
                     }
@@ -94,7 +90,7 @@ struct DefineGoalView: View {
                     }
                     
                     Button {
-                        if !runnerProfileVM.save(Goal(type: goalType, distance: distanceType, targetTime: Int(time)), for: profiles.first) {
+                        if !runnerProfileVM.save(Goal(type: defineGoalVM.goalType, distance: defineGoalVM.distanceType, targetTime: Int(defineGoalVM.time)), for: profiles.first) {
                             print("Fail to save goal")
                         }
                     } label: {
@@ -117,86 +113,15 @@ struct DefineGoalView: View {
         .onAppear {
             if let profile = profiles.first {
                 let goal = profile.goal
-                self.prs = profile.prs
-                self.distanceType = goal.distance
-                self.customDistance = goal.distance.meters
-                self.time = Double(goal.targetTime ?? 180)
+                defineGoalVM.prs = profile.prs
+                defineGoalVM.distanceType = goal.distance
+                defineGoalVM.customDistance = goal.distance.meters
+                defineGoalVM.time = Double(goal.targetTime ?? 180)
             }
         }
-        .onChange(of: distanceType) {
-            self.time = Double(self.timeBounds.max / 2)
+        .onChange(of: defineGoalVM.distanceType) {
+            defineGoalVM.time = Double(defineGoalVM.timeBounds.max / 2)
         }
-    }
-    
-    var timeBounds: (min: Int, max: Int) {
-        let km = distanceType.meters / 1000
-        let minPace: Double = 150 + km
-        let maxPace: Double = 600
-        
-        return (Int((minPace * km))/60, Int((maxPace * km))/60)
-    }
-    
-    var formatTime: String {
-        let h = Int(time) / 60
-        let m = Int(time) % 60
-        
-        if h > 0 {
-            return "\(h)h\(m<10 ? "0" : "")\(m)"
-        } else {
-            return "\(m) min"
-        }
-    }
-    
-    var pace: Workout.Pace {
-        return Workout.Pace(pace: time / (distanceType.meters / 1000))
-    }
-    
-    var progression: (label: String, feedback: String, state: String, color: Color, image: String) {
-        guard let profile = profiles.first else { return ("-", "Non defini", "-", .gray, "minus.circle") }
-        
-        guard let preset = PresetDistance.allCases.first(where: {$0.meters == distanceType.meters}) else {
-            return ("-", "Non defini", "-", .gray, "minus.circle")
-        }
-        
-        guard let pr = profile.prs[preset] else { return ("-", "Non defini", "-", .gray, "minus.circle") }
-                
-        let progression = ((pr.time - (time * 60)) / pr.time) * 100
-        let label = String(format: "%@%.0f%%", progression >= 0 ? "+" : "", progression)
-        
-        var feedback: String = ""
-        var state: String = ""
-        var color: Color = .green
-        var image: String = "minus.circle"
-        
-        switch progression {
-        case ...0:
-            feedback = "Défi atteint"
-            state = "Validé"
-            color = .green
-            image = "checkmark.circle"
-        case 0..<10:
-            feedback = "Défi atteignable"
-            state = "Rapidement"
-            color = .green
-            image = "checkmark.circle"
-        case 10..<20:
-            feedback = "Défi modéré"
-            state = "Réaliste"
-            color = .yellow
-            image = "checkmark.circle"
-        case 20..<30:
-            feedback = "Défi ambitieux"
-            state = "Challengeant"
-            color = .orange
-            image = "minus.circle"
-        default:
-            feedback = "Défi exigeant"
-            state = "Difficile"
-            color = .red
-            image = "xmark.circle"
-        }
-        
-        return (label, feedback, state, color, image)
     }
     
     @ViewBuilder
