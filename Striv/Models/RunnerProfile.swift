@@ -74,7 +74,6 @@ struct Goal: Codable {
 }
 
 struct PRResult: Codable {
-    let distance: Double
     let time: TimeInterval
     let workoutId: UUID
     let date: Date

@@ -45,14 +45,6 @@ struct LastRunView : View {
                 .font(.title3)
                 .foregroundStyle(.secondary)
         }
-        .onAppear {
-            for familyName in UIFont.familyNames {
-                print("\n-- \(familyName) \n")
-                for fontName in UIFont.fontNames(forFamilyName: familyName) {
-                    print(fontName)
-                }
-            }
-        }
     }
 }
 

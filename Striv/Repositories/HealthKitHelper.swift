@@ -475,6 +475,76 @@ class HealthKitHelper {
         }
     }
     
+    func fetchRunSamples(with id: UUID) async throws -> [RunSample]? {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchRunSamples(for: hkWorkout)
+    }
+    
+    func fetchRunSamples(for workout: HKWorkout) async throws -> [RunSample] {
+
+        guard let healthStore, self.isAuthorized else {
+            return []
+        }
+
+        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
+
+        let predicate = HKQuery.predicateForSamples(
+            withStart: workout.startDate,
+            end: workout.endDate,
+            options: .strictStartDate
+        )
+
+        let startDate = workout.startDate
+        let endDate = workout.endDate
+
+        return try await withCheckedThrowingContinuation { continuation in
+
+            let query = HKStatisticsCollectionQuery(
+                quantityType: distanceType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum,
+                anchorDate: startDate,
+                intervalComponents: DateComponents(second: 2)
+            )
+
+            query.initialResultsHandler = { _, results, error in
+
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                guard let results else {
+                    continuation.resume(returning: [])
+                    return
+                }
+
+                var samples: [RunSample] = []
+                var runningTotal: Double = 0
+
+                results.enumerateStatistics(from: startDate, to: endDate) { stat, _ in
+
+                    let value = stat.sumQuantity()?.doubleValue(for: .meter()) ?? 0
+                    runningTotal += value
+
+                    let time = stat.startDate.timeIntervalSince(startDate)
+
+                    samples.append(
+                        RunSample(
+                            distance: runningTotal,
+                            time: time
+                        )
+                    )
+                }
+
+                continuation.resume(returning: samples)
+            }
+
+            healthStore.execute(query)
+        }
+    }
+    
     // MARK: - Route
     
     /// Fetches the run's route from the workout with the given id.

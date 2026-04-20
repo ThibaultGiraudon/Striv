@@ -115,6 +115,9 @@ struct RunDetailView: View {
                 }
             }
         }
+        .onAppear {
+            print(workout.samples)
+        }
     }
     
     @ViewBuilder

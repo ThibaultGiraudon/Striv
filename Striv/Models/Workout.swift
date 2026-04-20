@@ -155,38 +155,7 @@ class Workout: Identifiable, Equatable {
         ])
     }
     
-    @Transient var samples: [RunSample] {
-        let sorted = coordinates.sorted { $0.timestamp < $1.timestamp }
-        guard sorted.count > 1 else { return [] }
-
-        var result: [RunSample] = []
-        var totalDistance: Double = 0
-        let startDate = sorted.first!.timestamp
-
-        for i in 1..<sorted.count {
-            let prev = sorted[i - 1]
-            let current = sorted[i]
-
-            let prevLoc = CLLocation(latitude: prev.latitude, longitude: prev.longitude)
-            let currentLoc = CLLocation(latitude: current.latitude, longitude: current.longitude)
-
-            guard currentLoc.horizontalAccuracy < 20 else { continue }
-
-            let delta = currentLoc.distance(from: prevLoc)
-            
-            guard delta > 1 else { continue }
-
-            totalDistance += delta
-
-            let time = current.timestamp.timeIntervalSince(startDate)
-
-            result.append(
-                RunSample(distance: totalDistance, time: time)
-            )
-        }
-
-        return result
-    }
+    var samples: [RunSample] = []
     
     // MARK: - Initializer
     

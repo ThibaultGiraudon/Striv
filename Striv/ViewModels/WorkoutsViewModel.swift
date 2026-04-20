@@ -79,6 +79,7 @@ class WorkoutsViewModel: ObservableObject {
             for hkWorkout in hkWorkouts {
                 do {
                     async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
+                    async let samples = HealthKitHelper.shared.fetchRunSamples(for: hkWorkout)
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     
@@ -87,8 +88,10 @@ class WorkoutsViewModel: ObservableObject {
                         date: hkWorkout.startDate,
                         distance: try await distance,
                         duration: .init(Int(duration)),
-                        elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter())
+                        elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter()),
                     )
+                    
+                    try await workout.samples = samples.sorted(by: {$0.time < $1.time})
                     
                     if !workoutsIDs.contains(hkWorkout.uuid) {
                         context.insert(workout)
@@ -134,7 +137,7 @@ class WorkoutsViewModel: ObservableObject {
                 .sorted { $0.timestamp < $1.timestamp }
                 .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
             workout.altitudes = locations.map { $0.altitude }.downSample()
-            
+                        
             try context.save()
             
         } catch {
@@ -143,19 +146,19 @@ class WorkoutsViewModel: ObservableObject {
     }
     
     func processNewWorkout(_ workouts: [Workout]) async {
-        await Task.detached(priority: .background) {
+        Task(priority: .background) {
             await self.process(workouts)
-        }.value
+        }
     }
     
     private func process(_ workouts: [Workout]) async {
         var state = self.getState()
         
         let unprocessed = workouts.filter {
-            !state.processedWorkoutIDs.contains($0.id)
+            !state.processedWorkoutIDs.contains($0.id) && ($0.distance ?? 0) > PresetDistance.fiveK.meters
         }
         
-        let batchSize = 5
+        let batchSize = ProcessInfo.processInfo.activeProcessorCount
         
         for batch in unprocessed.chunked(into: batchSize) {
             
@@ -166,18 +169,27 @@ class WorkoutsViewModel: ObservableObject {
             } catch {
                 print("Failed to save state: \(error.localizedDescription)")
             }
-            // laisse iOS respirer
-            try? await Task.sleep(nanoseconds: 200_000_000)
+
+            try? await Task.sleep(nanoseconds: 100_000_000)
         }
     }
     
     func processBatch(_ batch: [Workout], state: inout PRprocessingState) async {
 
         for workout in batch {
-
-            await fetchWorkoutRoutes(for: workout)
-
-            let prs = computePRs(for: workout)
+            
+            let sortedSample = workout.samples.sorted(by: { $0.time < $1.time })
+            
+            let bestTimes = self.bestTimes(in: sortedSample)
+            
+            let prs = bestTimes.map {
+                PRResult(
+                    time: $0.value,
+                    workoutId: workout.id,
+                    date: workout.date,
+                    prDistance: $0.key
+                )
+            }
 
             _ = runnerProfileVM?.updatePRs(prs)
             
@@ -244,6 +256,8 @@ class WorkoutsViewModel: ObservableObject {
             newWorkout.power = try await power
             newWorkout.cadence = cadence
             
+            await self.fetchWorkoutRoutes(for: workout)
+            
             try context.save()
             return newWorkout
         } catch {
@@ -266,58 +280,41 @@ class WorkoutsViewModel: ObservableObject {
         return await fetchWorkoutDetail(for: workout)
     }
     
-    func bestTime(for targetDistance: Double, in samples: [RunSample]) -> TimeInterval? {
-        var best: TimeInterval?
+    func bestTimes(in samples: [RunSample]) -> [PresetDistance: TimeInterval] {
+
+        var times: [PresetDistance: TimeInterval] = [:]
+
+        guard samples.count > 100 else { return [:] }
+
         var start = 0
 
         for end in 0..<samples.count {
-            while samples[end].distance - samples[start].distance > targetDistance {
+
+            while start < end &&
+                  samples[end].distance - samples[start].distance > PresetDistance.marathon.meters {
                 start += 1
             }
 
             let currentDistance = samples[end].distance - samples[start].distance
 
-            if currentDistance >= targetDistance - 5 {
+            for target in PresetDistance.allCases {
+
+                guard currentDistance >= target.meters - 5 else {
+                    continue
+                }
+                
                 let time = samples[end].time - samples[start].time
-                if time > 10 {
-                    best = min(best ?? time, time)
+                guard time > 10 else { continue }
+
+                if let current = times[target] {
+                    times[target] = min(current, time)
+                } else {
+                    times[target] = time
                 }
             }
         }
 
-        return best
-    }
-    
-    func computePRs(for workout: Workout) -> [PRResult] {
-
-        var results: [PRResult] = []
-
-        for target in PresetDistance.allCases {
-            var bestResult: PRResult?
-            let samples = workout.samples
-            guard samples.count > 100 else { continue }
-            guard (workout.distance ?? 0) > target.meters else { continue }
-
-            if let time = bestTime(for: target.meters, in: samples) {
-                let candidate = PRResult(
-                    distance: target.meters,
-                    time: time,
-                    workoutId: workout.id,
-                    date: workout.date,
-                    prDistance: target
-                )
-
-                if bestResult == nil || time < bestResult!.time {
-                    bestResult = candidate
-                }
-            }
-
-            if let bestResult {
-                results.append(bestResult)
-            }
-        }
-        
-        return results
+        return times
     }
     
     // MARK: - Private
