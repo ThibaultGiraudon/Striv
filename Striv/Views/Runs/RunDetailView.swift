@@ -95,14 +95,14 @@ struct RunDetailView: View {
                         withAnimation {
                             isShowingAnalyze.toggle()
                         }
-//                        if workout.analyze == nil {
+                        if workout.analyze == nil {
                             let analyzeRaw = await analyzeVM.analyze(workout, with: profile)
                             workout.analyzeRaw = analyzeRaw
                             analyze = workout.analyze
-//                        }
-//                        else {
-//                            analyze = workout.analyze
-//                        }
+                        }
+                        else {
+                            analyze = workout.analyze
+                        }
                     }
                 }
             }
