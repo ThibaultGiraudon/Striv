@@ -31,7 +31,7 @@ extension Array {
 /// `WorkoutsViewModel` synchronizes running workouts from HealthKit
 /// and persists them locally using SwiftData.
 /// It uses `HealthKitHelper` to fetch workout summaries and detailed metrics.
-class WorkoutsViewModel: ObservableObject {
+class WorkoutsViewModel: BaseViewModel {
     
     private var stateKey: String = "striv.state.key"
     
@@ -114,7 +114,7 @@ class WorkoutsViewModel: ObservableObject {
             try context.save()
             
         } catch {
-            print(error.localizedDescription)
+            self.errorPresenter.error = .database(.saving)
         }
     }
     
@@ -141,7 +141,7 @@ class WorkoutsViewModel: ObservableObject {
             try context.save()
             
         } catch {
-            print(error)
+            self.errorPresenter.error = .database(.saving)
         }
     }
     
@@ -167,7 +167,7 @@ class WorkoutsViewModel: ObservableObject {
             do {
                 try self.saveState(state)
             } catch {
-                print("Failed to save state: \(error.localizedDescription)")
+                self.errorPresenter.error = .database(.saving)
             }
 
             try? await Task.sleep(nanoseconds: 100_000_000)
@@ -261,7 +261,7 @@ class WorkoutsViewModel: ObservableObject {
             try context.save()
             return newWorkout
         } catch {
-            print(error.localizedDescription)
+            self.errorPresenter.error = .database(.saving)
         }
         return workout
     }
@@ -328,7 +328,7 @@ class WorkoutsViewModel: ObservableObject {
         do {
             return try context.fetch(request)
         } catch {
-            print(error.localizedDescription)
+            self.errorPresenter.error = .database(.fetching)
         }
         
         return []

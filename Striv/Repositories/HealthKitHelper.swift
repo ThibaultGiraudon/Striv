@@ -61,7 +61,7 @@ class HealthKitHelper {
     /// - Step count
     ///
     /// If authorization succeeds, `isAuthorized` becomes `true`.
-    func requestAuthorization() {
+    func requestAuthorization() -> Bool {
         if HKHealthStore.isHealthDataAvailable() {
             
             self.healthStore = HKHealthStore()
@@ -96,7 +96,10 @@ class HealthKitHelper {
                     print(error.localizedDescription)
                 }
             }
+            
+            return self.isAuthorized
         }
+        return false
     }
     
     // MARK: - Workouts

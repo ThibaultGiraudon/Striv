@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import SwiftData
 
-class RunnerProfileViewModel: ObservableObject {
+class RunnerProfileViewModel: BaseViewModel {
     private var context: ModelContext?
     
     func setContext(context: ModelContext) {
@@ -38,7 +38,7 @@ class RunnerProfileViewModel: ObservableObject {
             context.insert(profile)
             try context.save()
         } catch {
-            print(error.localizedDescription)
+            self.errorPresenter.error = .database(.saving)
         }
     }
     
@@ -52,7 +52,7 @@ class RunnerProfileViewModel: ObservableObject {
             
             try context.save()
         } catch {
-            print(error.localizedDescription)
+            self.errorPresenter.error = .database(.saving)
             return false
         }
         return true
@@ -78,7 +78,7 @@ class RunnerProfileViewModel: ObservableObject {
             profile.encodePRs(with: currentsPRs)
             try context.save()
         } catch {
-            print(error.localizedDescription)
+            self.errorPresenter.error = .database(.saving)
             return false
         }
         return true

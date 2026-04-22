@@ -91,7 +91,7 @@ struct DefineGoalView: View {
                     
                     Button {
                         if !runnerProfileVM.save(Goal(type: defineGoalVM.goalType, distance: defineGoalVM.distanceType, targetTime: Int(defineGoalVM.time)), for: profiles.first) {
-                            print("Fail to save goal")
+
                         }
                     } label: {
                         Text("Enregistrer")
@@ -158,5 +158,6 @@ struct DefineGoalView: View {
 }
 
 #Preview {
-    DefineGoalView(runnerProfileVM: .init())
+    @Previewable @StateObject var errorPresenter = ErrorPresenter()
+    DefineGoalView(runnerProfileVM: .init(errorPresenter: errorPresenter))
 }

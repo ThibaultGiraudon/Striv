@@ -8,21 +8,30 @@
 import SwiftUI
 import SwiftData
 
-// TODO: ajouter decompte avant prochaine course ex: 35 jours avant "Marathon de saint tropez"
-
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
-    @StateObject var workoutsVM: WorkoutsViewModel = .init()
-    @StateObject var dashboardVM: DashboardViewModel = .init()
-    @StateObject var runnerProfileVM: RunnerProfileViewModel = .init()
-    @StateObject var targetVM: TargetViewModel = .init()
-    @StateObject var widgetDataVM: WidgetDataViewModel = .init()
+    @EnvironmentObject var errorPresenter: ErrorPresenter
+    @StateObject var workoutsVM: WorkoutsViewModel
+    @StateObject var dashboardVM: DashboardViewModel
+    @StateObject var runnerProfileVM: RunnerProfileViewModel
+    @StateObject var targetVM: TargetViewModel
+    @StateObject var widgetDataVM: WidgetDataViewModel
     
     @State private var didRun: Bool = false
+    @State private var activError: String?
+    @State private var presentAlert: Bool = false
     
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @Query private var profiles: [RunnerProfile]
 
+    init(errorPresenter: ErrorPresenter) {
+        self._workoutsVM = StateObject(wrappedValue: WorkoutsViewModel(errorPresenter: errorPresenter))
+        self._dashboardVM = StateObject(wrappedValue: .init())
+        self._runnerProfileVM = StateObject(wrappedValue: .init(errorPresenter: errorPresenter))
+        self._targetVM = StateObject(wrappedValue: .init())
+        self._widgetDataVM = StateObject(wrappedValue: .init())
+    }
+    
     var body: some View {
         TabView {
             Tab("Accueil", systemImage: "house.fill") {
@@ -30,7 +39,7 @@ struct ContentView: View {
                     HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
                 }
             }
-
+            
             Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
                 NavigationStack {
                     AllStatsView(dashboardVM: dashboardVM)
@@ -42,12 +51,12 @@ struct ContentView: View {
                     DefineGoalView(runnerProfileVM: runnerProfileVM)
                 }
             }
-
-//            Tab("Challenges", systemImage: "trophy.fill") {
-//                NavigationStack {
-//                    ChallengesView()
-//                }
-//            }
+            
+            //            Tab("Challenges", systemImage: "trophy.fill") {
+            //                NavigationStack {
+            //                    ChallengesView()
+            //                }
+            //            }
             
             Tab("Courses", systemImage: "figure.run") {
                 NavigationStack {
@@ -75,18 +84,31 @@ struct ContentView: View {
                     prs.append(newPR)
                 }
             }
-
+            
             let widgetData = WidgetData(weeklyGoal: targetVM.distanceTarget, weeklyProgress: dashboardVM.stats.currentWeek.totalDistance, lastRunDistance: lastRun?.distance ?? 0, lastRunDuration: lastRun?.duration.longLabel ?? "", lastRunDate: lastRun?.date ?? Date.now, lastRunPace: lastRun?.pace.label ?? "", streak: dashboardVM.stats.currentStreak, prs: prs)
             
             widgetDataVM.saveWidgetData(widgetData)
+        }
+        .alert(item: $errorPresenter.error) { error in
+            Alert(
+                title: Text("Erreur"),
+                message: Text(error.errorDescription ?? ""),
+                dismissButton: .default(Text("OK")) {
+                    errorPresenter.error = nil
+                }
+            )
         }
     }
 }
 
 #Preview {
     @Previewable @Environment(\.modelContext) var modelContext
-    ContentView()
+    @Previewable @StateObject var errorPresenter = ErrorPresenter()
+    ContentView(errorPresenter: errorPresenter)
         .modelContainer(for: Workout.self, inMemory: true)
         .modelContainer(for: Duration.self, inMemory: true)
         .modelContainer(for: Coordinate.self, inMemory: true)
+        .modelContainer(for: RunnerProfile.self, inMemory: true)
+        .modelContainer(for: RunSample.self, inMemory: true)
+        .environmentObject(errorPresenter)
 }

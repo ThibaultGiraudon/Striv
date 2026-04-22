@@ -11,7 +11,6 @@ import WidgetKit
 
 class WidgetDataViewModel: ObservableObject {
     func saveWidgetData(_ data: WidgetData) {
-        print("Saving data")
         let defaults = UserDefaults(suiteName: "group.striv")
         let encoded = try? JSONEncoder().encode(data)
         defaults?.set(encoded, forKey: "widgetData")

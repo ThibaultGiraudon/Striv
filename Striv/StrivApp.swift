@@ -23,6 +23,7 @@ import SwiftData
 @main
 struct StrivApp: App {
     
+    @StateObject var errorPresenter = ErrorPresenter()
     let container: ModelContainer
     
     init() {
@@ -63,7 +64,8 @@ struct StrivApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(errorPresenter: errorPresenter)
+                .environmentObject(errorPresenter)
         }
         .modelContainer(container)
     }

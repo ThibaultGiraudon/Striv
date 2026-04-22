@@ -28,9 +28,8 @@ struct RunsListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Download", systemImage: "arrow.down.circle") {
-                    Task {
+                    Task { @MainActor in
                         await workoutsVM.fetchWorkoutsSummary()
-                        print("Creating widget data")
                         let lastRun = workouts.first
                         var prs: [PR] = []
                         
@@ -54,7 +53,8 @@ struct RunsListView: View {
 }
 
 #Preview {
+    @Previewable @StateObject var errorPresenter = ErrorPresenter()
     NavigationStack {
-        RunsListView(workoutsVM: .init(), targetVM: .init(), dashboardVM: .init())
+        RunsListView(workoutsVM: .init(errorPresenter: errorPresenter), targetVM: .init(), dashboardVM: .init())
     }
 }

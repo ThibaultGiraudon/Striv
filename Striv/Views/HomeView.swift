@@ -94,7 +94,8 @@ struct HomeView: View {
 }
 
 #Preview {
+    @Previewable @StateObject var errorPresenter = ErrorPresenter()
     NavigationStack {
-        HomeView(workoutsVM: .init(), dashboardVM: .init())
+        HomeView(workoutsVM: .init(errorPresenter: errorPresenter), dashboardVM: .init())
     }
 }
