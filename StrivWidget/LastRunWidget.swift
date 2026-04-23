@@ -13,7 +13,7 @@ extension Date {
     ///
     /// - Parameter format: A `String` representing the format into converts the date.
     /// - Returns: A `String` equal at the initial date.
-    func toString(format: String) -> String {
+    func formatted(format: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = format
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
@@ -27,7 +27,7 @@ struct LastRunView : View {
 
     var body: some View {
             VStack(alignment: .leading) {
-                Text(entry.data.lastRunDate.toString(format: "dd MMM. yyyy"))
+                Text(entry.data.lastRunDate.formatted(format: "dd MMM. yyyy"))
                     .foregroundStyle(.secondary)
                     .font(.title3)
                 Text("\(entry.data.lastRunDistance/1000, specifier: "%.2f") km")

@@ -22,7 +22,7 @@ struct NextRaceView: View {
             .foregroundStyle(Color.primaryText)
         } else {
             VStack(alignment: .leading, spacing: 10) {
-                Text(nextRaceVM.date.toString(format: "dd MMMM yyyy"))
+                Text(nextRaceVM.date.formatted(format: "dd MMMM yyyy"))
                     .foregroundStyle(.secondary)
                 Text(nextRaceVM.title)
                     .font(.title.bold())

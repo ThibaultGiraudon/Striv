@@ -1,5 +1,5 @@
 //
-//  Date+toString.swift
+//  Date+formatted.swift
 //  Striv
 //
 //  Created by Thibault Giraudon on 05/03/2026.
@@ -12,10 +12,11 @@ extension Date {
     ///
     /// - Parameter format: A `String` representing the format into converts the date.
     /// - Returns: A `String` equal at the initial date.
-    func toString(format: String) -> String {
+    func formatted(format: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = format
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        dateFormatter.timeZone = .current
+        dateFormatter.locale = .current
         
         return dateFormatter.string(from: self)
     }

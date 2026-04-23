@@ -45,7 +45,7 @@ struct RunDetailView: View {
                 RouteMapView(coordinates: workout.coordinates2d)
                     .disabled(isShowingStats)
                 VStack(alignment: .leading) {
-                    Text(workout.date.toString(format: "EEEE,"))
+                    Text(workout.date.formatted(format: "EEEE,"))
                         .font(.title.bold())
                     Text(title)
                         .font(.largeTitle.bold())
@@ -86,7 +86,7 @@ struct RunDetailView: View {
                 workout = await workoutsVM.fetchWorkoutDetailIfNeeded(for: workout)
             }
         }
-        .navigationTitle(workout.date.toString(format: "dd MMM. YYYY"))
+        .navigationTitle(workout.date.formatted(format: "dd MMM. YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

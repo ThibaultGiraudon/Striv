@@ -35,7 +35,7 @@ struct NextRaceFormView: View {
             Spacer()
             
             VStack(alignment: .leading, spacing: 10) {
-                Text(date.toString(format: "dd MMMM yyyy"))
+                Text(date.formatted(format: "dd MMMM yyyy"))
                     .foregroundStyle(.secondary)
                 Text(title)
                     .font(.title.bold())

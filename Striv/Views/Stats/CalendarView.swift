@@ -39,7 +39,7 @@ struct CalendarView: View {
                     Image(systemName: "chevron.left")
                 }
                 
-                Text(date.toString(format: "MMMM yyyy"))
+                Text(date.formatted(format: "MMMM yyyy"))
                 
                 Button {
                     date = Calendar.current.date(byAdding: .month, value: 1, to: date)!
