@@ -76,7 +76,7 @@ struct CalendarView: View {
     }
     
     func workoutExist(for date: Date) -> Bool {
-        workouts.first(where: {$0.date.stripped == date.stripped}) != nil
+        workouts.first(where: {$0.date.startOfDay == date.startOfDay}) != nil
     }
 }
 

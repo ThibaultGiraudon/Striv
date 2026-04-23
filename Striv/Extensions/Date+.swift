@@ -8,39 +8,44 @@
 import Foundation
 
 extension Date {
+    
+    private var calendar: Calendar {
+        var cal = Calendar(identifier: .iso8601)
+        cal.firstWeekday = 2 // Monday
+        return cal
+    }
+
     var hour: Int {
-        Calendar.current.component(.hour, from: self)
+        calendar.component(.hour, from: self)
     }
     
     var day: Int {
-        Calendar.current.component(.day, from: self)
+        calendar.component(.day, from: self)
     }
     
-    var week: Int {
-        Calendar.current.component(.weekOfYear, from: self)
+    var weekOfYear: Int {
+        calendar.component(.weekOfYear, from: self)
     }
     
     var month: Int {
-        Calendar.current.component(.month, from: self)
+        calendar.component(.month, from: self)
     }
     
     var year: Int {
-        Calendar.current.component(.year, from: self)
+        calendar.component(.year, from: self)
     }
     
-    var stripped: Date {
-        let components = Calendar.current.dateComponents([.day, .month, .year], from: self)
-        
-        return Calendar.current.date(from: components)!
+    var startOfDay: Date {
+        calendar.startOfDay(for: self)
     }
     
     var firstDayOfWeek: Date {
-        let components = Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
-        
-        return Calendar.current.date(from: components)!
+        calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self))
+        ?? self
     }
     
     var firstDayOfMonth: Date {
-        Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: self))!
+        calendar.date(from: calendar.dateComponents([.year, .month], from: self))
+        ?? self
     }
 }

@@ -74,7 +74,7 @@ class ChallengeViewModel: ObservableObject {
             guard !sortedWorkouts.isEmpty else { return (0, nil) }
             
             let uniqueDays = Set(
-                workouts.map { Calendar.current.startOfDay(for: $0.date).stripped }
+                workouts.map { $0.date.startOfDay }
             ).sorted()
             var streak = 1
             
