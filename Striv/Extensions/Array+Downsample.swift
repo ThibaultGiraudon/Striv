@@ -9,6 +9,9 @@ import Foundation
 
 extension Array<Double> {
     func downSample(maxDisplayPoints: Int = 300) -> [Double] {
+        guard maxDisplayPoints > 0 else {
+            return []
+        }
         guard self.count > maxDisplayPoints else {
             return self
         }
