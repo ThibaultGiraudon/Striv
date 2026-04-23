@@ -55,6 +55,6 @@ struct RunsListView: View {
 #Preview {
     @Previewable @StateObject var errorPresenter = ErrorPresenter()
     NavigationStack {
-        RunsListView(workoutsVM: .init(errorPresenter: errorPresenter), targetVM: .init(), dashboardVM: .init())
+        RunsListView(workoutsVM: .init(healthKitHelper: HealthKitHelper(), errorPresenter: errorPresenter), targetVM: .init(), dashboardVM: .init())
     }
 }

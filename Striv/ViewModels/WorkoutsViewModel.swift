@@ -42,6 +42,13 @@ class WorkoutsViewModel: BaseViewModel {
     
     private var runnerProfileVM: RunnerProfileViewModel?
     
+    private var healthKitHelper: HealthKitHelper
+    
+    init(healthKitHelper: HealthKitHelper, errorPresenter: ErrorPresenter) {
+        self.healthKitHelper = healthKitHelper
+        super.init(errorPresenter: errorPresenter)
+    }
+    
     // MARK: - Configuration
     
     /// Sets the `ModelContext` used to persist workouts in SwiftData.
@@ -68,7 +75,8 @@ class WorkoutsViewModel: BaseViewModel {
     func fetchWorkoutsSummary() async {
         do {
             guard let context else { return }
-            let (hkWorkouts, deletedIDs) = try await HealthKitHelper.shared.syncWorkouts()
+            try await healthKitHelper.requestAuthorization()
+            let (hkWorkouts, deletedIDs) = try await healthKitHelper.syncWorkouts()
             
             let savedWorkouts = getWorkouts()
             
@@ -78,8 +86,8 @@ class WorkoutsViewModel: BaseViewModel {
             
             for hkWorkout in hkWorkouts {
                 do {
-                    async let distance = HealthKitHelper.shared.fetchDistance(for: hkWorkout)
-                    async let samples = HealthKitHelper.shared.fetchRunSamples(for: hkWorkout)
+                    async let distance = healthKitHelper.fetchDistance(for: hkWorkout)
+                    async let samples = healthKitHelper.fetchRunSamples(for: hkWorkout)
                     
                     let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
                     
@@ -114,6 +122,7 @@ class WorkoutsViewModel: BaseViewModel {
             try context.save()
             
         } catch {
+            print(error.localizedDescription)
             self.errorPresenter.error = .database(.saving)
         }
     }
@@ -124,13 +133,13 @@ class WorkoutsViewModel: BaseViewModel {
         guard workout.coordinates.isEmpty else { return }
         
         do {
-            async let routes = HealthKitHelper.shared.fetchRoute(with: workout.id)
+            async let routes = healthKitHelper.fetchRoute(with: workout.id)
             
             let resolvedRoutes = try await routes
             
             var locations: [CLLocation] = []
             if let firstRoute = resolvedRoutes.first {
-                locations = try await HealthKitHelper.shared.fetchCoordinates(for: firstRoute)
+                locations = try await healthKitHelper.fetchCoordinates(for: firstRoute)
             }
             
             workout.coordinates = locations
@@ -243,10 +252,10 @@ class WorkoutsViewModel: BaseViewModel {
         let newWorkout = workout
         
         do {
-            async let hr = HealthKitHelper.shared.fetchAverageHeartRate(with: workout.id)
-            async let kcal = HealthKitHelper.shared.fetchActiveEnergy(with: workout.id)
-            async let power = HealthKitHelper.shared.fetchPower(with: workout.id)
-            async let stepCount = HealthKitHelper.shared.fetchCadence(with: workout.id)
+            async let hr = healthKitHelper.fetchAverageHeartRate(with: workout.id)
+            async let kcal = healthKitHelper.fetchActiveEnergy(with: workout.id)
+            async let power = healthKitHelper.fetchPower(with: workout.id)
+            async let stepCount = healthKitHelper.fetchCadence(with: workout.id)
             
             let minutes = max(Double(newWorkout.duration.totalSeconds) / 60, 1)
             let cadence = (try await stepCount ?? 0) / minutes

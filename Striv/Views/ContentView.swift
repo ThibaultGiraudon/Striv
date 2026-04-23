@@ -25,7 +25,7 @@ struct ContentView: View {
     @Query private var profiles: [RunnerProfile]
 
     init(errorPresenter: ErrorPresenter) {
-        self._workoutsVM = StateObject(wrappedValue: WorkoutsViewModel(errorPresenter: errorPresenter))
+        self._workoutsVM = StateObject(wrappedValue: WorkoutsViewModel(healthKitHelper: HealthKitHelper(), errorPresenter: errorPresenter))
         self._dashboardVM = StateObject(wrappedValue: .init())
         self._runnerProfileVM = StateObject(wrappedValue: .init(errorPresenter: errorPresenter))
         self._targetVM = StateObject(wrappedValue: .init())
