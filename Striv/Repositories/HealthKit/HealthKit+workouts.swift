@@ -43,11 +43,11 @@ extension HealthKitHelper {
         }
     }
     
-    func syncWorkouts() async throws -> ([HKWorkout], [UUID]) {
+    func syncWorkouts() async throws -> ([Workout], [UUID]) {
         let anchor = getAnchor()
         let predicate = HKQuery.predicateForWorkouts(with: .running)
         
-        return try await withCheckedThrowingContinuation { continuation in
+        let response: ([HKWorkout], [UUID]) = try await withCheckedThrowingContinuation { continuation in
             let query = HKAnchoredObjectQuery(
                 type: .workoutType(),
                 predicate: predicate,
@@ -72,5 +72,37 @@ extension HealthKitHelper {
             
             healthStore.execute(query)
         }
+        
+        let hkWorkouts: [HKWorkout] = response.0
+        var workouts: [Workout] = []
+        for hkWorkout in hkWorkouts {
+            do {
+                let workout = try await self.fetchWorkoutsMetrics(for: hkWorkout)
+                workouts.append(workout)
+            } catch {
+                continue
+            }
+        }
+        
+        return (workouts, response.1)
+    }
+    
+    func fetchWorkoutsMetrics(for hkWorkout: HKWorkout) async throws -> Workout {
+        async let distance = self.fetchDistance(for: hkWorkout)
+        async let samples = self.fetchRunSamples(for: hkWorkout)
+        
+        let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
+        
+        let workout = Workout(
+            id: hkWorkout.uuid,
+            date: hkWorkout.startDate,
+            distance: try await distance,
+            duration: .init(Int(duration)),
+            elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter()),
+        )
+        
+        try await workout.samples = samples.sorted(by: {$0.time < $1.time})
+        
+        return workout
     }
 }

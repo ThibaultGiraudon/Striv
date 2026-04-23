@@ -7,12 +7,8 @@
 
 import Foundation
 import Combine
-import HealthKit
 import CoreLocation
 import SwiftData
-import _SwiftData_SwiftUI
-
-
 
 struct PRprocessingState: Codable {
     var processedWorkoutIDs: Set<UUID>
@@ -42,9 +38,9 @@ class WorkoutsViewModel: BaseViewModel {
     
     private var runnerProfileVM: RunnerProfileViewModel?
     
-    private var healthKitHelper: HealthKitHelper
+    private var healthKitHelper: HealthKitHelperInterface
     
-    init(healthKitHelper: HealthKitHelper, errorPresenter: ErrorPresenter) {
+    init(healthKitHelper: HealthKitHelperInterface, errorPresenter: ErrorPresenter) {
         self.healthKitHelper = healthKitHelper
         super.init(errorPresenter: errorPresenter)
     }
@@ -76,7 +72,7 @@ class WorkoutsViewModel: BaseViewModel {
         do {
             guard let context else { return }
             try await healthKitHelper.requestAuthorization()
-            let (hkWorkouts, deletedIDs) = try await healthKitHelper.syncWorkouts()
+            let (workouts, deletedIDs) = try await healthKitHelper.syncWorkouts()
             
             let savedWorkouts = getWorkouts()
             
@@ -84,29 +80,12 @@ class WorkoutsViewModel: BaseViewModel {
             
             let workoutsIDs: [UUID] = savedWorkouts.map { $0.id }
             
-            for hkWorkout in hkWorkouts {
-                do {
-                    async let distance = healthKitHelper.fetchDistance(for: hkWorkout)
-                    async let samples = healthKitHelper.fetchRunSamples(for: hkWorkout)
-                    
-                    let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
-                    
-                    let workout = Workout(
-                        id: hkWorkout.uuid,
-                        date: hkWorkout.startDate,
-                        distance: try await distance,
-                        duration: .init(Int(duration)),
-                        elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter()),
-                    )
-                    
-                    try await workout.samples = samples.sorted(by: {$0.time < $1.time})
-                    
-                    if !workoutsIDs.contains(hkWorkout.uuid) {
-                        context.insert(workout)
-                        newWorkouts.append(workout)
-                    }
-                } catch {
-                    continue
+            // TODO: add loading view
+            
+            for workout in workouts {
+                if !workoutsIDs.contains(workout.id) {
+                    context.insert(workout)
+                    newWorkouts.append(workout)
                 }
             }
             
@@ -133,15 +112,7 @@ class WorkoutsViewModel: BaseViewModel {
         guard workout.coordinates.isEmpty else { return }
         
         do {
-            async let routes = healthKitHelper.fetchRoute(with: workout.id)
-            
-            let resolvedRoutes = try await routes
-            
-            var locations: [CLLocation] = []
-            if let firstRoute = resolvedRoutes.first {
-                locations = try await healthKitHelper.fetchCoordinates(for: firstRoute)
-            }
-            
+            let locations = try await healthKitHelper.fetchCoordinates(with: workout.id)
             workout.coordinates = locations
                 .sorted { $0.timestamp < $1.timestamp }
                 .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }

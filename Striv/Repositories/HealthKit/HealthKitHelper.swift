@@ -9,6 +9,19 @@ import Foundation
 import HealthKit
 import CoreLocation
 
+
+protocol HealthKitHelperInterface {
+    func requestAuthorization() async throws
+    func syncWorkouts() async throws -> ([Workout], [UUID])
+    func fetchCoordinates(with id: UUID) async throws -> [CLLocation]
+    func fetchActiveEnergy(with id: UUID) async throws -> Double?
+    func fetchAverageHeartRate(with id: UUID) async throws -> Double?
+    func fetchDistance(with id: UUID) async throws -> Double?
+    func fetchPower(with id: UUID) async throws -> Double?
+    func fetchCadence(with id: UUID) async throws -> Double?
+    func fetchRunSamples(with id: UUID) async throws -> [RunSample]
+}
+
 /// Helper responsible for interacting with HealthKit.
 ///
 /// `HealthKitHelper` provides a simplified interface to query
@@ -23,7 +36,7 @@ import CoreLocation
 ///
 /// This helper is implemented as a shared singleton because
 /// HealthKit interactions rely on a single `HKHealthStore` instance.
-actor HealthKitHelper {
+actor HealthKitHelper: HealthKitHelperInterface {
     
     // MARK: - Properties
     

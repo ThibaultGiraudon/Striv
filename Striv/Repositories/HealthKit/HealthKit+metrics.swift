@@ -85,7 +85,7 @@ extension HealthKitHelper {
         )
     }
     
-    func fetchRunSamples(with id: UUID) async throws -> [RunSample]? {
+    func fetchRunSamples(with id: UUID) async throws -> [RunSample] {
         let hkWorkout = try await getWorkout(with: id)
         
         return try await fetchRunSamples(for: hkWorkout)

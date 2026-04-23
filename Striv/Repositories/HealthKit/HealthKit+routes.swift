@@ -40,11 +40,13 @@ extension HealthKitHelper {
         }
     }
     
-    func fetchCoordinates(for route: HKWorkoutRoute) async throws -> [CLLocation] {
+    func fetchCoordinates(with id: UUID) async throws -> [CLLocation] {
+        let routes = try await self.fetchRoute(with: id)
+        guard let firstRoute = routes.first else { return [] }
         var locations: [CLLocation] = []
         
         return try await withCheckedThrowingContinuation { continuation in
-            let query = HKWorkoutRouteQuery(route: route) { _, locs, done, error in
+            let query = HKWorkoutRouteQuery(route: firstRoute) { _, locs, done, error in
                 
                 if let error {
                     continuation.resume(throwing: error)
