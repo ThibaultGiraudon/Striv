@@ -84,7 +84,8 @@ class Workout: Identifiable, Equatable {
 
         Analyse UNIQUEMENT cette séance de course, pas un plan d’entraînement global.
         Base-toi strictement sur les données fournies.
-        N’invente pas d’informations manquantes : indique-les brièvement si nécessaire.
+        Certaines données peuvent être absentes.
+        Si une donnée n’est pas fournie, ignore-la complètement dans ton analyse.
 
         Objectif de l’analyse :
         - Aider le coureur à comprendre CE QUE cette séance a travaillé
@@ -95,17 +96,24 @@ class Workout: Identifiable, Equatable {
         Règles d’évaluation de l’objectif :
         - Compare la performance réelle avec l’objectif utilisateur
         - Si l’objectif est atteint → considère-le comme réussi
-        - Si l’objectif est incohérent avec la performance ou les données → considère-le comme IRRÉALISTE / NON ATTEIGNABLE à l'instant T
+        - Si la performance se rapproche de l’objectif → considère cela comme une progression positive
 
         IMPORTANT :
-        Tu ne dois PAS ajouter de champ spécifique pour l’objectif.
-        Tu dois intégrer le verdict directement dans le champ "summary".
+        - Tu ne dois PAS ajouter de champ spécifique pour l’objectif.
+        - Tu dois intégrer le verdict directement dans le champ "summary".
+        - Une séance peut être bénéfique même si l’objectif final n’est pas atteint
+        - Valorise les signes de progression
+        - Évite les jugements trop stricts ou décourageants
+        - Si la séance est très différente de l’objectif (distance ou durée), considère qu’il s’agit d’une séance d’entraînement intermédiaire
+        - Analyse alors la qualité de l’effort plutôt que l’atteinte directe de l’objectif
 
         Contraintes de réponse :
         - Maximum 180 mots
         - Ton clair, direct et bienveillant
         - Pas de généralités sur l’entraînement global
-        - Pas plus de 4 bullet points par section
+        - workedOn : maximum 2 éléments
+        - watchPoints : maximum 2 éléments
+        - Le résumé doit être compréhensible en une seule lecture rapide
 
         Réponds en suivant EXACTEMENT et UNIQUEMENT ce format:
         {
@@ -120,9 +128,14 @@ class Workout: Identifiable, Equatable {
         
         prompts.append(profile.goalDescription())
         prompts.append("Date: \(date)")
-        prompts.append("Durée: \(duration.totalSeconds) secondes")
+        prompts.append("Durée: \(duration.label)")
+        prompts.append("Allure moyenne: \(pace.label)")
         
-        if let distance { prompts.append("Distance: \(distance) mètres") }
+        if let distance {
+            let speed = ((distance / Double(duration.totalSeconds)) * 3.6).roundedText(to: 1)
+            prompts.append("Vitesse moyenne: \(speed)km/h")
+            prompts.append("Distance: \(distance) mètres")
+        }
         if let hr { prompts.append("Fréquence cardiaque: \(hr) bpm") }
         if let kcal { prompts.append("Calories: \(kcal) kcal") }
         if let elevation { prompts.append("Dénivelé positif: \(elevation) mètres") }
