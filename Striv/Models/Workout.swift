@@ -168,7 +168,7 @@ class Workout: Identifiable, Equatable {
         ])
     }
     
-    var samples: [RunSample] = []
+    @Relationship var samples: [RunSampleEntity] = []
     
     // MARK: - Initializer
     
@@ -223,7 +223,7 @@ class Workout: Identifiable, Equatable {
 }
 
 @Model
-class RunSample {
+final class RunSampleEntity: Equatable {
     var distance: Double
     var time: TimeInterval
     
@@ -231,4 +231,18 @@ class RunSample {
         self.distance = distance
         self.time = time
     }
+}
+
+extension RunSampleEntity {
+    convenience init(from model: RunSample) {
+        self.init(
+            distance: model.distance,
+            time: model.time
+        )
+    }
+}
+
+struct RunSample {
+    var distance: Double
+    var time: TimeInterval
 }

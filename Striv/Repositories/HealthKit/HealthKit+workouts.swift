@@ -101,7 +101,7 @@ extension HealthKitHelper {
             elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter()),
         )
         
-        try await workout.samples = samples.sorted(by: {$0.time < $1.time})
+        try await workout.samples = samples.sorted(by: {$0.time < $1.time}).map { RunSampleEntity(from: $0)}
         
         return workout
     }

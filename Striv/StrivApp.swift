@@ -51,7 +51,7 @@ struct StrivApp: App {
                 Duration.self,
                 Coordinate.self,
                 RunnerProfile.self,
-                RunSample.self,
+                RunSampleEntity.self,
                 configurations: config
             )
             

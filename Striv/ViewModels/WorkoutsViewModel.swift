@@ -260,7 +260,7 @@ class WorkoutsViewModel: BaseViewModel {
         return await fetchWorkoutDetail(for: workout)
     }
     
-    func bestTimes(in samples: [RunSample]) -> [PresetDistance: TimeInterval] {
+    func bestTimes(in samples: [RunSampleEntity]) -> [PresetDistance: TimeInterval] {
 
         var times: [PresetDistance: TimeInterval] = [:]
 

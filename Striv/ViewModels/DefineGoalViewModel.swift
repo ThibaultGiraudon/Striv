@@ -18,8 +18,6 @@ final class DefineGoalViewModel: ObservableObject {
     @Published var time: Double = 180
     @Published var prs: [PresetDistance: PRResult] = [:]
     
-    var profile: RunnerProfile?
-    
     var timeBounds: (min: Int, max: Int) {
         let km = distanceType.meters / 1000
         let minPace: Double = 150 + km
@@ -40,9 +38,8 @@ final class DefineGoalViewModel: ObservableObject {
     }
     
     var progression: (label: String, feedback: String, state: String, color: Color, image: String) {
-        guard let profile,
-              let preset = PresetDistance.allCases.first(where: {$0.meters == distanceType.meters}),
-              let pr = profile.prs[preset]
+        guard let preset = PresetDistance.allCases.first(where: {$0.meters == distanceType.meters}),
+              let pr = prs[preset]
         else {
             return ("-", "Non defini", "-", .gray, "minus.circle")
         }

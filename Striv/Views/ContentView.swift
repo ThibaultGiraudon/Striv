@@ -109,6 +109,6 @@ struct ContentView: View {
         .modelContainer(for: Duration.self, inMemory: true)
         .modelContainer(for: Coordinate.self, inMemory: true)
         .modelContainer(for: RunnerProfile.self, inMemory: true)
-        .modelContainer(for: RunSample.self, inMemory: true)
+        .modelContainer(for: RunSampleEntity.self, inMemory: true)
         .environmentObject(errorPresenter)
 }

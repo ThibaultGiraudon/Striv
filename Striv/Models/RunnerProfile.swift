@@ -65,7 +65,7 @@ enum DistanceType: Codable, Equatable, Hashable {
     }
 }
 
-struct Goal: Codable {
+struct Goal: Codable, Sendable {
     var type: GoalType
     
     var distance: DistanceType
@@ -80,11 +80,32 @@ struct PRResult: Codable {
     let prDistance: PresetDistance
 }
 
+enum GoalMapper {
+    static func encode(_ goal: Goal) -> Data? {
+        try? JSONEncoder().encode(goal)
+    }
+    
+    static func decode(_ data: Data?) -> Goal {
+        guard let data,
+              let decoded = try? JSONDecoder().decode(Goal.self, from: data)
+        else {
+            return Goal(type: .distance, distance: .preset(.fiveK), targetTime: nil)
+        }
+        return decoded
+    }
+}
+
 @Model
 class RunnerProfile {
     @Attribute(.unique) var id: UUID
     
-    var goal: Goal
+    private var goalData: Data?
+
+    @Transient
+    var goal: Goal {
+        get { GoalMapper.decode(goalData) }
+        set { goalData = GoalMapper.encode(newValue) }
+    }
     
     private var prsData: Data?
     
