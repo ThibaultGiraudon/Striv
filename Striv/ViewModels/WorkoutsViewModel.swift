@@ -269,7 +269,7 @@ class WorkoutsViewModel: BaseViewModel {
         var start = 0
 
         for end in 0..<samples.count {
-
+            
             while start < end &&
                   samples[end].distance - samples[start].distance > PresetDistance.marathon.meters {
                 start += 1

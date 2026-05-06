@@ -174,6 +174,8 @@ final class WorkoutStatisticsService {
             .firstDayOfMonth else {
             return []
         }
+        
+        print(firstMonth)
 
         var monthsStats: [MonthlyStat] = []
 
@@ -212,7 +214,7 @@ final class WorkoutStatisticsService {
 
         rawStats.sort { $0.date < $1.date }
 
-        for i in 1..<rawStats.count {
+        for i in 0..<rawStats.count {
             let current = rawStats[i]
             
             var change: Double? = nil
