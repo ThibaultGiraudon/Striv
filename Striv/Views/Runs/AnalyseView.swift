@@ -16,7 +16,7 @@ struct AnalyzeView: View {
                 .foregroundStyle(Material.ultraThinMaterial)
                 .ignoresSafeArea()
             if let response {
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading) {
                         ForEach(response.sections, id: \.self) { section in
                          VStack(alignment: .leading) {

@@ -8,167 +8,6 @@
 import SwiftUI
 import SwiftData
 
-enum MetricType: String, CaseIterable, Identifiable {
-    case pace
-    case heartRate
-    case cadence
-    case power
-    case time
-    case elevation
-    case calories
-    
-    var id: String { rawValue }
-}
-
-extension MetricType {
-    
-    var title: String {
-        switch self {
-        case .pace: return "Allure"
-        case .heartRate: return "Fréquence cardiaque"
-        case .cadence: return "Cadence"
-        case .power: return "Puissance"
-        case .time: return "Temps"
-        case .elevation: return "Dénivelé"
-        case .calories: return "Calories"
-        }
-    }
-    
-    var unit: String {
-        switch self {
-        case .pace: return "/km"
-        case .heartRate: return "bpm"
-        case .cadence: return "spm"
-        case .power: return "W"
-        case .time: return ""
-        case .elevation: return "m"
-        case .calories: return "kcal"
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .pace: return "figure.run"
-        case .heartRate: return "heart.fill"
-        case .cadence: return "shoeprints.fill"
-        case .power: return "bolt.fill"
-        case .time: return "clock.fill"
-        case .elevation: return "mountain.2.fill"
-        case .calories: return "flame.fill"
-        }
-    }
-}
-
-extension MetricType {
-    
-    var definition: String {
-        switch self {
-        case .pace:
-            return "Temps nécessaire pour parcourir un kilomètre."
-        case .heartRate:
-            return "Nombre de battements de ton cœur par minute."
-        case .cadence:
-            return "Nombre de pas que tu fais par minute."
-        case .power:
-            return "Effort que tu produis en courant, exprimé en watts."
-        case .time:
-            return "Durée totale de ta course."
-        case .elevation:
-            return "Différence totale de hauteur parcourue pendant ta course."
-        case .calories:
-            return "Énergie dépensée pendant ton activité."
-        }
-    }
-    
-    var whyItMatters: String {
-        switch self {
-        case .pace:
-            return "Permet de suivre ta vitesse et ta progression."
-        case .heartRate:
-            return "Indique l’intensité réelle de ton effort."
-        case .cadence:
-            return "Améliore ton efficacité et réduit les blessures."
-        case .power:
-            return "Aide à gérer ton effort indépendamment du terrain."
-        case .time:
-            return "Permet de mesurer ton volume d’entraînement."
-        case .elevation:
-            return "Permet de mesurer la difficulté de ton parcours."
-        case .calories:
-            return "Donne une estimation de ton effort énergétique."
-        }
-    }
-    
-    var tip: String {
-        switch self {
-        case .pace:
-            return "Essaie de maintenir une allure régulière."
-        case .heartRate:
-            return "La majorité de tes runs devraient être en zone facile."
-        case .cadence:
-            return "Augmente légèrement ta cadence pour progresser."
-        case .power:
-            return "Garde une puissance stable plutôt qu’une allure fixe."
-        case .time:
-            return "Augmente progressivement la durée de tes sorties."
-        case .elevation:
-            return "Adapte ton effort en montée, ne cherche pas à garder la même allure."
-        case .calories:
-            return "Utilise cette donnée comme indicateur global, pas comme valeur exacte."
-        }
-    }
-}
-
-extension MetricType {
-    
-    var typicalValues: [(String, String)] {
-        switch self {
-            
-        case .cadence:
-            return [
-                ("Débutant", "150–165 spm"),
-                ("Intermédiaire", "165–175 spm"),
-                ("Avancé", "175–185+ spm")
-            ]
-            
-        case .heartRate:
-            return [
-                ("Facile", "60–70% FC max"),
-                ("Endurance", "70–80% FC max"),
-                ("Intense", "80–90% FC max")
-            ]
-            
-        case .power:
-            return [
-                ("Dépendance", "Liée au poids")
-            ]
-            
-        case .pace:
-            return [
-                ("Variabilité", "Selon le niveau"),
-                ("Suivi", "À comparer dans le temps")
-            ]
-            
-        case .time:
-            return [
-                ("Variable", "Dépend de ton objectif")
-            ]
-            
-        case .elevation:
-            return [
-                ("Variable", "Dépend de la distance")
-            ]
-            
-        case .calories:
-            return [
-                ("Facteur", "Dépend du poids"),
-                ("Intensité", "Varie selon l’effort"),
-                ("Précision", "Valeur approximative")
-            ]
-        }
-    }
-}
-
 struct RunDetailView: View {
     @Query private var profiles: [RunnerProfile]
     var profile: RunnerProfile {
@@ -182,8 +21,8 @@ struct RunDetailView: View {
     @State private var isShowingAnalyze: Bool = false
     @State private var analyze: Analyze?
     @State private var isShowingStats: Bool = true
-    @State private var isShwoingMetric: Bool = false
     @State private var selectedMetric: MetricType?
+    @State private var isShowingAIInfo: Bool = false
     
     var title: String {
         let hour = workout.date.hour
@@ -223,7 +62,7 @@ struct RunDetailView: View {
                             AltitudeView(altitudes: workout.altitudes)
                                 .frame(height: geo.size.height * 1/8)
                             
-                            ScrollView {
+                            ScrollView(showsIndicators: false) {
                                 statRow(systemImage: "clock.fill", title: "Time", value: workout.duration.label, metric: .time)
                                 statRow(systemImage: "figure.run", title: "Avg Pace", value: workout.pace.label, metric: .pace)
                                 statRow(systemImage: "suit.heart.fill", title: "Heart rate", value: workout.hr, metric: .heartRate)
@@ -251,6 +90,7 @@ struct RunDetailView: View {
         }
         .navigationTitle(workout.date.formatted(format: "dd MMM. YYYY"))
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(isShowingAnalyze)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Analyze", systemImage: isShowingAnalyze ? "xmark" : "apple.intelligence") {
@@ -270,10 +110,18 @@ struct RunDetailView: View {
                 }
             }
             ToolbarSpacer(placement: .topBarTrailing)
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Show Stats", systemImage: "waveform.path.ecg.text.clipboard") {
-                    withAnimation {
-                        isShowingStats.toggle()
+            if isShowingAnalyze {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("", systemImage: "info.circle") {
+                        isShowingAIInfo = true
+                    }
+                }
+            } else {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Show Stats", systemImage: "waveform.path.ecg.text.clipboard") {
+                        withAnimation {
+                            isShowingStats.toggle()
+                        }
                     }
                 }
             }
@@ -282,6 +130,10 @@ struct RunDetailView: View {
             MetricTipView(metric: metric)
                 .padding(.top)
                 .presentationDetents([.height(350)])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowingAIInfo) {
+            AIInfoView()
                 .presentationDragIndicator(.visible)
         }
     }

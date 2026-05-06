@@ -15,7 +15,7 @@ struct DefineGoalView: View {
     @StateObject private var defineGoalVM = DefineGoalViewModel()
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading) {
                 Text("Définir objectif")
                     .font(.title.bold())
