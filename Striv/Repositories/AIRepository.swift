@@ -24,6 +24,16 @@ class AIRepository {
     /// AI service instance provided by FirebaseAI.
     private let ai = FirebaseAI.firebaseAI(backend: .googleAI())
     
+    private var aiConsentAccepted: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: "aiConsentAccepted")
+        }
+        
+        set {
+            UserDefaults.standard.set(newValue, forKey: "aiConsentAccepted")
+        }
+    }
+    
     /// The generative model used to process user input.
     private var model: GenerativeModel {
         ai.generativeModel(modelName: "gemini-2.5-flash-lite")
@@ -42,6 +52,10 @@ class AIRepository {
     ///   - `AIDecodeError.missingKey` if a required key is missing in the response
     ///   - `AIDecodeError.unknown` for any other decoding failure
     func askGemini(with input: String) async throws -> String {
+        guard aiConsentAccepted else {
+            throw AIConsentError.consentRequired
+        }
+        
         let response = try await model.generateContent(input)
                 
         guard let text = response.text else {
@@ -50,6 +64,10 @@ class AIRepository {
         
         return text
     }
+}
+
+enum AIConsentError: Error {
+    case consentRequired
 }
 
 /// Errors that can occur when decoding AI responses.
