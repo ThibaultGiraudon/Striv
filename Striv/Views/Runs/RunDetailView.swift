@@ -23,6 +23,7 @@ struct RunDetailView: View {
     @State private var isShowingStats: Bool = true
     @State private var selectedMetric: MetricType?
     @State private var isShowingAIInfo: Bool = false
+    @State private var showAIConsent: Bool = false
     
     var title: String {
         let hour = workout.date.hour
@@ -98,14 +99,7 @@ struct RunDetailView: View {
                         withAnimation {
                             isShowingAnalyze.toggle()
                         }
-                        if workout.analyze == nil {
-                            let analyzeRaw = await analyzeVM.analyze(workout, with: profile)
-                            workout.analyzeRaw = analyzeRaw
-                            analyze = workout.analyze
-                        }
-                        else {
-                            analyze = workout.analyze
-                        }
+                        startAnalyze()
                     }
                 }
             }
@@ -136,6 +130,20 @@ struct RunDetailView: View {
             AIInfoView()
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showAIConsent) {
+            AIConsentView(
+                onAccept: {
+                    UserDefaults.standard.set(true, forKey: "aiConsentAccepted")
+                    startAnalyze()
+                },
+                onDecline: {
+                    UserDefaults.standard.set(false, forKey: "aiConsentAccepted")
+                    isShowingAnalyze = false
+                }
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
     }
     
     @ViewBuilder
@@ -161,6 +169,23 @@ struct RunDetailView: View {
             }
             .padding(.vertical)
             .padding(.horizontal, 20)
+        }
+    }
+    
+    private func startAnalyze() {
+        Task {
+            if workout.analyze == nil {
+                do {
+                    let analyzeRaw = try await analyzeVM.analyze(workout, with: profile)
+                    workout.analyzeRaw = analyzeRaw
+                    analyze = workout.analyze
+                } catch {
+                    showAIConsent = true
+                }
+            }
+            else {
+                analyze = workout.analyze
+            }
         }
     }
 }

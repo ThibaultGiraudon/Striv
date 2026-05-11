@@ -64,6 +64,8 @@ final class AIService {
             return try await aiRepository.askGemini(with: workout.analyzePrompt(with: profile))
         } catch is GenerateContentError {
             throw AIError.internalAI
+        } catch is AIConsentError {
+            throw AIConsentError.consentRequired
         } catch {
             throw AIError.invalid
         }
