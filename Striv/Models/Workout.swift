@@ -53,7 +53,7 @@ class Workout: Identifiable, Equatable {
     var power: Double?
     
     /// GPS coordinates associated with the workout.
-    @Relationship var coordinates: [Coordinate]
+    @Relationship(deleteRule: .cascade) var coordinates: [Coordinate]
     
     /// Altitudes recorded along the route.
     var altitudes: [Double] = []
@@ -65,7 +65,7 @@ class Workout: Identifiable, Equatable {
     
     /// Computes pace of the workout (minutes/km).
     @Transient var pace: Pace {
-        Pace(pace: Double(duration.totalSeconds / 60) / ((distance ?? 1) / 1000))
+        Pace(pace: (Double(duration.totalSeconds) / 60.0) / ((distance ?? 1) / 1000))
     }
     
     /// Returns coordinates as `CLLocationCoordinate2D`, sorted by timestamp descending.
@@ -127,7 +127,6 @@ class Workout: Identifiable, Equatable {
         """)
         
         prompts.append(profile.goalDescription())
-        prompts.append("Date: \(date)")
         prompts.append("Durée: \(duration.label)")
         prompts.append("Allure moyenne: \(pace.label)")
         
@@ -168,7 +167,7 @@ class Workout: Identifiable, Equatable {
         ])
     }
     
-    @Relationship var samples: [RunSampleEntity] = []
+    @Relationship(deleteRule: .cascade) var samples: [RunSampleEntity] = []
     
     // MARK: - Initializer
     
