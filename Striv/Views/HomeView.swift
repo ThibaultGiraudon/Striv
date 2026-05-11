@@ -81,6 +81,15 @@ struct HomeView: View {
             }
             .padding(.top)
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    SettingsView()
+                } label: {
+                    Label("Paramètres", systemImage: "gear")
+                }
+            }
+        }
         .navigationTitle("Accueil")
         .padding(.horizontal)
         .background(Color.background)
