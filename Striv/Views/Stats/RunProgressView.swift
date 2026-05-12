@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-// TODO: ajouter un écran de détail et d'explication
-
 struct RunProgressView: View {
     @ObservedObject var dashboardVM: DashboardViewModel
     var progression: Double {
