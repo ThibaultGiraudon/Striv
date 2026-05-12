@@ -254,8 +254,13 @@ final class WorkoutStatisticsService {
     func currentStreak(for weeklyStats: [WeeklyStat]) -> Int {
         var streak: Int = 0
         let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        var isFirstWeek: Bool = true
         
         for week in sortedWeeks {
+            if isFirstWeek && week.count == 0 {
+                continue
+            }
+            isFirstWeek = false
             if week.count > 0 {
                 streak += 1
             } else {
