@@ -52,7 +52,7 @@
 		CE867AC32F900D0800A8D96F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StrivWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CED9F3332FB1CC6900ED2F2E /* audit.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = audit.md; sourceTree = "<group>"; };
-		CED9F3E72FB3228400ED2F2E /* StrivShared */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = StrivShared; path = ../StrivShared; sourceTree = SOURCE_ROOT; };
+		CED9F5F42FB32B4B00ED2F2E /* StrivShared */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = StrivShared; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -126,7 +126,7 @@
 		CE7AB5D92EDF30370078BEC3 = {
 			isa = PBXGroup;
 			children = (
-				CED9F3E72FB3228400ED2F2E /* StrivShared */,
+				CED9F5F42FB32B4B00ED2F2E /* StrivShared */,
 				CED9F3332FB1CC6900ED2F2E /* audit.md */,
 				CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */,
 				CE2756D62F2262BB00BB378D /* .gitignore */,
