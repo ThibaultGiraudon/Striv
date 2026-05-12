@@ -29,6 +29,8 @@ extension Array {
 /// It uses `HealthKitHelper` to fetch workout summaries and detailed metrics.
 class WorkoutsViewModel: BaseViewModel {
     
+    @Published var isLoading: Bool = false
+    
     private var stateKey: String = "striv.state.key"
     
     // MARK: - Depedencies
@@ -69,8 +71,12 @@ class WorkoutsViewModel: BaseViewModel {
     /// - Inserts workouts that are not yet stored locally.
     /// - Removes workouts that were deleted from the Apple Health app.
     func fetchWorkoutsSummary() async {
+        
+        defer { isLoading = false }
+        
         do {
             guard let context else { return }
+            isLoading = true
             try await healthKitHelper.requestAuthorization()
             let (workouts, deletedIDs) = try await healthKitHelper.syncWorkouts()
             

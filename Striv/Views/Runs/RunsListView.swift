@@ -17,18 +17,33 @@ struct RunsListView: View {
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @Query private var profiles: [RunnerProfile]
     var body: some View {
-        List(workouts) { workout in
-            NavigationLink {
-                RunDetailView(workout: workout, workoutsVM: workoutsVM)
-            } label: {
-                RunRowView(workout: workout)
+        ZStack {
+            List(workouts) { workout in
+                NavigationLink {
+                    RunDetailView(workout: workout, workoutsVM: workoutsVM)
+                } label: {
+                    RunRowView(workout: workout)
+                }
+                .listRowBackground(Color.customPrimary)
             }
-            .listRowBackground(Color.customPrimary)
+            .scrollContentBackground(.hidden)
+            .background(Color.background)
+
+            if workoutsVM.isLoading {
+                VStack(spacing: 12) {
+                    ProgressView()
+                    Text("Téléchargement des courses...")
+                        .font(.caption)
+                }
+                .padding(20)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
         }
-        .navigationTitle("All runs")
+        .navigationTitle("Courses")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Download", systemImage: "arrow.down.circle") {
+                Button("Télécharger", systemImage: "arrow.down.circle") {
                     Task { @MainActor in
                         await workoutsVM.fetchWorkoutsSummary()
                         
@@ -42,6 +57,7 @@ struct RunsListView: View {
                         widgetDataVM.saveWidgetData(widgetData)
                     }
                 }
+                .disabled(workoutsVM.isLoading)
             }
         }
         .scrollContentBackground(.hidden)
