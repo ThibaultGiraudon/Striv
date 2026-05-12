@@ -27,6 +27,13 @@
 			remoteGlobalIDString = CE867ABE2F900D0800A8D96F;
 			remoteInfo = StrivWidgetExtension;
 		};
+		CED9F6042FB3348700ED2F2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7AB5DA2EDF30370078BEC3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CE7AB5E12EDF30370078BEC3;
+			remoteInfo = Striv;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -53,6 +60,7 @@
 		CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StrivWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CED9F3332FB1CC6900ED2F2E /* audit.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = audit.md; sourceTree = "<group>"; };
 		CED9F5F42FB32B4B00ED2F2E /* StrivShared */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = StrivShared; sourceTree = "<group>"; };
+		CED9F6002FB3348700ED2F2E /* StrivTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StrivTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -97,6 +105,11 @@
 			path = StrivWidget;
 			sourceTree = "<group>";
 		};
+		CED9F6012FB3348700ED2F2E /* StrivTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StrivTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +133,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CED9F5FD2FB3348700ED2F2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -133,6 +153,7 @@
 				CE2756D42F22628E00BB378D /* GoogleService-Info.plist */,
 				CE7AB5E42EDF30370078BEC3 /* Striv */,
 				CE867AC52F900D0800A8D96F /* StrivWidget */,
+				CED9F6012FB3348700ED2F2E /* StrivTests */,
 				CE867AC02F900D0800A8D96F /* Frameworks */,
 				CE7AB5E32EDF30370078BEC3 /* Products */,
 			);
@@ -143,6 +164,7 @@
 			children = (
 				CE7AB5E22EDF30370078BEC3 /* Striv.app */,
 				CE867ABF2F900D0800A8D96F /* StrivWidgetExtension.appex */,
+				CED9F6002FB3348700ED2F2E /* StrivTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -209,6 +231,29 @@
 			productReference = CE867ABF2F900D0800A8D96F /* StrivWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		CED9F5FF2FB3348700ED2F2E /* StrivTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CED9F6062FB3348700ED2F2E /* Build configuration list for PBXNativeTarget "StrivTests" */;
+			buildPhases = (
+				CED9F5FC2FB3348700ED2F2E /* Sources */,
+				CED9F5FD2FB3348700ED2F2E /* Frameworks */,
+				CED9F5FE2FB3348700ED2F2E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CED9F6052FB3348700ED2F2E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CED9F6012FB3348700ED2F2E /* StrivTests */,
+			);
+			name = StrivTests;
+			packageProductDependencies = (
+			);
+			productName = StrivTests;
+			productReference = CED9F6002FB3348700ED2F2E /* StrivTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -224,6 +269,10 @@
 					};
 					CE867ABE2F900D0800A8D96F = {
 						CreatedOnToolsVersion = 26.0;
+					};
+					CED9F5FF2FB3348700ED2F2E = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = CE7AB5E12EDF30370078BEC3;
 					};
 				};
 			};
@@ -246,6 +295,7 @@
 			targets = (
 				CE7AB5E12EDF30370078BEC3 /* Striv */,
 				CE867ABE2F900D0800A8D96F /* StrivWidgetExtension */,
+				CED9F5FF2FB3348700ED2F2E /* StrivTests */,
 			);
 		};
 /* End PBXProject section */
@@ -262,6 +312,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CE867ABD2F900D0800A8D96F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CED9F5FE2FB3348700ED2F2E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -285,6 +342,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CED9F5FC2FB3348700ED2F2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -292,6 +356,11 @@
 			isa = PBXTargetDependency;
 			target = CE867ABE2F900D0800A8D96F /* StrivWidgetExtension */;
 			targetProxy = CE867AD32F900D0900A8D96F /* PBXContainerItemProxy */;
+		};
+		CED9F6052FB3348700ED2F2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CE7AB5E12EDF30370078BEC3 /* Striv */;
+			targetProxy = CED9F6042FB3348700ED2F2E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -549,6 +618,48 @@
 			};
 			name = Release;
 		};
+		CED9F6072FB3348700ED2F2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T6PF4S9ABL;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thibaultgiraudon.StrivTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Striv.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Striv";
+			};
+			name = Debug;
+		};
+		CED9F6082FB3348700ED2F2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T6PF4S9ABL;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thibaultgiraudon.StrivTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Striv.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Striv";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -575,6 +686,15 @@
 			buildConfigurations = (
 				CE867AD72F900D0900A8D96F /* Debug */,
 				CE867AD82F900D0900A8D96F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CED9F6062FB3348700ED2F2E /* Build configuration list for PBXNativeTarget "StrivTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CED9F6072FB3348700ED2F2E /* Debug */,
+				CED9F6082FB3348700ED2F2E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

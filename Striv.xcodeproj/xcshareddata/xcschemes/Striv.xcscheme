@@ -35,7 +35,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CEBB8EF32F9B612A004324D9"
+               BlueprintIdentifier = "CED9F5FF2FB3348700ED2F2E"
                BuildableName = "StrivTests.xctest"
                BlueprintName = "StrivTests"
                ReferencedContainer = "container:Striv.xcodeproj">
