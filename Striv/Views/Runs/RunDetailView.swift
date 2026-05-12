@@ -30,15 +30,15 @@ struct RunDetailView: View {
 
         switch hour {
         case 5..<11:
-            return "Morning run"
+            return "Course le matin"
         case 11..<14:
-            return "Midday run"
+            return "Course le midi"
         case 14..<18:
-            return "Afternoon run"
+            return "Course l'après-midi"
         case 18..<22:
-            return "Evening run"
+            return "Course le soir"
         default:
-            return "Night run"
+            return "Course la nuit"
         }
     }
     
