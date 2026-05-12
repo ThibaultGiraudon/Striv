@@ -73,7 +73,7 @@ struct RunDetailView: View {
                                 statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
                             }
                             .frame(height: isShowingStats ? (geo.size.height * 1/3) : 0)
-                            .glassEffect(in: .rect(cornerRadius: 16.0))
+                            .glassContainer()
                             .font(.title2)
                             .opacity(isShowingStats ? 100 : 0)
                         }
@@ -103,7 +103,9 @@ struct RunDetailView: View {
                     }
                 }
             }
-            ToolbarSpacer(placement: .topBarTrailing)
+            if #available(iOS 26.0, *) {
+                ToolbarSpacer(placement: .topBarTrailing)
+            }
             if isShowingAnalyze {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("", systemImage: "info.circle") {

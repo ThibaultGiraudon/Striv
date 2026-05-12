@@ -34,7 +34,7 @@ struct TargetView: View {
                     .background {
                         Capsule()
                             .foregroundStyle(.quinary)
-                            .glassEffect()
+                            .glassContainer()
                     }
             }
         }

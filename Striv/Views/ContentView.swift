@@ -34,34 +34,51 @@ struct ContentView: View {
     }
     
     var body: some View {
-        TabView {
-            Tab("Accueil", systemImage: "house.fill") {
-                NavigationStack {
-                    HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
+        Group {
+            if #available(iOS 26.0, *) {
+                TabView {
+                    Tab("Accueil", systemImage: "house.fill") {
+                        HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
+                    }
+
+                    Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
+                        AllStatsView(dashboardVM: dashboardVM)
+                    }
+
+                    Tab("Objectif", systemImage: "trophy.fill") {
+                        DefineGoalView(runnerProfileVM: runnerProfileVM)
+                    }
+
+                    Tab("Courses", systemImage: "figure.run") {
+                        RunsListView(workoutsVM: workoutsVM, targetVM: targetVM, dashboardVM: dashboardVM)
+                    }
                 }
-            }
-            
-            Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
-                NavigationStack {
-                    AllStatsView(dashboardVM: dashboardVM)
-                }
-            }
-            
-            Tab("Objectif", systemImage: "trophy.fill") {
-                NavigationStack {
-                    DefineGoalView(runnerProfileVM: runnerProfileVM)
-                }
-            }
-            
-            //            Tab("Challenges", systemImage: "trophy.fill") {
-            //                NavigationStack {
-            //                    ChallengesView()
-            //                }
-            //            }
-            
-            Tab("Courses", systemImage: "figure.run") {
-                NavigationStack {
-                    RunsListView(workoutsVM: workoutsVM, targetVM: targetVM, dashboardVM: dashboardVM)
+            } else {
+                TabView {
+
+                    NavigationStack {
+                        HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
+                    }
+                    .tabItem { Label("Accueil", systemImage: "house.fill") }
+
+                    NavigationStack {
+                        AllStatsView(dashboardVM: dashboardVM)
+                    }
+                    .tabItem { Label("Stats", systemImage: "list.bullet.clipboard.fill") }
+
+                    NavigationStack {
+                        DefineGoalView(runnerProfileVM: runnerProfileVM)
+                    }
+                    .tabItem { Label("Objectif", systemImage: "trophy.fill") }
+
+                    NavigationStack {
+                        RunsListView(
+                            workoutsVM: workoutsVM,
+                            targetVM: targetVM,
+                            dashboardVM: dashboardVM
+                        )
+                    }
+                    .tabItem { Label("Courses", systemImage: "figure.run") }
                 }
             }
         }

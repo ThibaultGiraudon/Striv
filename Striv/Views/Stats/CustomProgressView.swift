@@ -16,7 +16,7 @@ struct CustomProgressView: View {
             let width = geo.size.width
             Capsule()
                 .foregroundStyle(.quinary)
-                .glassEffect()
+                .glassContainer()
             
             Capsule()
                 .fill(.teal)
