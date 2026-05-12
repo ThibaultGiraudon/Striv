@@ -175,8 +175,6 @@ final class WorkoutStatisticsService {
             return []
         }
         
-        print(firstMonth)
-
         var monthsStats: [MonthlyStat] = []
 
         let grouped = Dictionary(grouping: workouts) {

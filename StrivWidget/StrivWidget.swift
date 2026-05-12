@@ -62,19 +62,16 @@ private extension StrivProvider {
     
     func loadData() -> WidgetData? {
         guard let defaults = UserDefaults(suiteName: suiteName) else {
-            print("App Group inaccessible")
             return nil
         }
 
         guard let data = defaults.data(forKey: key) else {
-            print("No data in defaults")
             return nil
         }
 
         do {
             return try JSONDecoder().decode(WidgetData.self, from: data)
         } catch {
-            print("Decoding error:", error)
             return nil
         }
     }

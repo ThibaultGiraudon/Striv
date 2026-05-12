@@ -107,7 +107,6 @@ class WorkoutsViewModel: BaseViewModel {
             try context.save()
             
         } catch {
-            print(error.localizedDescription)
             self.errorPresenter.error = .database(.saving)
         }
     }
