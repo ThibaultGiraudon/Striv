@@ -15,6 +15,8 @@
 		CE867AC42F900D0800A8D96F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE867AC32F900D0800A8D96F /* SwiftUI.framework */; };
 		CE867AD52F900D0900A8D96F /* StrivWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CE867ABF2F900D0800A8D96F /* StrivWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CED9F3342FB1CC6900ED2F2E /* audit.md in Resources */ = {isa = PBXBuildFile; fileRef = CED9F3332FB1CC6900ED2F2E /* audit.md */; };
+		CED9F3E92FB3236D00ED2F2E /* StrivShared in Frameworks */ = {isa = PBXBuildFile; productRef = CED9F3E82FB3236D00ED2F2E /* StrivShared */; };
+		CED9F3EB2FB3255500ED2F2E /* StrivShared in Frameworks */ = {isa = PBXBuildFile; productRef = CED9F3EA2FB3255500ED2F2E /* StrivShared */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +52,7 @@
 		CE867AC32F900D0800A8D96F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StrivWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CED9F3332FB1CC6900ED2F2E /* audit.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = audit.md; sourceTree = "<group>"; };
+		CED9F3E72FB3228400ED2F2E /* StrivShared */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = StrivShared; path = ../StrivShared; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -102,6 +105,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE7AB6642EE986790078BEC3 /* FirebaseAILogic in Frameworks */,
+				CED9F3E92FB3236D00ED2F2E /* StrivShared in Frameworks */,
 				CE7AB6622EE986790078BEC3 /* FirebaseAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -111,6 +115,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE867AC42F900D0800A8D96F /* SwiftUI.framework in Frameworks */,
+				CED9F3EB2FB3255500ED2F2E /* StrivShared in Frameworks */,
 				CE867AC22F900D0800A8D96F /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -121,6 +126,7 @@
 		CE7AB5D92EDF30370078BEC3 = {
 			isa = PBXGroup;
 			children = (
+				CED9F3E72FB3228400ED2F2E /* StrivShared */,
 				CED9F3332FB1CC6900ED2F2E /* audit.md */,
 				CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */,
 				CE2756D62F2262BB00BB378D /* .gitignore */,
@@ -174,6 +180,7 @@
 			packageProductDependencies = (
 				CE7AB6612EE986790078BEC3 /* FirebaseAI */,
 				CE7AB6632EE986790078BEC3 /* FirebaseAILogic */,
+				CED9F3E82FB3236D00ED2F2E /* StrivShared */,
 			);
 			productName = Striv;
 			productReference = CE7AB5E22EDF30370078BEC3 /* Striv.app */;
@@ -196,6 +203,7 @@
 			);
 			name = StrivWidgetExtension;
 			packageProductDependencies = (
+				CED9F3EA2FB3255500ED2F2E /* StrivShared */,
 			);
 			productName = StrivWidgetExtension;
 			productReference = CE867ABF2F900D0800A8D96F /* StrivWidgetExtension.appex */;
@@ -594,6 +602,14 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CE7AB6602EE986790078BEC3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAILogic;
+		};
+		CED9F3E82FB3236D00ED2F2E /* StrivShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StrivShared;
+		};
+		CED9F3EA2FB3255500ED2F2E /* StrivShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StrivShared;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
