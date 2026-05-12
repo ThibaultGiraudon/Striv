@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 import FirebaseCore
 
-
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
@@ -17,8 +16,27 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-import SwiftUI
-import SwiftData
+enum StrivSchemaV1: VersionedSchema {
+    static var versionIdentifier = Schema.Version(1, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [Workout.self,
+         Duration.self,
+         Coordinate.self,
+         RunnerProfile.self,
+         RunSampleEntity.self,]
+    }
+}
+
+enum StrivMigrationPlan: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] {
+        [StrivSchemaV1.self]
+    }
+
+    static var stages: [MigrationStage] {
+        []
+    }
+}
 
 @main
 struct StrivApp: App {
