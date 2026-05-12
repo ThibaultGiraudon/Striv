@@ -31,17 +31,13 @@ struct RunsListView: View {
                 Button("Download", systemImage: "arrow.down.circle") {
                     Task { @MainActor in
                         await workoutsVM.fetchWorkoutsSummary()
-                        let lastRun = workouts.first
-                        var prs: [PR] = []
                         
-                        if let profile = profiles.first {
-                            for (_, pr) in profile.prs {
-                                let newPR = PR(title: pr.prDistance.title, value: Duration(Int(pr.time)).longLabel, distance: pr.prDistance.meters)
-                                prs.append(newPR)
-                            }
-                        }
-
-                        let widgetData = WidgetData(weeklyGoal: targetVM.distanceTarget, weeklyProgress: dashboardVM.stats.currentWeek.totalDistance, lastRunDistance: lastRun?.distance ?? 0, lastRunDuration: lastRun?.duration.longLabel ?? "", lastRunDate: lastRun?.date ?? Date.now, lastRunPace: lastRun?.pace.label ?? "", streak: dashboardVM.stats.currentStreak, prs: prs)
+                        let widgetData = widgetDataVM.buildWidgetData(
+                            workouts: workouts,
+                            profiles: profiles,
+                            targetVM: targetVM,
+                            dashboardVM: dashboardVM
+                        )
                         
                         widgetDataVM.saveWidgetData(widgetData)
                     }
