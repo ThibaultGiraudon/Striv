@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import StrivShared
 
 struct RunsListView: View {
     @ObservedObject var workoutsVM: WorkoutsViewModel

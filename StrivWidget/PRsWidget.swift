@@ -7,6 +7,7 @@
 
 import WidgetKit
 import SwiftUI
+import StrivShared
 
 struct PRsView : View {
     let entry: StrivEntry

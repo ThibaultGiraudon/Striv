@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import StrivShared
 
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
