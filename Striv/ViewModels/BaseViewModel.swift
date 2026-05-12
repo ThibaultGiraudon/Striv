@@ -37,22 +37,29 @@ enum ValidationError: LocalizedError, Equatable {
 }
 
 enum AppError: LocalizedError, Equatable, Identifiable {
-    case database(DatabaseError)
-    case validation(ValidationError)
-    case unknown
-    
+    case database(DatabaseError, id: UUID = UUID())
+    case validation(ValidationError, id: UUID = UUID())
+    case unknown(id: UUID = UUID())
+
     var errorDescription: String? {
         switch self {
-        case .database(let databaseError):
-            databaseError.errorDescription
-        case .validation(let validationError):
-            validationError.errorDescription
+        case .database(let databaseError, _):
+            return databaseError.errorDescription
+        case .validation(let validationError, _):
+            return validationError.errorDescription
         case .unknown:
-            "Une erreur inconnue est survenue."
+            return "Une erreur inconnue est survenue."
         }
     }
-    
-    var id: UUID { UUID() }
+
+    var id: UUID {
+        switch self {
+        case .database(_, let id),
+             .validation(_, let id),
+             .unknown(let id):
+            return id
+        }
+    }
 }
 
 @MainActor
@@ -80,7 +87,7 @@ class BaseViewModel: ObservableObject {
             errorPresenter.error = .validation(validationError)
             
         default:
-            errorPresenter.error = .unknown
+            errorPresenter.error = .unknown()
         }
     }
 }
