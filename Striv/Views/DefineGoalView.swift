@@ -63,7 +63,7 @@ struct DefineGoalView: View {
                         .foregroundStyle(Color.customPrimary)
                 }
                 HStack {
-                    cardView(systemImage: "bolt.fill", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
+                    cardView(systemImage: "figure.run", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
                         .foregroundStyle(.yellow)
                     cardView(systemImage: defineGoalVM.progression.image, title: defineGoalVM.progression.state, legend: "actuellement")
                         .foregroundStyle(defineGoalVM.progression.color)
@@ -138,15 +138,21 @@ struct DefineGoalView: View {
     
     @ViewBuilder
     func cardView(systemImage: String, title: String, legend: String) -> some View {
-        VStack {
+        VStack(spacing: 6) {
             Image(systemName: systemImage)
                 .font(.title2)
+
             Text(title)
                 .font(.title3.bold())
                 .foregroundStyle(.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(height: 28)
+
             Text(legend)
                 .font(.caption)
                 .foregroundStyle(.primaryText)
+                .frame(height: 16)
         }
         .padding()
         .frame(maxWidth: .infinity)
