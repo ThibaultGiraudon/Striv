@@ -98,7 +98,7 @@ extension HealthKitHelper {
             date: hkWorkout.startDate,
             distance: try await distance,
             duration: .init(Int(duration)),
-            elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity?)??.doubleValue(for: .meter()),
+            elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity)?.doubleValue(for: .meter()),
         )
         
         try await workout.samples = samples.sorted(by: {$0.time < $1.time}).map { RunSampleEntity(from: $0)}

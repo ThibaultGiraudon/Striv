@@ -7,26 +7,7 @@
 
 import WidgetKit
 import SwiftUI
-
-struct WidgetData: Codable {
-    let weeklyGoal: Int
-    let weeklyProgress: Double
-    
-    let lastRunDistance: Double
-    let lastRunDuration: String
-    let lastRunDate: Date
-    let lastRunPace: String
-    
-    let streak: Int
-    
-    let prs: [PR]
-}
-
-struct PR: Codable, Hashable {
-    let title: String
-    let value: String
-    let distance: Double
-}
+import StrivShared
 
 // MARK: - Entry
 
