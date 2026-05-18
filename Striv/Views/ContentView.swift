@@ -40,19 +40,27 @@ struct ContentView: View {
             if #available(iOS 26.0, *) {
                 TabView {
                     Tab("Accueil", systemImage: "house.fill") {
-                        HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
+                        NavigationStack {
+                            HomeView(workoutsVM: workoutsVM, dashboardVM: dashboardVM)
+                        }
                     }
 
                     Tab("Stats", systemImage: "list.bullet.clipboard.fill") {
-                        AllStatsView(dashboardVM: dashboardVM)
+                        NavigationStack {
+                            AllStatsView(dashboardVM: dashboardVM)
+                        }
                     }
 
                     Tab("Objectif", systemImage: "trophy.fill") {
-                        DefineGoalView(runnerProfileVM: runnerProfileVM)
+                        NavigationStack {
+                            DefineGoalView(runnerProfileVM: runnerProfileVM)
+                        }
                     }
 
                     Tab("Courses", systemImage: "figure.run") {
-                        RunsListView(workoutsVM: workoutsVM, targetVM: targetVM, dashboardVM: dashboardVM)
+                        NavigationStack {
+                            RunsListView(workoutsVM: workoutsVM, targetVM: targetVM, dashboardVM: dashboardVM)
+                        }
                     }
                 }
             } else {
