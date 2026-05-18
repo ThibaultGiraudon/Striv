@@ -31,7 +31,7 @@ struct DefineGoalView: View {
                     defineGoalVM.distanceType = .custom(defineGoalVM.customDistance)
                 } label: {
                     Text("Distance personnalisée")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.primaryText)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(10)
