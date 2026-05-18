@@ -92,6 +92,7 @@ struct StrivApp: App {
         WindowGroup {
             ContentView(errorPresenter: errorPresenter)
                 .environmentObject(errorPresenter)
+                .dynamicTypeSize(.xSmall ... .accessibility3)
         }
         .modelContainer(container)
     }
