@@ -85,9 +85,7 @@ class WorkoutsViewModel: BaseViewModel {
             var newWorkouts: [Workout] = []
             
             let workoutsIDs: [UUID] = savedWorkouts.map { $0.id }
-            
-            // TODO: add loading view
-            
+                        
             for workout in workouts {
                 if !workoutsIDs.contains(workout.id) {
                     context.insert(workout)

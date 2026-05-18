@@ -74,7 +74,15 @@ struct StrivApp: App {
             )
             
         } catch {
-            fatalError("SwiftData init failed: \(error)")
+            print("SwiftData init failed: \(error)")
+            
+            container = try! ModelContainer(
+                for: Workout.self,
+                Duration.self,
+                Coordinate.self,
+                RunnerProfile.self,
+                RunSampleEntity.self
+            )
         }
     }
     
