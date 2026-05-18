@@ -73,7 +73,7 @@ struct RunDetailView: View {
                                 statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
                             }
                             .frame(height: isShowingStats ? (geo.size.height * 1/3) : 0)
-                            .glassContainer()
+                            .glassContainer(shape: AnyShape(.rect(cornerRadius: 16)))
                             .font(.title2)
                             .opacity(isShowingStats ? 100 : 0)
                         }

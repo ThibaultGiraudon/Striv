@@ -8,22 +8,31 @@
 import SwiftUI
 
 struct GlassContainerModifier: ViewModifier {
+    var shape: AnyShape?
     var cornerRadius: CGFloat = 16
-
+    
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
-            content
-                .glassEffect(in: .rect(cornerRadius: 16))
+            if let shape {
+                content
+                    .glassEffect(in: shape)
+            } else {
+                content
+                    .glassEffect()
+            }
         } else {
             content
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                .clipShape(
+                    shape.map { AnyShape($0) } ??
+                    AnyShape(RoundedRectangle(cornerRadius: cornerRadius))
+                )
         }
     }
 }
 
 extension View {
-    func glassContainer(cornerRadius: CGFloat = 16) -> some View {
-        self.modifier(GlassContainerModifier(cornerRadius: cornerRadius))
+    func glassContainer(shape: AnyShape? = nil, cornerRadius: CGFloat = 16) -> some View {
+        self.modifier(GlassContainerModifier(shape: shape, cornerRadius: cornerRadius))
     }
 }
