@@ -11,9 +11,9 @@ struct RunRowView: View {
     var workout: Workout
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text(workout.date.formatted(format: "dd MMM. YYYY"))
+            Text(workout.date.formatted(format: "dd MMMM YYYY"))
                 .foregroundStyle(.secondary)
-            Text("\((workout.distance ?? 0.0)/1000, specifier: "%.2f" ) km")
+            Text("\((workout.distance ?? 0.0)/1000, specifier: "%.2f") km")
                 .font(.switzer(size: 36, weight: .bold))
                 .italic()
                 .foregroundStyle(.primaryText)
@@ -28,6 +28,22 @@ struct RunRowView: View {
             .foregroundStyle(.secondary)
         }
         .padding()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label())
+    }
+    
+    func label() -> String {
+        var labels: [String] = []
+        
+        labels.append(workout.date.formatted(format: "dd MMMM YYYY"))
+        
+        labels.append("\(((workout.distance ?? 0.0)/1000).roundedText(to: 2)) km")
+        
+        labels.append("en \(workout.duration.label)")
+        
+        labels.append("rythme: \(workout.pace.shortLabel) par km")
+        
+        return labels.joined(separator: ", ")
     }
 }
 

@@ -29,6 +29,7 @@ struct HomeView: View {
                     TargetView(dashboardVM: dashboardVM, targetVM: targetVM)
                         .padding(.bottom)
                 }
+                .accessibilityHint("Double tap pour modifier l'objectif")
                 
                 
                 Text("Prochaine course")
@@ -39,6 +40,7 @@ struct HomeView: View {
                     NextRaceView(nextRaceVM: nextRaceVM)
                         .padding(.bottom)
                 }
+                .accessibilityHint("Double tap pour ajouter ta prochaine course")
                 
                 Text("Cette semaine")
                     .font(.title.bold())
@@ -58,6 +60,7 @@ struct HomeView: View {
                                     .fill(Color.customPrimary)
                             }
                     }
+                    .accessibilityHint("Double tap pour voir les détails de la course")
                 } else {
                     Button {
                         Task {
@@ -76,6 +79,9 @@ struct HomeView: View {
                                 RoundedRectangle(cornerRadius: 16)
                                     .fill(.customPrimary)
                             }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Bouton")
+                            .accessibilityHint("Double tap pour importer ta première course")
                     }
                 }
             }
@@ -88,6 +94,7 @@ struct HomeView: View {
                 } label: {
                     Label("Paramètres", systemImage: "gear")
                 }
+                .accessibilityHint("Double tap pour ouvrir les paramètres")
             }
         }
         .navigationTitle("Accueil")

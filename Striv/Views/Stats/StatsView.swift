@@ -13,9 +13,18 @@ struct StatsView: View {
     var body: some View {
         LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
             statLabel(title: "Courses", value: "\(stats.count)")
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(stats.count) courses")
             statLabel(title: "Temps", value: "\(stats.totalDuration.hours) h \(stats.totalDuration.hours < 100 ? "\(stats.totalDuration.minutes)" : "")")
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Temps \(stats.totalDuration.label)")
             statLabel(title: "Dénivelé", value: "\(stats.totalElevation.roundedText(to: 0)) m")
-            statLabel(title: "Moyenne", value: "\(stats.count > 0 ? (stats.totalDistance / Double(stats.count)).roundedText(to: 1) : "0") km")
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(stats.totalElevation.roundedText(to: 0))m de dénivelé")
+            let average: Double = (stats.count > 0 ? (stats.totalDistance / Double(stats.count)) : 0)
+            statLabel(title: "Moyenne", value: "\(average.roundedText(to: 1)) km")
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(average.roundedText(to: 1))km en moyenne")
         }
     }
     

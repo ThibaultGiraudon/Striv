@@ -277,11 +277,12 @@
 				};
 			};
 			buildConfigurationList = CE7AB5DD2EDF30370078BEC3 /* Build configuration list for PBXProject "Striv" */;
-			developmentRegion = en;
+			developmentRegion = fr;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				fr,
 			);
 			mainGroup = CE7AB5D92EDF30370078BEC3;
 			minimizedProjectReferenceProxies = 1;

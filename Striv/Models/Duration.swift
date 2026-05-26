@@ -33,7 +33,14 @@ final class Duration: Equatable, Hashable {
     
     /// Returns a formatted string `"H:MM:SS"` for display purposes.
     var label: String {
-        String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        let formatted: String
+
+        if hours > 0 {
+            formatted = String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            formatted = String(format: "%02d:%02d", minutes, seconds)
+        }
+        return formatted
     }
     
     var longLabel: String {
