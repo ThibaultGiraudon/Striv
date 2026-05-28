@@ -39,7 +39,7 @@ struct RunRowView: View {
         
         labels.append("\(((workout.distance ?? 0.0)/1000).roundedText(to: 2)) km")
         
-        labels.append("en \(workout.duration.label)")
+        labels.append("en \(workout.duration.voiceOverLabel)")
         
         labels.append("rythme: \(workout.pace.shortLabel) par km")
         

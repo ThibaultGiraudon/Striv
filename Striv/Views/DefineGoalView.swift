@@ -31,6 +31,7 @@ struct DefineGoalView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(10)
+                .contentShape(Capsule())
                 .background {
                     Capsule()
                         .fill(
@@ -38,19 +39,31 @@ struct DefineGoalView: View {
                         )
                 }
                 .padding(.bottom)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Distance personnalisée")
+                .accessibilityHint("Double tap pour rentrer une distance personnalisée")
                 
                 if defineGoalVM.distanceType.title == "Distance personnalisée" {
                     CustomTextField("Distance en m", systemName: "flag.checkered", value: $defineGoalVM.customDistance)
                         .onSubmit {
                             defineGoalVM.distanceType = .custom(defineGoalVM.customDistance)
                         }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Champs de texte")
+                        .accessibilityHint("Double tap pour renseigner votre objectif")
                 }
                 
                 VStack(alignment: .center) {
                     Text(defineGoalVM.formatTime)
                         .font(.system(size: 50).bold())
+                        .accessibilityElement(children: .ignore)
                     Text("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km")
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km : \(defineGoalVM.formatTime)")
                     Slider(value: $defineGoalVM.time, in: Double(defineGoalVM.timeBounds.min)...Double(defineGoalVM.timeBounds.max))
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Élément ajustable pour définir votre objectif de temps")
+                        .accessibilityValue("\(defineGoalVM.formatTime)")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding()
@@ -84,23 +97,28 @@ struct DefineGoalView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.customPrimary)
                     }
-                    
-                    Button {
-                        if !runnerProfileVM.save(Goal(type: defineGoalVM.goalType, distance: defineGoalVM.distanceType, targetTime: Int(defineGoalVM.time)), for: profiles.first) {
-
-                        }
-                    } label: {
-                        Text("Enregistrer")
-                            .font(.title.bold())
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background {
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(.teal)
-                            }
-                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).voiceOverLabel)")
                 }
+                    
+                Button {
+                    if !runnerProfileVM.save(Goal(type: defineGoalVM.goalType, distance: defineGoalVM.distanceType, targetTime: Int(defineGoalVM.time)), for: profiles.first) {
+
+                    }
+                } label: {
+                    Text("Enregistrer")
+                        .font(.title.bold())
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.teal)
+                        }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Enregistrer bouton")
+                .accessibilityHint("Double tap pour enregistrer l'objectif")
             }
             
         }
@@ -156,6 +174,8 @@ struct DefineGoalView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.customPrimary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(legend): \(title)")
     }
 }
 

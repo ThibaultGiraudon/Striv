@@ -17,7 +17,7 @@ struct StatsView: View {
                 .accessibilityLabel("\(stats.count) courses")
             statLabel(title: "Temps", value: "\(stats.totalDuration.hours) h \(stats.totalDuration.hours < 100 ? "\(stats.totalDuration.minutes)" : "")")
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Temps \(stats.totalDuration.label)")
+                .accessibilityLabel("Temps \(stats.totalDuration.voiceOverLabel)")
             statLabel(title: "Dénivelé", value: "\(stats.totalElevation.roundedText(to: 0)) m")
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("\(stats.totalElevation.roundedText(to: 0))m de dénivelé")

@@ -54,6 +54,17 @@ final class Duration: Equatable, Hashable {
         return formatted
     }
     
+    var voiceOverLabel: String {
+        let formatted: String
+
+        if hours > 0 {
+            formatted = String(format: "%02d heure %02d minutes et %02d secondes", hours, minutes, seconds)
+        } else {
+            formatted = String(format: "%02d minutes et %02d secondes", minutes, seconds)
+        }
+        return formatted
+    }
+    
     /// Initializes a `Duration` from a total number of seconds.
     ///
     /// - Parameter time: Total time in seconds.

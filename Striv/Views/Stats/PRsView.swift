@@ -25,7 +25,7 @@ struct PRsView: View {
                             .font(.title2.bold())
                     }
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("\(pr.prDistance.title) en \(Duration(Int(pr.time)).label)")
+                    .accessibilityLabel("\(pr.prDistance.title) en \(Duration(Int(pr.time)).voiceOverLabel)")
                     Divider()
                 }
             }
