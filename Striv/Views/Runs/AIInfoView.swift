@@ -48,6 +48,7 @@ private extension AIInfoView {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .foregroundStyle(.cyan)
+                    .accessibilityElement(children: .ignore)
                 
                 Text(title)
                     .font(.headline)
@@ -71,6 +72,7 @@ private extension AIInfoView {
             Image(systemName: "sparkles")
                 .font(.system(size: 40))
                 .foregroundStyle(.cyan)
+                .accessibilityElement(children: .ignore)
             
             Text("Analyses intelligentes")
                 .font(.title2)

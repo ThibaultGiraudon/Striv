@@ -58,6 +58,9 @@ struct RunsListView: View {
                     }
                 }
                 .disabled(workoutsVM.isLoading)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Importer les nouvelles courses bouton")
+                .accessibilityHint("Double tap pour importer les courses")
             }
         }
         .scrollContentBackground(.hidden)

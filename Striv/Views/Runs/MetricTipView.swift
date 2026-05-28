@@ -19,10 +19,13 @@ struct MetricTipView: View {
                     Spacer()
                 }
                 .font(.largeTitle)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(metric.title)
                 Text(metric.definition)
                     .padding(.vertical)
                 HStack(alignment: .top) {
                     Image(systemName: "lightbulb.circle")
+                        .accessibilityElement(children: .ignore)
                     VStack(alignment: .leading) {
                         Text("Pourquoi c'est utile ?")
                         Text(metric.whyItMatters)
@@ -30,6 +33,7 @@ struct MetricTipView: View {
                 }
                 HStack(alignment: .top) {
                     Image(systemName: "exclamationmark.circle")
+                        .accessibilityElement(children: .ignore)
                     VStack(alignment: .leading) {
                         Text("Valeurs typiques")
                         ForEach(metric.typicalValues, id: \.0) {
@@ -51,10 +55,6 @@ struct MetricTipView: View {
             }
         }
         .padding()
-//        .background {
-//            Color.background
-//                .ignoresSafeArea()
-//        }
         .foregroundStyle(Color.primaryText)
         .font(.title3)
     }

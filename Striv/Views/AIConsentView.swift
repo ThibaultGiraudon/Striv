@@ -35,6 +35,7 @@ struct AIConsentView: View {
                                 .font(.system(size: 48))
                                 .foregroundStyle(.blue)
                         }
+                        .accessibilityElement(children: .ignore)
                         
                         VStack(spacing: 12) {
                             Text("Analyse IA de vos séances")
@@ -132,6 +133,7 @@ private extension AIConsentView {
                 .font(.title3)
                 .foregroundStyle(.blue)
                 .frame(width: 28)
+                .accessibilityElement(children: .ignore)
             
             VStack(alignment: .leading, spacing: 4) {
                 

@@ -25,34 +25,13 @@ struct RunDetailView: View {
     @State private var isShowingAIInfo: Bool = false
     @State private var showAIConsent: Bool = false
     
-    var title: String {
-        let hour = workout.date.hour
-
-        switch hour {
-        case 5..<11:
-            return "Course le matin"
-        case 11..<14:
-            return "Course le midi"
-        case 14..<18:
-            return "Course l'après-midi"
-        case 18..<22:
-            return "Course le soir"
-        default:
-            return "Course la nuit"
-        }
-    }
-    
     var body: some View {
         VStack {
             ZStack {
                 RouteMapView(coordinates: workout.coordinates2d)
                     .disabled(isShowingStats)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading) {
-                    Text(workout.date.formatted(format: "EEEE,"))
-                        .font(.title.bold())
-                    Text(title)
-                        .font(.largeTitle.bold())
-                    
                     GeometryReader { geo in
                         VStack(alignment: .leading) {
                             Spacer()
@@ -62,14 +41,17 @@ struct RunDetailView: View {
                                 .frame(height: geo.size.height * 1/8)
                             AltitudeView(altitudes: workout.altitudes)
                                 .frame(height: geo.size.height * 1/8)
+                                .accessibilityHidden(true)
                             
                             ScrollView(showsIndicators: false) {
-                                statRow(systemImage: "clock.fill", title: "Time", value: workout.duration.label, metric: .time)
-                                statRow(systemImage: "figure.run", title: "Avg Pace", value: workout.pace.label, metric: .pace)
-                                statRow(systemImage: "suit.heart.fill", title: "Heart rate", value: workout.hr, metric: .heartRate)
-                                statRow(systemImage: "flame.fill", title: "Calories", value: workout.kcal, metric: .calories)
-                                statRow(systemImage: "mountain.2.fill", title: "Elevation gained", value: workout.elevation, metric: .elevation)
-                                statRow(systemImage: "bolt.fill", title: "Power", value: workout.power, metric: .power)
+                                statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
+                                    .accessibilityLabel("Temps")
+                                    .accessibilityValue("\(workout.duration.voiceOverLabel)")
+                                statRow(systemImage: "figure.run", title: "Rythme", value: workout.pace.shortLabel, metric: .pace)
+                                statRow(systemImage: "suit.heart.fill", title: "Fréquence", value: workout.hr, metric: .heartRate)
+                                statRow(systemImage: "flame.fill", title: "Calorie", value: workout.kcal, metric: .calories)
+                                statRow(systemImage: "mountain.2.fill", title: "Dénivelé", value: workout.elevation, metric: .elevation)
+                                statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
                                 statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
                             }
                             .frame(height: isShowingStats ? (geo.size.height * 1/3) : 0)
@@ -102,23 +84,32 @@ struct RunDetailView: View {
                         startAnalyze()
                     }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Analyze bouton")
+                .accessibilityHint("Double tap pour lancer l'analyze de la course par intelligence artificiel")
             }
             if #available(iOS 26.0, *) {
                 ToolbarSpacer(placement: .topBarTrailing)
             }
             if isShowingAnalyze {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("", systemImage: "info.circle") {
+                    Button("Info", systemImage: "info.circle") {
                         isShowingAIInfo = true
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Info bouton")
+                    .accessibilityHint("Double tap pour avoir la notice d'utilisation de l'intelligence artificiel")
                 }
             } else {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Show Stats", systemImage: "waveform.path.ecg.text.clipboard") {
+                    Button("Données", systemImage: "waveform.path.ecg.text.clipboard") {
                         withAnimation {
                             isShowingStats.toggle()
                         }
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Afficher les données bouton")
+                    .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
                 }
             }
         }
@@ -152,14 +143,20 @@ struct RunDetailView: View {
     func statRow(systemImage: String, title: String, value: StatDisplayable?, metric: MetricType) -> some View{
         if let value, value.statText != "0" {
             HStack {
-                Image(systemName: systemImage)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20)
-                Text(title)
-                    .padding(.leading, 20)
-                Spacer()
-                Text(value.statText)
-                    .padding(.trailing)
+                Group {
+                    Image(systemName: systemImage)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20)
+                    Text(title)
+                        .padding(.leading, 20)
+                    Spacer()
+                    Text(value.statText)
+                        .padding(.trailing)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(title)
+                .accessibilityValue(metric.valuePlusUnit(value.statText))
+                
                 Image(systemName: "info.circle")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -168,6 +165,9 @@ struct RunDetailView: View {
                     .onTapGesture {
                         selectedMetric = metric
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Info")
+                    .accessibilityHint("Double tap pour afficher les information sur les données de \(title)")
             }
             .padding(.vertical)
             .padding(.horizontal, 20)

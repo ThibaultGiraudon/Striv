@@ -35,13 +35,13 @@ extension MetricType {
     
     var unit: String {
         switch self {
-        case .pace: return "/km"
-        case .heartRate: return "bpm"
-        case .cadence: return "spm"
-        case .power: return "W"
+        case .pace: return "par kilomètre"
+        case .heartRate: return "battement par minutes"
+        case .cadence: return "pas par minute"
+        case .power: return "watt"
         case .time: return ""
-        case .elevation: return "m"
-        case .calories: return "kcal"
+        case .elevation: return "mètre"
+        case .calories: return "kilocalorie"
         }
     }
     
@@ -55,6 +55,10 @@ extension MetricType {
         case .elevation: return "mountain.2.fill"
         case .calories: return "flame.fill"
         }
+    }
+    
+    func valuePlusUnit(_ value: String) -> String {
+        "\(value) \(self.unit)"
     }
 }
 
