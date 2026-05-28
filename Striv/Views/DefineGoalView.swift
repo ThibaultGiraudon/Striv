@@ -21,10 +21,6 @@ struct DefineGoalView: View {
                     .font(.title.bold())
                 Text("Choisi ton objectif de course.")
                 
-                SegmentedPicker(items: GoalType.allCases, title: { $0.rawValue }, selection: $defineGoalVM.goalType, size: 10)
-                    .font(.title2)
-                    .padding(.vertical)
-                
                 SegmentedPicker(items: DistanceType.allCases, title: { $0.title }, selection: $defineGoalVM.distanceType, size: 10)
                 
                 Button {

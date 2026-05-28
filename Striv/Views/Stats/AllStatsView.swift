@@ -23,10 +23,13 @@ struct AllStatsView: View {
                     Text("km")
                         .font(.system(size: 60).bold())
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Distance total : \(dashboardVM.stats.global.totalDistance.roundedText(to: 0))km")
                 
                 Text("Distance total")
                     .font(.title)
                     .foregroundStyle(.secondary)
+                    .accessibilityElement(children: .ignore)
                 
                 StreakView(currentStreak: dashboardVM.stats.currentStreak)
                     .padding(.bottom, 10)
@@ -37,7 +40,7 @@ struct AllStatsView: View {
                 PRsView()
                     .padding(.bottom, 10)
                 
-                RunChartsView(dashboardVM: dashboardVM)
+                WeeklyVolumeView(dashboardVM: dashboardVM)
                     .padding(.bottom, 10)
                 
                 CalendarView()

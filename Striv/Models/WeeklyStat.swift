@@ -28,7 +28,7 @@ struct WeeklyStat: Identifiable, Hashable {
     
     /// A readable label for the week, e.g., "10 Mar-16 Mar".
     var label: String {
-        startOfWeek.formatted(format: "d MMM") + "-" + endOfWeek.formatted(format: "d MMM")
+        startOfWeek.formatted(format: "d MMMM") + " - " + endOfWeek.formatted(format: "d MMMM")
     }
     
     /// Total distance run in meters during the week.

@@ -14,13 +14,9 @@ struct RunChartsView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Distance hebdomadaire")
-                .font(.title)
-                .padding(.bottom)
-            
             if let selectedWeek {
                 VStack(alignment: .leading) {
-                    Text("\(selectedWeek.label) ")
+                    Text("\(selectedWeek.label)")
                     HStack {
                         VStack(alignment: .leading) {
                             Text("Distance")
@@ -80,12 +76,8 @@ struct RunChartsView: View {
                         selectedWeek = dashboardVM.stats.weekly.first(where: {$0.startOfWeek == result?.0.firstDayOfWeek})
                     }
             }
-            .frame(height: 150)
-        }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.customPrimary)
+            .frame(height: 200)
+            .accessibilityHidden(true)
         }
         .onAppear {
             self.selectedWeek = dashboardVM.stats.weekly.last

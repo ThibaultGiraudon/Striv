@@ -43,6 +43,8 @@ struct StreakView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(.red.opacity(0.1))
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Tu as réalisé une chaine de \(currentStreak) semaines, \(streakTitle)")
     }
     
     var streakTitle: String {
