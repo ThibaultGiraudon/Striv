@@ -93,15 +93,16 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            guard !didRun else { return }
-            didRun = true
-            workoutsVM.setContext(context: modelContext)
-            workoutsVM.setRunnerProfileVM(runnerProfileVM)
-            runnerProfileVM.setContext(context: modelContext)
-            runnerProfileVM.createProfileIfNeeded()
-            Task {
-                let snapshot = workouts
-                await workoutsVM.processNewWorkout(snapshot)
+            if !didRun {
+                didRun = true
+                workoutsVM.setContext(context: modelContext)
+                workoutsVM.setRunnerProfileVM(runnerProfileVM)
+                runnerProfileVM.setContext(context: modelContext)
+                runnerProfileVM.createProfileIfNeeded()
+                Task {
+                    let snapshot = workouts
+                    await workoutsVM.processNewWorkout(snapshot)
+                }
             }
             
             let widgetData = widgetDataVM.buildWidgetData(
