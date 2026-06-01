@@ -9,8 +9,6 @@ import SwiftUI
 import SwiftData
 import StrivShared
 
-// TODO: add Accessibility
-
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
     @EnvironmentObject var errorPresenter: ErrorPresenter
