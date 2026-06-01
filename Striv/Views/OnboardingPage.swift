@@ -1,5 +1,5 @@
 //
-//  OnBoardingView.swift
+//  OnboardingView.swift
 //  Striv
 //
 //  Created by Thibault Giraudon on 31/05/2026.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct OnBoardingPage: Identifiable, Hashable {
+struct OnboardingPage: Identifiable, Hashable {
     let id = UUID()
     
     var image: String
@@ -15,8 +15,8 @@ struct OnBoardingPage: Identifiable, Hashable {
     var description: String
 }
 
-extension OnBoardingPage {
-    static let pages: [OnBoardingPage] = [
+extension OnboardingPage {
+    static let pages: [OnboardingPage] = [
         .init(
             image: "figure.run",
             title: "Bienvenue sur Striv",
@@ -40,13 +40,13 @@ extension OnBoardingPage {
     ]
 }
 
-struct OnBoardingView: View {
+struct OnboardingView: View {
     
-    @AppStorage("hasSeenOnBoarding")
-    var hasSeenOnBoarding = false
+    @AppStorage("hasSeenOnboarding")
+    var hasSeenOnboarding = false
     
     @State private var currentPage: Int = 0
-    private let pages = OnBoardingPage.pages
+    private let pages = OnboardingPage.pages
     
     var body: some View {
         VStack {
@@ -79,7 +79,7 @@ struct OnBoardingView: View {
 
 struct OnboardingCard: View {
 
-    let page: OnBoardingPage
+    let page: OnboardingPage
 
     var body: some View {
         VStack(spacing: 32) {
@@ -104,7 +104,7 @@ struct OnboardingCard: View {
     }
 }
 
-extension OnBoardingView {
+extension OnboardingView {
     var header: some View {
         HStack {
             Button {
@@ -123,7 +123,7 @@ extension OnBoardingView {
             Spacer()
             
             Button("Passer") {
-                hasSeenOnBoarding = true
+                hasSeenOnboarding = true
             }
             .foregroundStyle(.primaryText)
         }
@@ -151,7 +151,7 @@ extension OnBoardingView {
         VStack {
             Button {
                 guard currentPage < pages.count - 1 else {
-                    hasSeenOnBoarding = true
+                    hasSeenOnboarding = true
                     return
                 }
                 
@@ -160,8 +160,11 @@ extension OnBoardingView {
                 }
             } label: {
                 HStack {
-                    Text(currentPage == pages.count - 1 ? "Terminer" : "Suivant")
-                    Image(systemName: "arrow.right")
+                    if currentPage == pages.count - 1 {
+                        Label("Commencer", systemImage: "flag.checkered")
+                    } else {
+                        Label("Suivant", systemImage: "arrow.right")
+                    }
                 }
                     .foregroundStyle(Color.background)
                     .padding()
@@ -176,5 +179,5 @@ extension OnBoardingView {
 }
 
 #Preview {
-    OnBoardingView()
+    OnboardingView()
 }

@@ -97,7 +97,7 @@ struct StrivApp: App {
                 if hasSeenOnBoarding {
                     ContentView(errorPresenter: errorPresenter)
                 } else {
-                    OnBoardingView()
+                    OnboardingView()
                 }
             }
             .dynamicTypeSize(.xSmall ... .accessibility3)
