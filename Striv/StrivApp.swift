@@ -87,12 +87,21 @@ struct StrivApp: App {
     }
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    @AppStorage("hasSeenOnBoarding")
+    var hasSeenOnBoarding = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView(errorPresenter: errorPresenter)
-                .environmentObject(errorPresenter)
-                .dynamicTypeSize(.xSmall ... .accessibility3)
+            Group {
+                if hasSeenOnBoarding {
+                    ContentView(errorPresenter: errorPresenter)
+                } else {
+                    OnBoardingView()
+                }
+            }
+            .dynamicTypeSize(.xSmall ... .accessibility3)
+            .environmentObject(errorPresenter)
         }
         .modelContainer(container)
     }
