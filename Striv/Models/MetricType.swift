@@ -69,7 +69,7 @@ extension MetricType {
         case .pace:
             return "Temps nécessaire pour parcourir un kilomètre."
         case .heartRate:
-            return "Nombre de battements de ton cœur par minute."
+            return "Nombre de battements de ton cœur par minute. La fréquence cardiaque maximale (FC max) est le nombre maximal de battements que ton cœur peut atteindre à l’effort. Elle sert à définir tes zones d’intensité. Estimation courante : 220 - ton âge."
         case .cadence:
             return "Nombre de pas que tu fais par minute."
         case .power:
@@ -129,9 +129,9 @@ extension MetricType {
             
         case .cadence:
             return [
-                ("Débutant", "150–165 spm"),
-                ("Intermédiaire", "165–175 spm"),
-                ("Avancé", "175–185+ spm")
+                ("Débutant", "150–165 ppm"),
+                ("Intermédiaire", "165–175 ppm"),
+                ("Avancé", "175–185+ ppm")
             ]
             
         case .heartRate:

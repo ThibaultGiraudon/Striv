@@ -42,7 +42,7 @@ struct NextRaceFormView: View {
                 HStack(spacing: 0) {
                     Text("dans ")
                     Text(nextRaceVM.formatTime(for: date))
-                        .foregroundStyle(.teal)
+                        .foregroundStyle(.customPink)
                         .fontWeight(.bold)
                     Spacer()
                 }
@@ -70,7 +70,7 @@ struct NextRaceFormView: View {
                     .padding()
                     .background {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(.teal.opacity(shouldDisable ? 0.5 : 1))
+                            .fill(.customPink.opacity(shouldDisable ? 0.5 : 1))
                     }
             }
             .disabled(shouldDisable)
@@ -100,6 +100,9 @@ struct NextRaceFormView: View {
         }
         .onAppear {
             self.date = nextRaceVM.date
+            if nextRaceVM.date.timeIntervalSinceNow < 0 {
+                self.date = .now
+            }
             self.title = nextRaceVM.title
         }
         .padding()

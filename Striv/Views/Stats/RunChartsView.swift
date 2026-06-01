@@ -46,19 +46,19 @@ struct RunChartsView: View {
                         x: .value("Week", weekStat.startOfWeek),
                         y: .value("Distance", weekStat.distance)
                     )
-                    .foregroundStyle(selectedWeek == weekStat ? .white : .teal)
+                    .foregroundStyle(selectedWeek == weekStat ? .white : .customPink)
                     
                     LineMark(
                         x: .value("Week", weekStat.startOfWeek),
                         y: .value("Distance", weekStat.distance)
                     )
-                    .foregroundStyle(.teal)
+                    .foregroundStyle(.customPink)
                     
                     AreaMark(
                         x: .value("Week", weekStat.startOfWeek),
                         y: .value("Distance", weekStat.distance)
                     )
-                    .foregroundStyle(LinearGradient(colors: [.teal, .clear], startPoint: .top, endPoint: .bottom))
+                    .foregroundStyle(LinearGradient(colors: [.customPink, .clear], startPoint: .top, endPoint: .bottom))
                     
                     if selectedWeek == weekStat {
                         RuleMark(x: .value("Week", weekStat.startOfWeek))

@@ -119,7 +119,7 @@ struct DistanceView : View {
             
             HStack {
                 ProgressView(value: entry.data.weeklyProgress, total: Double(entry.data.weeklyGoal))
-                    .tint(.teal)
+                    .tint(Color.customPink)
                 
                 Text("\(entry.data.weeklyGoal) km")
                     .padding(.horizontal, 5)

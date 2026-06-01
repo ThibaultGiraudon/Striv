@@ -88,7 +88,7 @@ struct StrivApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    @AppStorage("hasSeenOnBoarding")
+    @AppStorage("hasSeenOnboarding")
     var hasSeenOnBoarding = false
 
     var body: some Scene {

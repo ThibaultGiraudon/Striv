@@ -94,6 +94,7 @@ struct HomeView: View {
                 } label: {
                     Label("Paramètres", systemImage: "gear")
                 }
+                .tint(.primaryText)
                 .accessibilityHint("Double tap pour ouvrir les paramètres")
             }
         }

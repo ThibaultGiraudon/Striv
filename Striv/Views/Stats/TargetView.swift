@@ -43,7 +43,7 @@ struct TargetView: View {
         .foregroundStyle(.primaryText)
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(LinearGradient(colors: [.teal, .teal], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.1))
+                .fill(LinearGradient(colors: [.customPink, .customPink], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.1))
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Objectif hébdomadaire \(currentWeekDistance.roundedText(to: 1))km sur \(targetVM.distanceTarget)")

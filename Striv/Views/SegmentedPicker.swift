@@ -26,7 +26,7 @@ struct SegmentedPicker<T: Hashable>: View {
                     .background {
                         if isSelected {
                             Capsule()
-                                .fill(.teal)
+                                .fill(.customPink)
                                 .matchedGeometryEffect(id: "ACTIVETAB", in: animation)
                         }
                     }

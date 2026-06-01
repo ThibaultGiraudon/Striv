@@ -19,7 +19,7 @@ struct ChallengesView: View {
                         Image(systemName: "figure.run.circle.fill")
                             .resizable()
                             .scaledToFit()
-                            .foregroundStyle(challenge.isCompleted ? .teal : .gray)
+                            .foregroundStyle(challenge.isCompleted ? .customPink : .gray)
                         Text(challenge.title)
                         ProgressView(value: challenge.progression, total: 1.0)
                     }

@@ -135,7 +135,7 @@ extension OnboardingView {
             ForEach(0..<pages.count, id: \.self) { index in
                 if index == currentPage {
                     Capsule()
-                        .foregroundStyle(.teal)
+                        .foregroundStyle(.customPink)
                         .frame(width: 30, height: 10)
                 } else {
                     Circle()

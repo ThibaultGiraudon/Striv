@@ -84,6 +84,7 @@ struct RunDetailView: View {
                         startAnalyze()
                     }
                 }
+                .tint(.primaryText)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Analyze bouton")
                 .accessibilityHint("Double tap pour lancer l'analyze de la course par intelligence artificiel")
@@ -96,6 +97,7 @@ struct RunDetailView: View {
                     Button("Info", systemImage: "info.circle") {
                         isShowingAIInfo = true
                     }
+                    .tint(.primaryText)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("Info bouton")
                     .accessibilityHint("Double tap pour avoir la notice d'utilisation de l'intelligence artificiel")
@@ -107,6 +109,7 @@ struct RunDetailView: View {
                             isShowingStats.toggle()
                         }
                     }
+                    .tint(.primaryText)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("Afficher les données bouton")
                     .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")

@@ -26,7 +26,7 @@ struct RouteMapView: View {
         Map(position: $cameraPosition) {
             if !coordinates.isEmpty {
                 MapPolyline(coordinates: coordinates)
-                    .stroke(.teal, lineWidth: 4)
+                    .stroke(.customPink, lineWidth: 4)
             }
         }
         .mapStyle(.standard(emphasis: .muted, pointsOfInterest: .excludingAll , showsTraffic: false))

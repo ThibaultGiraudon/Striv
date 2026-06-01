@@ -28,14 +28,14 @@ struct TargetFormView: View {
                         Text("km")
                             .font(.system(size: 50).bold())
                     }
-                    .foregroundStyle(.teal)
+                    .foregroundStyle(.customPink)
                     
                     Text("par semaine")
                         .foregroundStyle(.secondary)
                         .padding(.bottom)
                     
                     Slider(value: $distance, in: 0...150)
-                        .tint(.teal)
+                        .tint(.customPink)
                     
                     HStack {
                         Text("0 km")
@@ -69,7 +69,7 @@ struct TargetFormView: View {
                         .padding()
                         .background {
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(.teal)
+                                .fill(.customPink)
                         }
                 }
             }

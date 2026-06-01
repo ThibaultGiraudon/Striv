@@ -22,7 +22,7 @@ struct RunRowView: View {
                 Text(workout.duration.label)
                 Spacer()
                 Image(systemName: "figure.run")
-                    .foregroundStyle(.teal)
+                    .foregroundStyle(.customPink)
                 Text(workout.pace.label)
             }
             .foregroundStyle(.secondary)

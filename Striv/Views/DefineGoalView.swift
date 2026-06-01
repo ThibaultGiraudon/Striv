@@ -35,7 +35,7 @@ struct DefineGoalView: View {
                 .background {
                     Capsule()
                         .fill(
-                            defineGoalVM.distanceType.title == "Distance personnalisée" ? .teal : .customPrimary
+                            defineGoalVM.distanceType.title == "Distance personnalisée" ? .customPink : .customPrimary
                         )
                 }
                 .padding(.bottom)
@@ -73,7 +73,7 @@ struct DefineGoalView: View {
                 }
                 HStack {
                     cardView(systemImage: "figure.run", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
-                        .foregroundStyle(.yellow)
+                        .foregroundStyle(.teal)
                     cardView(systemImage: defineGoalVM.progression.image, title: defineGoalVM.progression.state, legend: "actuellement")
                         .foregroundStyle(defineGoalVM.progression.color)
                     cardView(systemImage: "star.fill", title: defineGoalVM.progression.label, legend: defineGoalVM.progression.feedback)
@@ -101,6 +101,8 @@ struct DefineGoalView: View {
                     .accessibilityLabel("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).voiceOverLabel)")
                 }
                     
+                Spacer()
+                
                 Button {
                     if !runnerProfileVM.save(Goal(type: defineGoalVM.goalType, distance: defineGoalVM.distanceType, targetTime: Int(defineGoalVM.time)), for: profiles.first) {
 
@@ -113,7 +115,7 @@ struct DefineGoalView: View {
                         .padding()
                         .background {
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(.teal)
+                                .fill(.customPink)
                         }
                 }
                 .accessibilityElement(children: .ignore)
@@ -142,7 +144,7 @@ struct DefineGoalView: View {
     func CustomTextField(_ title: String, systemName: String, value: Binding<Double>) -> some View {
         HStack {
             Image(systemName: systemName)
-                .foregroundStyle(.teal)
+                .foregroundStyle(.customPink)
             Text(title)
             Spacer()
             TextField("", value: value, format: .number)

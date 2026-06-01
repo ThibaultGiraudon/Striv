@@ -61,6 +61,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .tint(Color.customPink)
             } else {
                 TabView {
 

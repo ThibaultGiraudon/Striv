@@ -28,6 +28,11 @@ struct PRsView: View {
                     .accessibilityLabel("\(pr.prDistance.title) en \(Duration(Int(pr.time)).voiceOverLabel)")
                     Divider()
                 }
+                if profile.prs.isEmpty {
+                    Text("Aucun record personnel pour le moment. Commence à courir pour en établir !")
+                        .foregroundStyle(.primaryText)
+                        .frame(maxWidth: .infinity)
+                }
             }
             .padding()
             .background {

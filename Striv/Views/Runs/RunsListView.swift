@@ -57,6 +57,7 @@ struct RunsListView: View {
                         widgetDataVM.saveWidgetData(widgetData)
                     }
                 }
+                .tint(.primaryText)
                 .disabled(workoutsVM.isLoading)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Importer les nouvelles courses bouton")

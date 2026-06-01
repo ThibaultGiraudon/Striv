@@ -29,7 +29,7 @@ struct NextRaceView: View {
                 HStack(spacing: 0) {
                     Text("dans ")
                     Text(nextRaceVM.formatTime(for: nextRaceVM.date))
-                        .foregroundStyle(.teal)
+                        .foregroundStyle(.customPink)
                         .fontWeight(.bold)
                     Spacer()
                 }

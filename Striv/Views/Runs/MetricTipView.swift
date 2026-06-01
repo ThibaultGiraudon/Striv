@@ -49,7 +49,7 @@ struct MetricTipView: View {
                 .padding()
                 .background {
                     RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(.teal.opacity(0.5))
+                        .foregroundStyle(.customPink.opacity(0.5))
                 }
                 .padding(.vertical)
             }
