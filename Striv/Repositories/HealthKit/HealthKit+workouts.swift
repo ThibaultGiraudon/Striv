@@ -43,7 +43,7 @@ extension HealthKitHelper {
         }
     }
     
-    func syncWorkouts() async throws -> ([Workout], [UUID]) {
+    func syncWorkouts() async throws -> ([WorkoutData], [UUID]) {
         let anchor = getAnchor()
         let predicate = HKQuery.predicateForWorkouts(with: .running)
         
@@ -74,34 +74,45 @@ extension HealthKitHelper {
         }
         
         let hkWorkouts: [HKWorkout] = response.0
-        var workouts: [Workout] = []
-        for hkWorkout in hkWorkouts {
-            do {
-                let workout = try await self.fetchWorkoutsMetrics(for: hkWorkout)
-                workouts.append(workout)
-            } catch {
-                continue
+
+        let workouts = try await withThrowingTaskGroup(of: WorkoutData.self) { group in
+
+            for hkWorkout in hkWorkouts {
+                group.addTask {
+                    try await self.fetchWorkoutsMetrics(for: hkWorkout)
+                }
             }
+
+            var results: [WorkoutData] = []
+
+            for try await workout in group {
+                results.append(workout)
+            }
+
+            return results
         }
+        
         
         return (workouts, response.1)
     }
     
-    func fetchWorkoutsMetrics(for hkWorkout: HKWorkout) async throws -> Workout {
+    func fetchWorkoutsMetrics(for hkWorkout: HKWorkout) async throws -> WorkoutData {
         async let distance = self.fetchDistance(for: hkWorkout)
-        async let samples = self.fetchRunSamples(for: hkWorkout)
+        let samples = try await self.fetchRunSamples(for: hkWorkout)
         
         let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
         
-        let workout = Workout(
+        let workout = WorkoutData(
             id: hkWorkout.uuid,
             date: hkWorkout.startDate,
             distance: try await distance,
-            duration: .init(Int(duration)),
+            duration: duration,
             elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity)?.doubleValue(for: .meter()),
+            samples: samples.map {
+                .init(time: $0.time, distance: $0.distance)
+            }
         )
         
-        try await workout.samples = samples.sorted(by: {$0.time < $1.time}).map { RunSampleEntity(from: $0)}
         
         return workout
     }

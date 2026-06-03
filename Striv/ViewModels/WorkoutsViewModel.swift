@@ -31,8 +31,6 @@ class WorkoutsViewModel: BaseViewModel {
     
     @Published var isLoading: Bool = false
     
-    private var stateKey: String = "striv.state.key"
-    
     // MARK: - Depedencies
     
     /// The `ModelContext` used to persist workouts
@@ -82,18 +80,18 @@ class WorkoutsViewModel: BaseViewModel {
             
             let savedWorkouts = getWorkouts()
             
-            var newWorkouts: [Workout] = []
+            var newWorkouts: [WorkoutData] = []
             
             let workoutsIDs: [UUID] = savedWorkouts.map { $0.id }
                         
-            for workout in workouts {
-                if !workoutsIDs.contains(workout.id) {
-                    context.insert(workout)
-                    newWorkouts.append(workout)
+            for workoutData in workouts {
+                if !workoutsIDs.contains(workoutData.id) {
+                    context.insert(Workout(id: workoutData.id, date: workoutData.date, distance: workoutData.distance, duration: .init(Int(workoutData.duration)), elevation: workoutData.elevation))
+                    newWorkouts.append(workoutData)
                 }
             }
             
-            await self.processNewWorkout(newWorkouts)
+            self.processNewWorkout(newWorkouts)
             
             for id in deletedIDs {
                 guard let workoutToDelete = savedWorkouts.first(where: { $0.id == id }) else {
@@ -103,7 +101,6 @@ class WorkoutsViewModel: BaseViewModel {
             }
             
             try context.save()
-            
         } catch {
             self.errorPresenter.error = .database(.saving)
         }
@@ -128,83 +125,22 @@ class WorkoutsViewModel: BaseViewModel {
         }
     }
     
-    func processNewWorkout(_ workouts: [Workout]) async {
-        Task(priority: .background) {
-            await self.process(workouts)
-        }
-    }
-    
-    private func process(_ workouts: [Workout]) async {
-        var state = self.getState()
-        
-        let unprocessed = workouts.filter {
-            !state.processedWorkoutIDs.contains($0.id) && ($0.distance ?? 0) > PresetDistance.fiveK.meters
-        }
-        
-        let batchSize = ProcessInfo.processInfo.activeProcessorCount
-        
-        for batch in unprocessed.chunked(into: batchSize) {
-            
-            await processBatch(batch, state: &state)
-            
+    func processNewWorkout(_ workouts: [WorkoutData]) {
+        Task.detached(priority: .background) {
             do {
-                try self.saveState(state)
+                let prs = try await PRCalculator().process(workouts)
+                
+                await MainActor.run {
+                    _ = self.runnerProfileVM?.updatePRs(prs)
+                }
+                
             } catch {
-                self.errorPresenter.error = .database(.saving)
+                await MainActor.run {
+                    self.errorPresenter.error = .database(.saving)
+                }
             }
-
-            try? await Task.sleep(nanoseconds: 100_000_000)
         }
     }
-    
-    func processBatch(_ batch: [Workout], state: inout PRprocessingState) async {
-
-        for workout in batch {
-            
-            let sortedSample = workout.samples.sorted(by: { $0.time < $1.time })
-            
-            let bestTimes = self.bestTimes(in: sortedSample)
-            
-            let prs = bestTimes.map {
-                PRResult(
-                    time: $0.value,
-                    workoutId: workout.id,
-                    date: workout.date,
-                    prDistance: $0.key
-                )
-            }
-
-            _ = runnerProfileVM?.updatePRs(prs)
-            
-            state.processedWorkoutIDs.insert(workout.id)
-        }
-    }
-    
-    // MARK: - Anchor
-    
-    /// Retrieves the previously stored HealthKit query anchor.
-    ///
-    /// - Returns: The saved `HKQueryAnchor`, or `nil` if none exists.
-    private func getState() -> PRprocessingState {
-        guard let stateData = UserDefaults.standard.value(forKey: self.stateKey) as? Data,
-              let state = try? JSONDecoder().decode(PRprocessingState.self, from: stateData) else {
-            return PRprocessingState(processedWorkoutIDs: [])
-        }
-        
-        return state
-    }
-    
-    /// Persists a HealthKit query anchor in `UserDefaults`.
-    ///
-    /// - Parameter anchor: The anchor to save.
-    /// - Throws: An error if the anchor cannot be archived.
-    private func saveState(_ state: PRprocessingState) throws {
-        let stateData = try JSONEncoder().encode(state)
-        
-        UserDefaults.standard.set(stateData, forKey: self.stateKey)
-    }
-    
-    
     
     /// Fetches detailed metrics for a given workout.
     ///
@@ -263,43 +199,6 @@ class WorkoutsViewModel: BaseViewModel {
         return await fetchWorkoutDetail(for: workout)
     }
     
-    func bestTimes(in samples: [RunSampleEntity]) -> [PresetDistance: TimeInterval] {
-
-        var times: [PresetDistance: TimeInterval] = [:]
-
-        guard samples.count > 100 else { return [:] }
-
-        var start = 0
-
-        for end in 0..<samples.count {
-            
-            while start < end &&
-                  samples[end].distance - samples[start].distance > PresetDistance.marathon.meters {
-                start += 1
-            }
-
-            let currentDistance = samples[end].distance - samples[start].distance
-
-            for target in PresetDistance.allCases {
-
-                guard currentDistance >= target.meters - 5 else {
-                    continue
-                }
-                
-                let time = samples[end].time - samples[start].time
-                guard time > 10 else { continue }
-
-                if let current = times[target] {
-                    times[target] = min(current, time)
-                } else {
-                    times[target] = time
-                }
-            }
-        }
-
-        return times
-    }
-    
     // MARK: - Private
     
     /// Fetches workouts stored in SwiftData.
@@ -315,5 +214,100 @@ class WorkoutsViewModel: BaseViewModel {
         }
         
         return []
+    }
+}
+
+struct SampleData: Sendable {
+    let time: TimeInterval
+    let distance: Double
+}
+
+struct WorkoutData: Sendable {
+    let id: UUID
+    let date: Date
+    let distance: Double?
+    let duration: Double
+    let elevation: Double?
+    let samples: [SampleData]
+}
+
+final class PRCalculator {
+
+    func process(_ workouts: [WorkoutData]) async throws -> [PRResult] {
+        
+        let unprocessed = workouts.filter {
+            ($0.distance ?? 0) > PresetDistance.fiveK.meters
+        }
+        var allPRs: [PRResult] = []
+
+        
+        for workout in unprocessed {
+            let prs = await processWorkout(workout)
+
+            allPRs.append(contentsOf: prs)
+            await Task.yield()
+        }
+        
+        return allPRs
+    }
+
+    private func processWorkout(_ workout: WorkoutData) async -> [PRResult] {
+        let samples = workout.samples
+
+        let result = await bestTimes(in: samples)
+        
+        let prs = result.map {
+            PRResult(
+                time: $0.value,
+                workoutId: workout.id,
+                date: workout.date,
+                prDistance: $0.key
+            )
+        }
+
+        return prs
+    }
+
+    private func bestTimes(in samples: [SampleData]) async -> [PresetDistance: TimeInterval] {
+
+        guard samples.count > 100 else {
+            return [:]
+        }
+
+        var times: [PresetDistance: TimeInterval] = [:]
+        var start = 0
+
+        for end in samples.indices {
+            
+            while start < end &&
+                  samples[end].distance - samples[start].distance > PresetDistance.marathon.meters {
+                start += 1
+            }
+
+            let currentDistance =
+                samples[end].distance - samples[start].distance
+
+            for target in PresetDistance.allCases {
+
+                guard currentDistance >= target.meters - 5 else {
+                    continue
+                }
+
+                let time =
+                    samples[end].time - samples[start].time
+
+                guard time > 10 else {
+                    continue
+                }
+
+                if let current = times[target] {
+                    times[target] = min(current, time)
+                } else {
+                    times[target] = time
+                }
+            }
+        }
+
+        return times
     }
 }
