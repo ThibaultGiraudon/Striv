@@ -122,9 +122,8 @@ struct DefineGoalView: View {
                 .accessibilityLabel("Enregistrer bouton")
                 .accessibilityHint("Double tap pour enregistrer l'objectif")
             }
-            
+            .padding()
         }
-        .padding()
         .background(Color.background)
         .onAppear {
             if let profile = profiles.first {

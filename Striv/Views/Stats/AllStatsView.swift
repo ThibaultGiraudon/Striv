@@ -45,8 +45,8 @@ struct AllStatsView: View {
                 
                 CalendarView()
             }
+            .padding()
         }
-        .padding()
         .foregroundStyle(.primaryText)
         .background(Color.background)
         .onChange(of: workouts) { _, workouts in

@@ -85,7 +85,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .padding(.top)
+            .padding()
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -99,7 +99,6 @@ struct HomeView: View {
             }
         }
         .navigationTitle("Accueil")
-        .padding(.horizontal)
         .background(Color.background)
         .onChange(of: workouts) { _, workouts in
             dashboardVM.load(with: workouts)
