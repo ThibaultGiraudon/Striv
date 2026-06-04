@@ -101,6 +101,8 @@ class WorkoutsViewModel: BaseViewModel {
             }
             
             try context.save()
+        } catch _ as HealthKitError {
+            self.errorPresenter.error = .healthKit(.noDataOrNoPermission)
         } catch {
             self.errorPresenter.error = .database(.saving)
         }

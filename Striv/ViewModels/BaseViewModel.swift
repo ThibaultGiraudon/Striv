@@ -39,6 +39,7 @@ enum ValidationError: LocalizedError, Equatable {
 enum AppError: LocalizedError, Equatable, Identifiable {
     case database(DatabaseError, id: UUID = UUID())
     case validation(ValidationError, id: UUID = UUID())
+    case healthKit(HealthKitError, id: UUID = UUID())
     case unknown(id: UUID = UUID())
 
     var errorDescription: String? {
@@ -47,6 +48,8 @@ enum AppError: LocalizedError, Equatable, Identifiable {
             return databaseError.errorDescription
         case .validation(let validationError, _):
             return validationError.errorDescription
+        case .healthKit(let healthKitError, _):
+            return healthKitError.errorDescription
         case .unknown:
             return "Une erreur inconnue est survenue."
         }
@@ -56,6 +59,7 @@ enum AppError: LocalizedError, Equatable, Identifiable {
         switch self {
         case .database(_, let id),
              .validation(_, let id),
+             .healthKit(_, let id),
              .unknown(let id):
             return id
         }

@@ -47,7 +47,7 @@ extension HealthKitHelper {
         let anchor = getAnchor()
         let predicate = HKQuery.predicateForWorkouts(with: .running)
         
-        let response: ([HKWorkout], [UUID]) = try await withCheckedThrowingContinuation { continuation in
+        let response: ([HKWorkout], [UUID], HKQueryAnchor) = try await withCheckedThrowingContinuation { continuation in
             let query = HKAnchoredObjectQuery(
                 type: .workoutType(),
                 predicate: predicate,
@@ -59,15 +59,19 @@ extension HealthKitHelper {
                     continuation.resume(throwing: error)
                     return
                 }
-                
-                if let newAnchor {
-                    try? self.saveAnchor(newAnchor)
+                guard let newAnchor else {
+                    continuation.resume(throwing: HealthKitError.noDataOrNoPermission)
+                    return
                 }
                 
-                let workouts = samples as? [HKWorkout] ?? []
-                let deletedIds = deleted?.map(\.uuid) ?? []
+                guard let workouts = samples as? [HKWorkout], !workouts.isEmpty else {
+                    continuation.resume(throwing: HealthKitError.noDataOrNoPermission)
+                    return
+                }
                 
-                continuation.resume(returning: (workouts, deletedIds))
+                let deletedIds = deleted?.map(\.uuid) ?? []
+
+                continuation.resume(returning: (workouts, deletedIds, newAnchor))
             }
             
             healthStore.execute(query)
@@ -92,6 +96,7 @@ extension HealthKitHelper {
             return results
         }
         
+        try? self.saveAnchor(response.2)
         
         return (workouts, response.1)
     }
