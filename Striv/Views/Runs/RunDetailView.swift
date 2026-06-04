@@ -45,6 +45,7 @@ struct RunDetailView: View {
                             
                             ScrollView(showsIndicators: false) {
                                 statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
+                                    .accessibilityElement(children: .ignore)
                                     .accessibilityLabel("Temps")
                                     .accessibilityValue("\(workout.duration.voiceOverLabel)")
                                 statRow(systemImage: "figure.run", title: "Rythme", value: workout.pace.shortLabel, metric: .pace)
@@ -86,8 +87,8 @@ struct RunDetailView: View {
                 }
                 .tint(.primaryText)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Analyze bouton")
-                .accessibilityHint("Double tap pour lancer l'analyze de la course par intelligence artificiel")
+                .accessibilityLabel("\(!isShowingAnalyze ? "Analyser" : "Fermer")")
+                .accessibilityHint("Double tap pour \(!isShowingAnalyze ? "lancer l'analyse de la course par intelligence artificiel" : "Fermer l'analyse")")
             }
             if #available(iOS 26.0, *) {
                 ToolbarSpacer(placement: .topBarTrailing)
@@ -99,7 +100,7 @@ struct RunDetailView: View {
                     }
                     .tint(.primaryText)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Info bouton")
+                    .accessibilityLabel("Info")
                     .accessibilityHint("Double tap pour avoir la notice d'utilisation de l'intelligence artificiel")
                 }
             } else {
@@ -111,7 +112,7 @@ struct RunDetailView: View {
                     }
                     .tint(.primaryText)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Afficher les données bouton")
+                    .accessibilityLabel("Afficher les données")
                     .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
                 }
             }
@@ -146,7 +147,7 @@ struct RunDetailView: View {
     func statRow(systemImage: String, title: String, value: StatDisplayable?, metric: MetricType) -> some View{
         if let value, value.statText != "0" {
             HStack {
-                Group {
+                HStack {
                     Image(systemName: systemImage)
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 20)

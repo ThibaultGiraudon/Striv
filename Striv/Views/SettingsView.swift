@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct SettingsView: View {
     
     @AppStorage("aiConsentAccepted")
     private var aiConsentAccepted = false
+    
+    @Environment(\.requestReview) var requestReview
     
     @State private var showPrivacyPolicy = false
     
@@ -18,9 +21,10 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 aiSection
+                feedbackSection
                 legalSection
             }
-            .navigationTitle("Confidentialité")
+            .navigationTitle("Paramètres")
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView()
             }
@@ -86,6 +90,49 @@ private extension SettingsView {
             }
         } header: {
             Text("Informations légales")
+        }
+    }
+    
+    var feedbackSection: some View {
+        Section {
+            Link(
+                destination: URL(string: "striv.feedback@gmail.com?subject=Avis%20sur%20Striv")!
+            ) {
+                Label("Envoyer un commentaire", systemImage: "envelope")
+            }
+
+            Link(
+                destination: URL(string: "mailto:striv.feedback@gmail.com?subject=Suggestion%20de%20fonctionnalité")!
+            ) {
+                Label("Suggérer une fonctionnalité", systemImage: "lightbulb")
+            }
+
+            Button {
+                requestReview()
+            } label: {
+                Label("Noter Striv", systemImage: "star")
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Fonctionnalités à venir", systemImage: "figure.run")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                Text("• Défis et objectifs avancés")
+                Text("• Analyses de progression enrichies")
+                Text("• Suggestions d'entraînement personnalisées")
+                Text("• Nouvelles statistiques de course")
+
+                Text("Votre avis aide à définir les prochaines évolutions de Striv.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Communauté & Feedback")
+        } footer: {
+            Text("Striv évolue grâce aux retours de ses utilisateurs.")
         }
     }
 }
