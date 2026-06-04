@@ -12,7 +12,7 @@ import CoreLocation
 
 protocol HealthKitHelperInterface {
     func requestAuthorization() async throws
-    func syncWorkouts() async throws -> ([Workout], [UUID])
+    func syncWorkouts() async throws -> ([WorkoutData], [UUID])
     func fetchCoordinates(with id: UUID) async throws -> [CLLocation]
     func fetchActiveEnergy(with id: UUID) async throws -> Double?
     func fetchAverageHeartRate(with id: UUID) async throws -> Double?

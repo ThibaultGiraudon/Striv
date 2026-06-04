@@ -98,10 +98,6 @@ struct ContentView: View {
                 workoutsVM.setRunnerProfileVM(runnerProfileVM)
                 runnerProfileVM.setContext(context: modelContext)
                 runnerProfileVM.createProfileIfNeeded()
-                Task {
-                    let snapshot = workouts
-                    await workoutsVM.processNewWorkout(snapshot)
-                }
             }
             
             let widgetData = widgetDataVM.buildWidgetData(
