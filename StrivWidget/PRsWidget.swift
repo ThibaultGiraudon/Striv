@@ -22,6 +22,8 @@ struct PRsView : View {
                     Text(pr.value)
                         .font(.title3.bold())
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(pr.title) en \(pr.value)")
                 if pr != sortedPRs.last {
                     Divider()
                 }
@@ -60,6 +62,7 @@ struct PRsWidget: Widget {
         lastRunDuration: "25:00",
         lastRunDate: .now,
         lastRunPace: "05\'46\"",
+        voiceOverLabels: .init(distance: "", duration: "", date: "", pace: ""),
         streak: 3,
         prs: [
             PR(title: "5 km", value: "22min38", distance: 5000),

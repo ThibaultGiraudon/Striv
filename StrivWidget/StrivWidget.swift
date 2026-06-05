@@ -90,6 +90,7 @@ private extension StrivProvider {
             lastRunDuration: "-",
             lastRunDate: Date.now,
             lastRunPace: "05\'46\"",
+            voiceOverLabels: .init(distance: "", duration: "", date: "", pace: ""),
             
             streak: 0,
             
@@ -130,6 +131,8 @@ struct DistanceView : View {
                     }
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Objectif hébdomadaire \(entry.data.weeklyProgress.roundedText(to: 1))km sur \(entry.data.weeklyGoal)")
     }
 }
 
@@ -160,6 +163,7 @@ struct DistanceWidget: Widget {
         lastRunDuration: "25:00",
         lastRunDate: .now,
         lastRunPace: "05\'46\"",
+        voiceOverLabels: .init(distance: "", duration: "", date: "", pace: ""),
         streak: 3,
         prs: [
             PR(title: "5 km", value: "20:00", distance: 5000)

@@ -13,25 +13,47 @@ struct LastRunView : View {
     let entry: StrivEntry
 
     var body: some View {
-            VStack(alignment: .leading) {
-                Text(entry.data.lastRunDate.formatted(format: "dd MMM. yyyy"))
-                    .foregroundStyle(.secondary)
-                    .font(.title3)
-                Text("\(entry.data.lastRunDistance/1000, specifier: "%.2f") km")
-                    .font(.switzer(size: 40, weight: .bold))
-                    .italic()
-                    .padding(.bottom, 4)
-                HStack {
-                    Image(systemName: "clock")
-                    Text(entry.data.lastRunDuration)
-                    Spacer()
-                    Image(systemName: "figure.run")
-                    Text(entry.data.lastRunPace)
-                    
-                }
-                .font(.title3)
+        VStack(alignment: .leading) {
+            Text(entry.data.lastRunDate.formatted(format: "dd MMM. yyyy"))
                 .foregroundStyle(.secondary)
+                .font(.title3)
+            Text("\(entry.data.lastRunDistance/1000, specifier: "%.2f") km")
+                .font(.switzer(size: 40, weight: .bold))
+                .italic()
+                .padding(.bottom, 4)
+            HStack {
+                Image(systemName: "clock")
+                Text(entry.data.lastRunDuration)
+                Spacer()
+                Image(systemName: "figure.run")
+                Text(entry.data.lastRunPace)
+                
+            }
+            .font(.title3)
+            .foregroundStyle(.secondary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label())
+    }
+    
+    func label() -> String {
+        var labels: [String] = []
+        
+        labels.append(entry.data.voiceOverLabels.date)
+        
+        labels.append("\(entry.data.voiceOverLabels.distance) km")
+        
+        labels.append("en \(entry.data.voiceOverLabels.duration)")
+        
+        labels.append("rythme: \(entry.data.voiceOverLabels.pace) par km")
+        
+        return labels.joined(separator: ", ")
+    }
+}
+
+extension Double {
+    func roundedText(to numbers: Int) -> String {
+        String(format: "%.\(numbers)f", self)
     }
 }
 
@@ -62,6 +84,7 @@ struct LastRunWidget: Widget {
         lastRunDuration: "25:00",
         lastRunDate: .now,
         lastRunPace: "05\'46\"",
+        voiceOverLabels: .init(distance: "", duration: "", date: "", pace: ""),
         streak: 3,
         prs: [
             PR(title: "5 km", value: "22min38", distance: 5000),
