@@ -41,7 +41,7 @@ private extension SettingsView {
                     Text("Analyses IA")
                         .font(.headline)
                     
-                    Text("Autorise Striv à utiliser Google Gemini pour analyser vos séances de course.")
+                    Text("Autorise Haaku à utiliser Google Gemini pour analyser vos séances de course.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -85,7 +85,7 @@ private extension SettingsView {
                 Label("Confidentialité Google Gemini", systemImage: "link")
             }
             
-            Link(destination: URL(string: "https://thibaultgiraudon.github.io/striv-privacy/")!) {
+            Link(destination: URL(string: "https://thibaultgiraudon.github.io/haaku-privacy/")!) {
                 Label("Confidentialité App Store", systemImage: "apple.logo")
             }
         } header: {
@@ -95,22 +95,10 @@ private extension SettingsView {
     
     var feedbackSection: some View {
         Section {
-            Link(
-                destination: URL(string: "striv.feedback@gmail.com?subject=Avis%20sur%20Striv")!
-            ) {
-                Label("Envoyer un commentaire", systemImage: "envelope")
-            }
-
-            Link(
-                destination: URL(string: "mailto:striv.feedback@gmail.com?subject=Suggestion%20de%20fonctionnalité")!
-            ) {
-                Label("Suggérer une fonctionnalité", systemImage: "lightbulb")
-            }
-
             Button {
                 requestReview()
             } label: {
-                Label("Noter Striv", systemImage: "star")
+                Label("Noter Haaku", systemImage: "star")
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -123,7 +111,7 @@ private extension SettingsView {
                 Text("• Suggestions d'entraînement personnalisées")
                 Text("• Nouvelles statistiques de course")
 
-                Text("Votre avis aide à définir les prochaines évolutions de Striv.")
+                Text("Votre avis aide à définir les prochaines évolutions de Haaku.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
@@ -132,7 +120,7 @@ private extension SettingsView {
         } header: {
             Text("Communauté & Feedback")
         } footer: {
-            Text("Striv évolue grâce aux retours de ses utilisateurs.")
+            Text("Haaku évolue grâce aux retours de ses utilisateurs.")
         }
     }
 }
@@ -156,7 +144,7 @@ struct PrivacyPolicyView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     section(
                         title: "Données collectées",
-                        content: "Striv peut utiliser certaines données d’activité physique telles que la durée, la distance, l’allure moyenne, la fréquence cardiaque ou le dénivelé afin de fournir des analyses personnalisées."
+                        content: "Haaku peut utiliser certaines données d’activité physique telles que la durée, la distance, l’allure moyenne, la fréquence cardiaque ou le dénivelé afin de fournir des analyses personnalisées."
                     )
                     
                     section(

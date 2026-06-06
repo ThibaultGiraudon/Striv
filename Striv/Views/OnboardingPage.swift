@@ -19,7 +19,7 @@ extension OnboardingPage {
     static let pages: [OnboardingPage] = [
         .init(
             image: "figure.run",
-            title: "Bienvenue sur Striv",
+            title: "Bienvenue sur Haaku",
             description: "Analyse tes courses, comprends tes performances et atteins tes objectifs."
         ),
         .init(

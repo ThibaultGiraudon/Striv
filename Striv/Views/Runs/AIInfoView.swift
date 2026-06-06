@@ -19,7 +19,7 @@ struct AIInfoView: View {
                     section(
                         title: "Comment ça marche",
                         icon: "brain.head.profile",
-                        content: "Striv utilise des modèles d’intelligence artificielle pour analyser tes courses et générer des insights personnalisés à partir de tes données (allure, fréquence cardiaque, distance…)."
+                        content: "Haaku utilise des modèles d’intelligence artificielle pour analyser tes courses et générer des insights personnalisés à partir de tes données (allure, fréquence cardiaque, distance…)."
                     )
                     
                     section(
