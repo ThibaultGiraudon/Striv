@@ -99,7 +99,8 @@ struct ContentView: View {
                 runnerProfileVM.setContext(context: modelContext)
                 runnerProfileVM.createProfileIfNeeded()
             }
-            
+        }
+        .onChange(of: dashboardVM.stats.currentStreak) {
             let widgetData = widgetDataVM.buildWidgetData(
                 workouts: workouts,
                 profiles: profiles,
