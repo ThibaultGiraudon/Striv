@@ -12,79 +12,116 @@ struct RunChartsView: View {
     @ObservedObject var dashboardVM: DashboardViewModel
     @State private var selectedWeek: WeeklyStat? = nil
 
+    private var weeks: [WeeklyStat] {
+        dashboardVM.stats.weekly
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
+
             if let selectedWeek {
                 VStack(alignment: .leading) {
-                    Text("\(selectedWeek.label)")
+                    Text(selectedWeek.label)
+
                     HStack {
-                        VStack(alignment: .leading) {
-                            Text("Distance")
-                                .font(.footnote)
-                            Text("\(selectedWeek.distance.roundedText(to: 2)) km")
-                                .bold()
-                        }
-                        VStack(alignment: .leading) {
-                            Text("Temps")
-                                .font(.footnote)
-                            Text(selectedWeek.duration.label)
-                                .bold()
-                        }
-                        VStack(alignment: .leading) {
-                            Text("Dénivelé")
-                                .font(.footnote)
-                            Text("\(selectedWeek.elevation.roundedText(to: 0)) m")
-                                .bold()
-                        }
+                        metric(title: "Distance",
+                               value: "\(selectedWeek.distance.roundedText(to: 2)) km")
+
+                        metric(title: "Temps",
+                               value: selectedWeek.duration.label)
+
+                        metric(title: "Dénivelé",
+                               value: "\(selectedWeek.elevation.roundedText(to: 0)) m")
                     }
                 }
             }
-            
-            Chart {
-                ForEach(dashboardVM.stats.weekly, id: \.self) { weekStat in
-                    PointMark(
-                        x: .value("Week", weekStat.startOfWeek),
-                        y: .value("Distance", weekStat.distance)
-                    )
-                    .foregroundStyle(selectedWeek == weekStat ? .white : .customPink)
-                    
-                    LineMark(
-                        x: .value("Week", weekStat.startOfWeek),
-                        y: .value("Distance", weekStat.distance)
-                    )
-                    .foregroundStyle(.customPink)
-                    
-                    AreaMark(
-                        x: .value("Week", weekStat.startOfWeek),
-                        y: .value("Distance", weekStat.distance)
-                    )
-                    .foregroundStyle(LinearGradient(colors: [.customPink, .clear], startPoint: .top, endPoint: .bottom))
-                    
-                    if selectedWeek == weekStat {
-                        RuleMark(x: .value("Week", weekStat.startOfWeek))
+
+            if weeks.isEmpty {
+                Text("Aucune courses enregistrées")
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+            } else {
+
+                let start = weeks.first?.startOfWeek ?? Date()
+                let end = weeks.last?.startOfWeek ?? Date()
+
+                Chart {
+                    ForEach(weeks, id: \.id) { weekStat in
+
+                        PointMark(
+                            x: .value("Week", weekStat.startOfWeek),
+                            y: .value("Distance", weekStat.distance)
+                        )
+                        .foregroundStyle(selectedWeek?.id == weekStat.id ? .white : .customPink)
+
+                        LineMark(
+                            x: .value("Week", weekStat.startOfWeek),
+                            y: .value("Distance", weekStat.distance)
+                        )
+                        .foregroundStyle(.customPink)
+
+                        AreaMark(
+                            x: .value("Week", weekStat.startOfWeek),
+                            y: .value("Distance", weekStat.distance)
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.customPink, .clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+
+                        if selectedWeek?.id == weekStat.id {
+                            RuleMark(x: .value("Week", weekStat.startOfWeek))
+                        }
                     }
                 }
+
+                .chartXScale(domain: safeDateRange(start: start, end: end))
+                .chartScrollableAxes(.horizontal)
+                .chartXVisibleDomain(length: 60 * 60 * 24 * 7 * 11)
+                .chartScrollPosition(initialX: end)
+                .chartGesture { chart in
+                    SpatialTapGesture()
+                        .onEnded { value in
+                            guard let result = chart.value(at: value.location, as: (Date, Double).self) else {
+                                return
+                            }
+
+                            selectedWeek = weeks.first(where: {
+                                $0.startOfWeek == result.0.firstDayOfWeek
+                            })
+                        }
+                }
+
+                .frame(height: 200)
+                .accessibilityHidden(true)
             }
-            .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: 60 * 60 * 24 * 7 * 11)
-            .chartXScale(domain: (dashboardVM.stats.weekly.first?.startOfWeek ?? Date.now)...Date.now)
-            .chartScrollPosition(initialX: Date.now)
-            .chartGesture { chart in
-                SpatialTapGesture()
-                    .onEnded { value in
-                        let result = chart.value(at: value.location, as: (Date, Double).self)
-                        selectedWeek = dashboardVM.stats.weekly.first(where: {$0.startOfWeek == result?.0.firstDayOfWeek})
-                    }
-            }
-            .frame(height: 200)
-            .accessibilityHidden(true)
         }
         .onAppear {
-            self.selectedWeek = dashboardVM.stats.weekly.last
+            selectedWeek = weeks.last
         }
     }
-}
 
+    @ViewBuilder
+    private func metric(title: String, value: String) -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.footnote)
+            Text(value)
+                .bold()
+        }
+    }
+
+    private func safeDateRange(start: Date, end: Date) -> ClosedRange<Date> {
+        guard start < end else {
+            let now = Date()
+            return now...now.addingTimeInterval(1)
+        }
+        return start...end
+    }
+}
 #Preview {
     RunChartsView(dashboardVM: .init())
 }
