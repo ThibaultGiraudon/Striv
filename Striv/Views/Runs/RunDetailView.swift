@@ -24,49 +24,22 @@ struct RunDetailView: View {
     @State private var selectedMetric: MetricType?
     @State private var isShowingAIInfo: Bool = false
     @State private var showAIConsent: Bool = false
+    @State private var showShareView: Bool = false
     
     var body: some View {
         VStack {
             ZStack {
-                if !workout.coordinates2d.isEmpty {
-                    RouteMapView(coordinates: workout.coordinates2d)
-                        .accessibilityHidden(true)
-                        .onTapGesture {
-                            withAnimation {
-                                isShowingStats.toggle()
-                            }
-                        }
-                }
+                map
+                
                 VStack(alignment: .leading) {
                     GeometryReader { geo in
                         VStack(alignment: .leading) {
                             Spacer()
-                            Text("\((workout.distance ?? 0) / 1000, specifier: "%.2f")km")
-                                .font(.switzer(size: 66, weight: .bold))
-                                .italic()
-                                .frame(height: geo.size.height * 1/8)
-                            if !workout.altitudes.isEmpty && isShowingStats {
-                                AltitudeView(altitudes: workout.altitudes)
-                                    .frame(height: geo.size.height * 1/8)
-                                    .accessibilityHidden(true)
-                            }
+                            distanceView(geo)
                             
-                            ScrollView(showsIndicators: false) {
-                                statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
-                                    .accessibilityElement(children: .ignore)
-                                    .accessibilityLabel("Temps")
-                                    .accessibilityValue("\(workout.duration.voiceOverLabel)")
-                                statRow(systemImage: "figure.run", title: "Rythme", value: workout.pace.shortLabel, metric: .pace)
-                                statRow(systemImage: "suit.heart.fill", title: "Fréquence", value: workout.hr, metric: .heartRate)
-                                statRow(systemImage: "flame.fill", title: "Calorie", value: workout.kcal, metric: .calories)
-                                statRow(systemImage: "mountain.2.fill", title: "Dénivelé", value: workout.elevation, metric: .elevation)
-                                statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
-                                statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
-                            }
-                            .frame(height: isShowingStats ? (geo.size.height * 1/3) : 0)
-                            .glassContainer(shape: AnyShape(.rect(cornerRadius: 16)))
-                            .font(.title2)
-                            .opacity(isShowingStats ? 100 : 0)
+                            altitudeView(geo)
+                            
+                            statsList(geo)
                         }
                     }
                     
@@ -85,46 +58,23 @@ struct RunDetailView: View {
         .navigationBarBackButtonHidden(isShowingAnalyze)
         .toolbar {
             if isShowingStats {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Analyze", systemImage: isShowingAnalyze ? "xmark" : "apple.intelligence") {
-                        Task {
-                            withAnimation {
-                                isShowingAnalyze.toggle()
-                            }
-                            startAnalyze()
+                analyzeButton
+                
+                if #available(iOS 26.0, *) {
+                    ToolbarSpacer(placement: .topBarTrailing)
+                }
+                if isShowingAnalyze {
+                    infoButton
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu("Menu", systemImage: "ellipsis") {
+                            showStatsButton
+                            shareButton
                         }
+                        .tint(.primaryText)
                     }
-                    .tint(.primaryText)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("\(!isShowingAnalyze ? "Analyser" : "Fermer")")
-                    .accessibilityHint("Double tap pour \(!isShowingAnalyze ? "lancer l'analyse de la course par intelligence artificiel" : "Fermer l'analyse")")
                 }
-            }
-            if #available(iOS 26.0, *) {
-                ToolbarSpacer(placement: .topBarTrailing)
-            }
-            if isShowingAnalyze {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Info", systemImage: "info.circle") {
-                        isShowingAIInfo = true
-                    }
-                    .tint(.primaryText)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Info")
-                    .accessibilityHint("Double tap pour avoir la notice d'utilisation de l'intelligence artificiel")
-                }
-            } else if isShowingStats {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Données", systemImage: "waveform.path.ecg.text.clipboard") {
-                        withAnimation {
-                            isShowingStats.toggle()
-                        }
-                    }
-                    .tint(.primaryText)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Afficher les données")
-                    .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
-                }
+                
             }
         }
         .sheet(item: $selectedMetric) { metric in
@@ -150,6 +100,17 @@ struct RunDetailView: View {
             )
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showShareView) {
+            RunShareCarouselView(workout: workout)
+                .padding(.top)
+                .presentationDragIndicator(.visible)
+                .frame(maxHeight: .infinity)
+                .background(Color.background)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.userDidTakeScreenshotNotification)) { _ in
+            print("Screenshot taken")
+            showShareView = true
         }
         .navigationBarBackButtonHidden(!isShowingStats)
     }
@@ -204,6 +165,116 @@ struct RunDetailView: View {
                 analyze = workout.analyze
             }
         }
+    }
+}
+
+extension RunDetailView {
+    
+    var map: some View {
+        Group {
+            if !workout.coordinates2d.isEmpty {
+                RouteMapView(coordinates: workout.coordinates2d)
+                    .accessibilityHidden(true)
+                    .onTapGesture {
+                        withAnimation {
+                            isShowingStats.toggle()
+                        }
+                    }
+            }
+        }
+    }
+}
+
+private extension RunDetailView {
+
+    func distanceView(_ geo: GeometryProxy) -> some View {
+        Text("\((workout.distance ?? 0) / 1000, specifier: "%.2f")km")
+            .font(.switzer(size: 66, weight: .bold))
+            .italic()
+            .frame(height: geo.size.height * 1/8)
+    }
+
+    func altitudeView(_ geo: GeometryProxy) -> some View {
+        Group {
+            if !workout.altitudes.isEmpty && isShowingStats {
+                AltitudeView(altitudes: workout.altitudes)
+                    .frame(height: geo.size.height * 1/8)
+                    .accessibilityHidden(true)
+            }
+        }
+    }
+
+    func statsList(_ geo: GeometryProxy) -> some View {
+        ScrollView(showsIndicators: false) {
+            statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
+            statRow(systemImage: "figure.run", title: "Rythme", value: workout.pace.shortLabel, metric: .pace)
+            statRow(systemImage: "suit.heart.fill", title: "Fréquence", value: workout.hr, metric: .heartRate)
+            statRow(systemImage: "flame.fill", title: "Calorie", value: workout.kcal, metric: .calories)
+            statRow(systemImage: "mountain.2.fill", title: "Dénivelé", value: workout.elevation, metric: .elevation)
+            statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
+            statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
+        }
+        .frame(height: isShowingStats ? (geo.size.height * 1/3) : 0)
+        .glassContainer(shape: AnyShape(.rect(cornerRadius: 16)))
+        .font(.title2)
+        .opacity(isShowingStats ? 1 : 0)
+    }
+}
+
+private extension RunDetailView {
+    var analyzeButton: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Button("Analyze", systemImage: isShowingAnalyze ? "xmark" : "apple.intelligence") {
+                Task {
+                    withAnimation {
+                        isShowingAnalyze.toggle()
+                    }
+                    startAnalyze()
+                }
+            }
+            .tint(.primaryText)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(!isShowingAnalyze ? "Analyser" : "Fermer")")
+            .accessibilityHint("Double tap pour \(!isShowingAnalyze ? "lancer l'analyse de la course par intelligence artificiel" : "Fermer l'analyse")")
+        }
+    }
+    
+    var infoButton: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Button("Notice usage IA", systemImage: "info.circle") {
+                isShowingAIInfo = true
+            }
+            .tint(.primaryText)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Notice usage IA")
+            .accessibilityHint("Double tap pour avoir la notice d'utilisation de l'intelligence artificiel")
+        }
+    }
+    
+    var showStatsButton: some View {
+//            ToolbarItem(placement: .topBarTrailing) {
+                Button("Masquer les données", systemImage: "waveform.path.ecg.text.clipboard") {
+                    withAnimation {
+                        isShowingStats.toggle()
+                    }
+                }
+                .tint(.primaryText)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Masquer les données")
+                .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
+//            }
+    }
+    
+    var shareButton: some View {
+//        ToolbarItem(placement: .topBarTrailing) {
+            Button("Partager", systemImage: "square.and.arrow.up") {
+                showShareView = true
+            }
+            .tint(.primaryText)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Partager")
+            .accessibilityHint("Double tap pour partager ta course")
+//        }
     }
 }
 
