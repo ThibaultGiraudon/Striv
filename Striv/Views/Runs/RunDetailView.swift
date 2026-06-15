@@ -65,7 +65,7 @@ struct RunDetailView: View {
                 }
                 if isShowingAnalyze {
                     infoButton
-                } else {
+                } else if !workout.coordinates2d.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu("Menu", systemImage: "ellipsis") {
                             showStatsButton
@@ -180,6 +180,13 @@ extension RunDetailView {
                             isShowingStats.toggle()
                         }
                     }
+            } else {
+                GeometryReader { geo in
+                    Image("treadmill")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                }
             }
         }
     }
@@ -252,29 +259,25 @@ private extension RunDetailView {
     }
     
     var showStatsButton: some View {
-//            ToolbarItem(placement: .topBarTrailing) {
-                Button("Masquer les données", systemImage: "waveform.path.ecg.text.clipboard") {
-                    withAnimation {
-                        isShowingStats.toggle()
-                    }
+            Button("Masquer les données", systemImage: "waveform.path.ecg.text.clipboard") {
+                withAnimation {
+                    isShowingStats.toggle()
                 }
-                .tint(.primaryText)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Masquer les données")
-                .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
-//            }
-    }
-    
-    var shareButton: some View {
-//        ToolbarItem(placement: .topBarTrailing) {
-            Button("Partager", systemImage: "square.and.arrow.up") {
-                showShareView = true
             }
             .tint(.primaryText)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Partager")
-            .accessibilityHint("Double tap pour partager ta course")
-//        }
+            .accessibilityLabel("Masquer les données")
+            .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
+    }
+    
+    var shareButton: some View {
+        Button("Partager", systemImage: "square.and.arrow.up") {
+            showShareView = true
+        }
+        .tint(.primaryText)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Partager")
+        .accessibilityHint("Double tap pour partager ta course")
     }
 }
 
