@@ -28,9 +28,15 @@ struct RunDetailView: View {
     var body: some View {
         VStack {
             ZStack {
-                RouteMapView(coordinates: workout.coordinates2d)
-                    .disabled(isShowingStats)
-                    .accessibilityHidden(true)
+                if !workout.coordinates2d.isEmpty {
+                    RouteMapView(coordinates: workout.coordinates2d)
+                        .accessibilityHidden(true)
+                        .onTapGesture {
+                            withAnimation {
+                                isShowingStats.toggle()
+                            }
+                        }
+                }
                 VStack(alignment: .leading) {
                     GeometryReader { geo in
                         VStack(alignment: .leading) {
@@ -39,9 +45,11 @@ struct RunDetailView: View {
                                 .font(.switzer(size: 66, weight: .bold))
                                 .italic()
                                 .frame(height: geo.size.height * 1/8)
-                            AltitudeView(altitudes: workout.altitudes)
-                                .frame(height: geo.size.height * 1/8)
-                                .accessibilityHidden(true)
+                            if !workout.altitudes.isEmpty && isShowingStats {
+                                AltitudeView(altitudes: workout.altitudes)
+                                    .frame(height: geo.size.height * 1/8)
+                                    .accessibilityHidden(true)
+                            }
                             
                             ScrollView(showsIndicators: false) {
                                 statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
@@ -76,19 +84,21 @@ struct RunDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isShowingAnalyze)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Analyze", systemImage: isShowingAnalyze ? "xmark" : "apple.intelligence") {
-                    Task {
-                        withAnimation {
-                            isShowingAnalyze.toggle()
+            if isShowingStats {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Analyze", systemImage: isShowingAnalyze ? "xmark" : "apple.intelligence") {
+                        Task {
+                            withAnimation {
+                                isShowingAnalyze.toggle()
+                            }
+                            startAnalyze()
                         }
-                        startAnalyze()
                     }
+                    .tint(.primaryText)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(!isShowingAnalyze ? "Analyser" : "Fermer")")
+                    .accessibilityHint("Double tap pour \(!isShowingAnalyze ? "lancer l'analyse de la course par intelligence artificiel" : "Fermer l'analyse")")
                 }
-                .tint(.primaryText)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(!isShowingAnalyze ? "Analyser" : "Fermer")")
-                .accessibilityHint("Double tap pour \(!isShowingAnalyze ? "lancer l'analyse de la course par intelligence artificiel" : "Fermer l'analyse")")
             }
             if #available(iOS 26.0, *) {
                 ToolbarSpacer(placement: .topBarTrailing)
@@ -103,7 +113,7 @@ struct RunDetailView: View {
                     .accessibilityLabel("Info")
                     .accessibilityHint("Double tap pour avoir la notice d'utilisation de l'intelligence artificiel")
                 }
-            } else {
+            } else if isShowingStats {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Données", systemImage: "waveform.path.ecg.text.clipboard") {
                         withAnimation {
@@ -141,6 +151,7 @@ struct RunDetailView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
+        .navigationBarBackButtonHidden(!isShowingStats)
     }
     
     @ViewBuilder
