@@ -29,6 +29,11 @@ extension HealthKitHelper {
             ) { _, samples, _, _, error in
                 
                 if let error {
+                    if let hkError = error as? HKError,
+                       hkError.code == .errorNoData {
+                        continuation.resume(returning: [])
+                        return
+                    }
                     continuation.resume(throwing: error)
                     return
                 }

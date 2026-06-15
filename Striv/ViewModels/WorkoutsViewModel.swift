@@ -181,7 +181,15 @@ class WorkoutsViewModel: BaseViewModel {
             
             try context.save()
             return newWorkout
+        } catch let err as HealthKitError {
+            if err == .noData {
+                
+            } else {
+                self.errorPresenter.error = .unknown()
+            }
         } catch {
+            print(error)
+            print(error.localizedDescription)
             self.errorPresenter.error = .database(.saving)
         }
         return workout
