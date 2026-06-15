@@ -106,6 +106,11 @@ extension HealthKitHelper {
         let endDate = workout.endDate
 
         return try await withCheckedThrowingContinuation { continuation in
+            
+            guard startDate < endDate else {
+                continuation.resume(returning: [])
+                return
+            }
 
             let query = HKStatisticsCollectionQuery(
                 quantityType: distanceType,
@@ -135,7 +140,7 @@ extension HealthKitHelper {
                     let value = stat.sumQuantity()?.doubleValue(for: .meter()) ?? 0
                     runningTotal += value
 
-                    let time = stat.startDate.timeIntervalSince(startDate)
+                    let time = max(stat.startDate.timeIntervalSince(startDate), 0)
 
                     samples.append(
                         RunSample(

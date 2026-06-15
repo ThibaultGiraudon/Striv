@@ -135,6 +135,8 @@ final class WorkoutStatisticsService {
         
         var currentWeek = Date().firstDayOfWeek
         
+        guard firstWeek <= currentWeek else { return [] }
+        
         while firstWeek <= currentWeek {
             let startOfWeek = currentWeek
             

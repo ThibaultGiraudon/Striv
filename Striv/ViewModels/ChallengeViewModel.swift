@@ -37,6 +37,8 @@ class ChallengeViewModel: ObservableObject {
         switch challenge.challengeType {
             
         case .distance(let target):
+            guard target > 0 else { return (0.0, nil)}
+            
             var total: Double = 0
             
             for workout in sortedWorkouts {
@@ -49,6 +51,7 @@ class ChallengeViewModel: ObservableObject {
             return (min(total / target, 1.0), nil)
 
         case .runs(let target):
+            guard target > 0 else { return (0.0, nil)}
             if sortedWorkouts.count >= target {
                 return (1.0, sortedWorkouts[target - 1].date)
             }
@@ -71,6 +74,7 @@ class ChallengeViewModel: ObservableObject {
             return (0, nil)
 
         case .streak(let target):
+            guard target > 0 else { return (0.0, nil)}
             guard !sortedWorkouts.isEmpty else { return (0, nil) }
             
             let uniqueDays = Set(

@@ -20,7 +20,7 @@ struct CustomProgressView: View {
             
             Capsule()
                 .fill(.customPink)
-                .frame(width: value * width / total)
+                .frame(width: value * width / max(total, 1))
         }
         .frame(height: 12)
     }

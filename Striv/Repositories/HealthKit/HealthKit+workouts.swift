@@ -78,19 +78,26 @@ extension HealthKitHelper {
         }
         
         let hkWorkouts: [HKWorkout] = response.0
-
-        let workouts = try await withThrowingTaskGroup(of: WorkoutData.self) { group in
+        
+        let workouts = await withTaskGroup(of: WorkoutData?.self) { group in
 
             for hkWorkout in hkWorkouts {
                 group.addTask {
-                    try await self.fetchWorkoutsMetrics(for: hkWorkout)
+                    do {
+                        return try await self.fetchWorkoutsMetrics(for: hkWorkout)
+                    } catch {
+                        print(hkWorkout.startDate)
+                        return nil
+                    }
                 }
             }
 
             var results: [WorkoutData] = []
 
-            for try await workout in group {
-                results.append(workout)
+            for await workout in group {
+                if let workout {
+                    results.append(workout)
+                }
             }
 
             return results
@@ -102,15 +109,18 @@ extension HealthKitHelper {
     }
     
     func fetchWorkoutsMetrics(for hkWorkout: HKWorkout) async throws -> WorkoutData {
-        async let distance = self.fetchDistance(for: hkWorkout)
+        let distance = try await self.fetchDistance(for: hkWorkout)
         let samples = try await self.fetchRunSamples(for: hkWorkout)
         
-        let duration = hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate)
+        let duration = max(
+            hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate),
+            1
+        )
         
         let workout = WorkoutData(
             id: hkWorkout.uuid,
             date: hkWorkout.startDate,
-            distance: try await distance,
+            distance: distance,
             duration: duration,
             elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity)?.doubleValue(for: .meter()),
             samples: samples.map {

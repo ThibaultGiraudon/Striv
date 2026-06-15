@@ -44,7 +44,7 @@ final class DefineGoalViewModel: ObservableObject {
             return ("-", "Non defini", "-", .gray, "minus.circle")
         }
         
-        let progression = ((pr.time - (time * 60)) / pr.time) * 100
+        let progression = ((pr.time - (time * 60)) / max(pr.time, 1)) * 100
         let label = String(format: "%@%.0f%%", progression >= 0 ? "+" : "", progression)
         
         switch progression {
