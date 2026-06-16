@@ -56,6 +56,7 @@ struct RunDetailView: View {
         .navigationTitle(workout.date.formatted(format: "dd MMM. YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isShowingAnalyze)
+        .background(Color.background)
         .toolbar {
             if isShowingStats {
                 analyzeButton
@@ -180,13 +181,6 @@ extension RunDetailView {
                             isShowingStats.toggle()
                         }
                     }
-            } else {
-                GeometryReader { geo in
-                    Image("treadmill")
-                        .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea()
-                }
             }
         }
     }

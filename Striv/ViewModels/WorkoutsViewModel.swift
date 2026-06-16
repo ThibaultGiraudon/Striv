@@ -161,9 +161,12 @@ class WorkoutsViewModel: BaseViewModel {
     func fetchWorkoutDetail(for workout: Workout) async -> Workout {
         guard let context else { return workout }
         
+        
+        defer { isLoading = false}
         let newWorkout = workout
         
         do {
+            isLoading = true
             async let hr = healthKitHelper.fetchAverageHeartRate(with: workout.id)
             async let kcal = healthKitHelper.fetchActiveEnergy(with: workout.id)
             async let power = healthKitHelper.fetchPower(with: workout.id)
@@ -188,8 +191,6 @@ class WorkoutsViewModel: BaseViewModel {
                 self.errorPresenter.error = .unknown()
             }
         } catch {
-            print(error)
-            print(error.localizedDescription)
             self.errorPresenter.error = .database(.saving)
         }
         return workout
