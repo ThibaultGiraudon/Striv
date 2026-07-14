@@ -40,6 +40,36 @@ extension HealthKitHelper {
         )
     }
     
+    func fetchHeartRateSamples(with id: UUID) async throws -> [MetricSample] {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchHeartRateSamples(for: hkWorkout)
+    }
+    
+    func fetchHeartRateSamples(for workout: HKWorkout) async throws -> [MetricSample] {
+        try await fetchSamples(
+            for: workout,
+            identifier: .heartRate,
+            unit: HKUnit(from: "count/min"),
+            options: .discreteAverage
+        )
+    }
+    
+    func fetchActiveEnergySamples(with id: UUID) async throws -> [MetricSample] {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchActiveEnergySamples(for: hkWorkout)
+    }
+    
+    func fetchActiveEnergySamples(for workout: HKWorkout) async throws -> [MetricSample] {
+        try await fetchSamples(
+            for: workout,
+            identifier: .activeEnergyBurned,
+            unit: .kilocalorie(),
+            options: .discreteAverage
+        )
+    }
+    
     func fetchDistance(with id: UUID) async throws -> Double? {
         let hkWorkout = try await getWorkout(with: id)
         
@@ -52,6 +82,21 @@ extension HealthKitHelper {
             identifier: .distanceWalkingRunning,
             options: .cumulativeSum,
             unit: .meter()
+        )
+    }
+    
+    func fetchDistanceSamples(with id: UUID) async throws -> [MetricSample] {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchDistanceSamples(for: hkWorkout)
+    }
+    
+    func fetchDistanceSamples(for workout: HKWorkout) async throws -> [MetricSample] {
+        try await fetchSamples(
+            for: workout,
+            identifier: .distanceWalkingRunning,
+            unit: .meter(),
+            options: .cumulativeSum
         )
     }
     
@@ -70,6 +115,21 @@ extension HealthKitHelper {
         )
     }
     
+    func fetchPowerSamples(with id: UUID) async throws -> [MetricSample] {
+        let hkWorkout = try await getWorkout(with: id)
+        
+        return try await fetchPowerSamples(for: hkWorkout)
+    }
+    
+    func fetchPowerSamples(for workout: HKWorkout) async throws -> [MetricSample] {
+        try await fetchSamples(
+            for: workout,
+            identifier: .runningPower,
+            unit: .watt(),
+            options: .discreteAverage
+        )
+    }
+    
     func fetchCadence(with id: UUID) async throws -> Double? {
         let hkWorkout = try await getWorkout(with: id)
         
@@ -85,13 +145,13 @@ extension HealthKitHelper {
         )
     }
     
-    func fetchRunSamples(with id: UUID) async throws -> [RunSample] {
+    func fetchRunSamples(with id: UUID) async throws -> [MetricSample] {
         let hkWorkout = try await getWorkout(with: id)
         
         return try await fetchRunSamples(for: hkWorkout)
     }
     
-    func fetchRunSamples(for workout: HKWorkout) async throws -> [RunSample] {
+    func fetchRunSamples(for workout: HKWorkout) async throws -> [MetricSample] {
         guard let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) else {
             throw HealthKitError.invalidType
         }
@@ -132,7 +192,7 @@ extension HealthKitHelper {
                     return
                 }
 
-                var samples: [RunSample] = []
+                var samples: [MetricSample] = []
                 var runningTotal: Double = 0
 
                 results.enumerateStatistics(from: startDate, to: endDate) { stat, _ in
@@ -143,9 +203,9 @@ extension HealthKitHelper {
                     let time = max(stat.startDate.timeIntervalSince(startDate), 0)
 
                     samples.append(
-                        RunSample(
-                            distance: runningTotal,
-                            time: time
+                        MetricSample(
+                            time: time,
+                            value: runningTotal
                         )
                     )
                 }

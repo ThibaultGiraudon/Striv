@@ -169,6 +169,8 @@ class Workout: Identifiable, Equatable {
     
     @Relationship(deleteRule: .cascade) var samples: [RunSampleEntity] = []
     
+    @Relationship(deleteRule: .cascade) var metricsSeries: [MetricSeries] = []
+    
     // MARK: - Initializer
     
     /// Creates a new `Workout`.
@@ -244,4 +246,56 @@ extension RunSampleEntity {
 struct RunSample {
     var distance: Double
     var time: TimeInterval
+}
+
+@Model
+final class MetricSampleEntity: Equatable {
+    var id: UUID
+    var time: TimeInterval
+    var value: Double
+    var normalizedValue: Double
+    
+    init(id: UUID = UUID(), time: TimeInterval, value: Double, normalizedValue: Double = 0) {
+        self.id = id
+        self.time = time
+        self.value = value
+        self.normalizedValue = normalizedValue
+    }
+}
+
+extension MetricSampleEntity {
+    convenience init(from model: MetricSample) {
+        self.init(id: model.id, time: model.time, value: model.value, normalizedValue: model.normalizedValue)
+    }
+}
+
+struct MetricSample: Identifiable {
+    var id = UUID()
+    
+    var time: TimeInterval
+    var value: Double
+    var normalizedValue: Double
+    
+    nonisolated init(id: UUID = UUID(), time: TimeInterval, value: Double, normalizedValue: Double = 0) {
+        self.id = id
+        self.time = time
+        self.value = value
+        self.normalizedValue = normalizedValue
+    }
+}
+
+@Model
+final class MetricSeries: Identifiable {
+    var id = UUID()
+
+    var type: MetricType
+    var samples: [MetricSampleEntity]
+    
+    init(id: UUID = UUID(), type: MetricType, samples: [MetricSample]) {
+        self.id = id
+        self.type = type
+        self.samples = samples.map {
+            MetricSampleEntity(from: $0)
+        }
+    }
 }

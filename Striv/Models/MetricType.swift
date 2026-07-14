@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MetricType: String, CaseIterable, Identifiable {
+enum MetricType: String, CaseIterable, Identifiable, Codable {
     case pace
     case heartRate
     case cadence
@@ -15,6 +15,7 @@ enum MetricType: String, CaseIterable, Identifiable {
     case time
     case elevation
     case calories
+    case distance
     
     var id: String { rawValue }
 }
@@ -30,6 +31,7 @@ extension MetricType {
         case .time: return "Temps"
         case .elevation: return "Dénivelé"
         case .calories: return "Calories"
+        case .distance: return "Distance"
         }
     }
     
@@ -42,6 +44,7 @@ extension MetricType {
         case .time: return ""
         case .elevation: return "mètre"
         case .calories: return "kilocalorie"
+        case .distance: return "kilomètre"
         }
     }
     
@@ -54,6 +57,7 @@ extension MetricType {
         case .time: return "clock.fill"
         case .elevation: return "mountain.2.fill"
         case .calories: return "flame.fill"
+        case .distance: return "figure.run"
         }
     }
     
@@ -80,6 +84,8 @@ extension MetricType {
             return "Différence totale de hauteur parcourue pendant ta course."
         case .calories:
             return "Énergie dépensée pendant ton activité."
+        case .distance:
+            return ""
         }
     }
     
@@ -99,6 +105,8 @@ extension MetricType {
             return "Permet de mesurer la difficulté de ton parcours."
         case .calories:
             return "Donne une estimation de ton effort énergétique."
+        case .distance:
+            return ""
         }
     }
     
@@ -118,6 +126,8 @@ extension MetricType {
             return "Adapte ton effort en montée, ne cherche pas à garder la même allure."
         case .calories:
             return "Utilise cette donnée comme indicateur global, pas comme valeur exacte."
+        case .distance:
+            return ""
         }
     }
 }
@@ -168,6 +178,9 @@ extension MetricType {
                 ("Intensité", "Varie selon l’effort"),
                 ("Précision", "Valeur approximative")
             ]
+            
+        case .distance:
+            return []
         }
     }
 }

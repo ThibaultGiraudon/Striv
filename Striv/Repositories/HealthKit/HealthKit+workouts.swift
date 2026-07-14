@@ -86,7 +86,6 @@ extension HealthKitHelper {
                     do {
                         return try await self.fetchWorkoutsMetrics(for: hkWorkout)
                     } catch {
-                        print(hkWorkout.startDate)
                         return nil
                     }
                 }
@@ -116,19 +115,61 @@ extension HealthKitHelper {
             hkWorkout.endDate.timeIntervalSince(hkWorkout.startDate),
             1
         )
-        
+                
         let workout = WorkoutData(
             id: hkWorkout.uuid,
             date: hkWorkout.startDate,
             distance: distance,
             duration: duration,
             elevation: (hkWorkout.metadata?["HKElevationAscended"] as? HKQuantity)?.doubleValue(for: .meter()),
-            samples: samples.map {
-                .init(time: $0.time, distance: $0.distance)
-            }
+            runSamples: samples.map( {SampleData(time: $0.time, distance: $0.value) })
         )
         
         
         return workout
     }
+    
+    func fetchWorkoutSeries(
+        with id: UUID
+    ) async throws -> [MetricSeries] {
+
+        async let heartRate = fetchHeartRateSamples(with: id)
+        async let power = fetchPowerSamples(with: id)
+        let distance = try await fetchDistanceSamples(with: id)
+
+        let pace = distance
+            .sorted(by: { $0.time < $1.time })
+            .map {
+                let minute = 20.0 / 60
+                let km = $0.value / 1000
+                
+                let currentPace = minute / km
+                
+                return MetricSample(time: $0.time, value: currentPace)
+                
+            }
+        
+        return [
+            MetricSeries(
+                type: .heartRate,
+                samples: try await heartRate,
+            ),
+
+            MetricSeries(
+                type: .power,
+                samples: try await power
+            ),
+
+            MetricSeries(
+                type: .distance,
+                samples: distance
+            ),
+
+            MetricSeries(
+                type: .pace,
+                samples: pace
+            )
+        ]
+    }
+    
 }

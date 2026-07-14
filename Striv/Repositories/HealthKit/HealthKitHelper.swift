@@ -19,7 +19,11 @@ protocol HealthKitHelperInterface {
     func fetchDistance(with id: UUID) async throws -> Double?
     func fetchPower(with id: UUID) async throws -> Double?
     func fetchCadence(with id: UUID) async throws -> Double?
-    func fetchRunSamples(with id: UUID) async throws -> [RunSample]
+    func fetchRunSamples(with id: UUID) async throws -> [MetricSample]
+    func fetchHeartRateSamples(with id: UUID) async throws -> [MetricSample]
+    func fetchActiveEnergySamples(with id: UUID) async throws -> [MetricSample]
+    func fetchPowerSamples(with id: UUID) async throws -> [MetricSample]
+    func fetchWorkoutSeries(with id: UUID) async throws -> [MetricSeries]
 }
 
 /// Helper responsible for interacting with HealthKit.

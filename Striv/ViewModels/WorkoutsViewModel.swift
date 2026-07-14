@@ -108,7 +108,7 @@ class WorkoutsViewModel: BaseViewModel {
         }
     }
     
-    func fetchWorkoutRoutes(for workout: Workout) async{
+    func fetchWorkoutRoutes(for workout: Workout) async {
         guard let context else { return }
         
         guard workout.coordinates.isEmpty else { return }
@@ -119,6 +119,9 @@ class WorkoutsViewModel: BaseViewModel {
                 .sorted { $0.timestamp < $1.timestamp }
                 .map { .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude, timestamp: $0.timestamp) }
             workout.altitudes = locations.map { $0.altitude }.downSample()
+            let startDate = locations.sorted { $0.timestamp < $1.timestamp }.first?.timestamp ?? .now
+            let elevationSamples: [MetricSample] = locations.map { .init(time: $0.timestamp.timeIntervalSince(startDate), value: $0.altitude)}
+            workout.metricsSeries.append(.init(type: .elevation, samples: elevationSamples))
                         
             try context.save()
             
@@ -171,6 +174,7 @@ class WorkoutsViewModel: BaseViewModel {
             async let kcal = healthKitHelper.fetchActiveEnergy(with: workout.id)
             async let power = healthKitHelper.fetchPower(with: workout.id)
             async let stepCount = healthKitHelper.fetchCadence(with: workout.id)
+            let metricsSeries = try await healthKitHelper.fetchWorkoutSeries(with: workout.id)
             
             let minutes = max(Double(newWorkout.duration.totalSeconds) / 60, 1)
             let cadence = (try await stepCount ?? 0) / minutes
@@ -180,22 +184,42 @@ class WorkoutsViewModel: BaseViewModel {
             newWorkout.power = try await power
             newWorkout.cadence = cadence
             
+            var normalizedSeries: [MetricSeries] = []
+            
+            for serie in metricsSeries {
+                normalizedSeries.append(MetricSeries(type: serie.type, samples: normalizeSamples(for: serie.samples)))
+            }
+            
+            newWorkout.metricsSeries = normalizedSeries
+            
             await self.fetchWorkoutRoutes(for: workout)
             
             try context.save()
             return newWorkout
         } catch let err as HealthKitError {
+            print(err)
             if err == .noData {
                 
             } else {
                 self.errorPresenter.error = .unknown()
             }
         } catch {
+            print(error)
             self.errorPresenter.error = .database(.saving)
         }
         return workout
     }
     
+    func normalizeSamples(for samples: [MetricSampleEntity]) -> [MetricSample] {
+//        let min = samples.map(\.value).min() ?? 0
+        let max = samples.map(\.value).max() ?? 0
+        
+        return samples.map {
+            let normalizedValue = $0.value * 100 / max
+            return .init(time: $0.time, value: $0.value, normalizedValue: normalizedValue)
+        }
+    }
+        
     /// Fetches workout details only if they are not already available.
     ///
     /// - Parameter workout: The workout to check.
@@ -239,7 +263,7 @@ struct WorkoutData: Sendable {
     let distance: Double?
     let duration: Double
     let elevation: Double?
-    let samples: [SampleData]
+    let runSamples: [SampleData]
 }
 
 final class PRCalculator {
@@ -263,7 +287,7 @@ final class PRCalculator {
     }
 
     private func processWorkout(_ workout: WorkoutData) async -> [PRResult] {
-        let samples = workout.samples
+        let samples = workout.runSamples
 
         let result = await bestTimes(in: samples)
         

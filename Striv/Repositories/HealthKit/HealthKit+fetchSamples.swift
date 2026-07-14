@@ -14,7 +14,7 @@ extension HealthKitHelper {
         identifier: HKQuantityTypeIdentifier,
         unit: HKUnit,
         options: HKStatisticsOptions
-    ) async throws -> [RunSample] {
+    ) async throws -> [MetricSample] {
 
         guard let type = HKQuantityType.quantityType(forIdentifier: identifier) else {
             throw HealthKitError.invalidType
@@ -41,7 +41,7 @@ extension HealthKitHelper {
                 quantitySamplePredicate: predicate,
                 options: options,
                 anchorDate: startDate,
-                intervalComponents: DateComponents(second: 2)
+                intervalComponents: DateComponents(second: 20)
             )
 
             query.initialResultsHandler = { _, results, error in
@@ -56,7 +56,7 @@ extension HealthKitHelper {
                     return
                 }
 
-                var samples: [RunSample] = []
+                var samples: [MetricSample] = []
 
                 results.enumerateStatistics(from: startDate, to: endDate) { stat, _ in
 
@@ -80,9 +80,9 @@ extension HealthKitHelper {
                     let time = stat.startDate.timeIntervalSince(startDate)
 
                     samples.append(
-                        RunSample(
-                            distance: value,
-                            time: time
+                        MetricSample(
+                            time: time,
+                            value: value
                         )
                     )
                 }
