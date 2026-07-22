@@ -169,7 +169,7 @@ class Workout: Identifiable, Equatable {
     
     @Relationship(deleteRule: .cascade) var samples: [RunSampleEntity] = []
     
-    @Relationship(deleteRule: .cascade) var metricsSeries: [MetricSeries] = []
+    @Relationship(deleteRule: .cascade) var metricsSeries: [MetricSeriesEntity] = []
     
     // MARK: - Initializer
     
@@ -285,7 +285,7 @@ struct MetricSample: Identifiable {
 }
 
 @Model
-final class MetricSeries: Identifiable {
+final class MetricSeriesEntity: Identifiable, Equatable {
     var id = UUID()
 
     var type: MetricType
@@ -297,5 +297,24 @@ final class MetricSeries: Identifiable {
         self.samples = samples.map {
             MetricSampleEntity(from: $0)
         }
+    }
+}
+
+extension MetricSeriesEntity {
+    convenience init(from model: MetricSeries) {
+        self.init(id: model.id, type: model.type, samples: model.samples)
+    }
+}
+
+struct MetricSeries: Identifiable {
+    var id = UUID()
+
+    var type: MetricType
+    var samples: [MetricSample]
+    
+    init(id: UUID = UUID(), type: MetricType, samples: [MetricSample]) {
+        self.id = id
+        self.type = type
+        self.samples = samples
     }
 }

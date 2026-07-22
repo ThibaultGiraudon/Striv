@@ -70,7 +70,7 @@ struct StrivApp: App {
                 Coordinate.self,
                 RunnerProfile.self,
                 RunSampleEntity.self,
-                MetricSeries.self,
+                MetricSeriesEntity.self,
                 configurations: config
             )
             
@@ -83,7 +83,7 @@ struct StrivApp: App {
                 Coordinate.self,
                 RunnerProfile.self,
                 RunSampleEntity.self,
-                MetricSeries.self
+                MetricSeriesEntity.self
             )
         }
     }

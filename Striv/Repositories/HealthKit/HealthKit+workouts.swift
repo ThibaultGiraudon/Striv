@@ -139,17 +139,19 @@ extension HealthKitHelper {
 
         let pace = distance
             .sorted(by: { $0.time < $1.time })
-            .map {
+            .compactMap { sample -> MetricSample? in
                 let minute = 20.0 / 60
-                let km = $0.value / 1000
+                let km = sample.value / 1000
                 
-                let currentPace = minute / km
+                var currentPace = minute / km
                 
-                return MetricSample(time: $0.time, value: currentPace)
+                currentPace = min(currentPace, 12)
+                
+                return MetricSample(time: sample.time, value: currentPace)
                 
             }
         
-        return [
+        return await [
             MetricSeries(
                 type: .heartRate,
                 samples: try await heartRate,
