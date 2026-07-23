@@ -12,12 +12,17 @@ struct MetricsOverlayChartView: View {
     var workout: Workout
     @State private var primarySeries: MetricSeriesEntity?
     @State private var secondarySeries: MetricSeriesEntity?
+    
+    @State private var primarySamples: [MetricSampleEntity] = []
+    
+    @State private var secondarySamples: [MetricSampleEntity] = []
+    
     @State private var selectedTime: Double?
     var selectedPrimarySample: MetricSampleEntity? {
         guard let selectedTime else {
             return nil
         }
-        return primarySeries?.samples.min {
+        return primarySamples.min {
             abs($0.time - selectedTime) < abs($1.time - selectedTime)
         }
     }
@@ -25,7 +30,7 @@ struct MetricsOverlayChartView: View {
         guard let selectedTime else {
             return nil
         }
-        return secondarySeries?.samples.min {
+        return secondarySamples.min {
             abs($0.time - selectedTime) < abs($1.time - selectedTime)
         }
     }
@@ -40,6 +45,9 @@ struct MetricsOverlayChartView: View {
                     }
                 }
                 .tint(primarySeries?.type.color)
+                .onChange(of: primarySeries) { oldValue, newValue in
+                    self.primarySamples = primarySeries?.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50) ?? []
+                }
                 Spacer()
                 Picker("Graphique 2", selection: $secondarySeries) {
                     ForEach(workout.metricsSeries.filter({ $0.id != primarySeries?.id })) { series in
@@ -48,17 +56,16 @@ struct MetricsOverlayChartView: View {
                     }
                 }
                 .tint(secondarySeries?.type.color)
+                .onChange(of: secondarySeries) { oldValue, newValue in
+                    self.secondarySamples = secondarySeries?.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50) ?? []
+                }
             }
             if let primarySeries, let secondarySeries {
                 ZStack(alignment: .center) {
-                    let primarySamples = primarySeries.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 100)
                     let maxTime: Double = primarySamples.last?.time ?? 0
                     
                     let primaryMinValue = primarySamples.map(\.value).min() ?? 0
                     let primaryMaxValue = primarySamples.map(\.value).max() ?? 0
-                    
-                    
-                    let secondarySamples = secondarySeries.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 100)
                     
                     let secondaryMinValue = secondarySamples.map(\.value).min() ?? 0
                     let secondaryMaxValue = secondarySamples.map(\.value).max() ?? 0

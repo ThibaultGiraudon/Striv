@@ -10,28 +10,30 @@ import Charts
 
 struct PaceCharts: View {
     var series: MetricSeriesEntity
+    let downSampled: [MetricSampleEntity]
     @State private var selectedTime: Double?
     var selectedMetricSample: MetricSampleEntity? {
         guard let selectedTime else {
             return nil
         }
-        return series.samples.min {
+        return downSampled.min {
             abs($0.time - selectedTime) < abs($1.time - selectedTime)
         }
     }
     
+    init(series: MetricSeriesEntity) {
+        self.series = series
+        self.downSampled = series.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50)
+    }
+    
     var body: some View {
-        Text("\(series.type.title)")
-
-        let samples = series.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 100)
-
-        let maxTime = samples.last?.time ?? 0
+        let maxTime = downSampled.last?.time ?? 0
         
-        let minValue = samples.map(\.value).min() ?? 0
-        let maxValue = min(12.0, samples.map(\.value).max() ?? 12.0)
+        let minValue = downSampled.map(\.value).min() ?? 0
+        let maxValue = min(12.0, downSampled.map(\.value).max() ?? 12.0)
 
         Chart {
-            ForEach(samples) { sample in
+            ForEach(downSampled) { sample in
                 if let selectedMetricSample {
                     RuleMark(
                         x: .value("Time", selectedMetricSample.time)

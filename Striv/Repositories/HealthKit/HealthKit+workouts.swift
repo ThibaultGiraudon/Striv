@@ -163,10 +163,10 @@ extension HealthKitHelper {
                 samples: try await power
             ),
 
-//            MetricSeries(
-//                type: .distance,
-//                samples: distance
-//            ),
+            MetricSeries(
+                type: .distance,
+                samples: distance
+            ),
 
             MetricSeries(
                 type: .pace,
