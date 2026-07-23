@@ -46,13 +46,13 @@ struct RunDetailView: View {
                 workout = await workoutsVM.fetchWorkoutDetailIfNeeded(for: workout)
             }
             .sheet(isPresented: .constant(true)) {
-                    statsList
-                    .presentationDetents([.height(300), .medium, .large], selection: $selectedDetent)
+                    RunDatasView(workout: workout)
+                    .presentationDetents([.fraction(0.3), .medium, .large], selection: $selectedDetent)
                     .interactiveDismissDisabled()
                     .presentationBackgroundInteraction(.enabled)
             }
         }
-        .navigationTitle(workout.date.formatted(format: "dd MMM. YYYY"))
+        .navigationTitle(workout.date.formatted(format: "dd MMM YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isShowingAnalyze)
         .background(Color.background)
@@ -115,41 +115,6 @@ struct RunDetailView: View {
         .navigationBarBackButtonHidden(!isShowingStats)
     }
     
-    @ViewBuilder
-    func statRow(systemImage: String, title: String, value: StatDisplayable?, metric: MetricType) -> some View{
-        if let value, value.statText != "0" {
-            HStack {
-                HStack {
-                    Image(systemName: systemImage)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 20)
-                    Text(title)
-                        .padding(.leading, 20)
-                    Spacer()
-                    Text(value.statText)
-                        .padding(.trailing)
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(title)
-                .accessibilityValue(metric.valuePlusUnit(value.statText))
-                
-                Image(systemName: "info.circle")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20)
-                    .foregroundStyle(.secondary)
-                    .onTapGesture {
-                        selectedMetric = metric
-                    }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Info")
-                    .accessibilityHint("Double tap pour afficher les information sur les données de \(title)")
-            }
-            .padding(.vertical)
-            .padding(.horizontal, 20)
-        }
-    }
-    
     private func startAnalyze() {
         Task {
             if workout.analyze == nil {
@@ -191,102 +156,6 @@ private extension RunDetailView {
         Text("\((workout.distance ?? 0) / 1000, specifier: "%.2f")km")
             .font(.switzer(size: 66, weight: .bold))
             .italic()
-    }
-
-    var altitudeView: some View {
-        Group {
-            if !workout.altitudes.isEmpty && isShowingStats {
-                AltitudeView(altitudes: workout.altitudes)
-                    .accessibilityHidden(true)
-            }
-        }
-    }
-
-    var statsList: some View {
-        ScrollView(showsIndicators: false) {
-            statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
-            statRow(systemImage: "figure.run", title: "Rythme", value: workout.pace.shortLabel, metric: .pace)
-            statRow(systemImage: "suit.heart.fill", title: "Fréquence", value: workout.hr, metric: .heartRate)
-            statRow(systemImage: "flame.fill", title: "Calorie", value: workout.kcal, metric: .calories)
-            statRow(systemImage: "mountain.2.fill", title: "Dénivelé", value: workout.elevation, metric: .elevation)
-            statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
-            statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
-            
-            ForEach(workout.metricsSeries) { serie in
-                Text("\(serie.type.title)")
-
-                let samples = serie.samples.sorted(by: { $0.time < $1.time })
-
-//                let normalizedMin = samples.map(\.normalizedValue).min() ?? 0
-//                let normalizedMax = samples.map(\.normalizedValue).max() ?? 0
-
-                let minValue = samples.map(\.value).min() ?? 0
-                let maxValue = serie.type == .pace
-                    ? 12
-                    : samples.map(\.value).max() ?? 0
-
-                Chart {
-                    ForEach(samples) { sample in
-                        AreaMark(
-                            x: .value("Time", sample.time),
-                            yStart: .value("Min", minValue),
-                            yEnd: .value(
-                                serie.type.title,
-                                sample.value
-                            )
-                        )
-                    }
-                }
-                .chartYScale(
-                    domain: serie.type == .pace
-                        ? [maxValue, minValue]
-                        : [minValue, maxValue]
-                )
-                .chartYAxis {
-                    AxisMarks(values: [minValue, maxValue])
-                }
-                .frame(maxHeight: 400)
-            }
-            
-        }
-        .font(.title2)
-    }
-    
-    func downSample(
-        samples: [MetricSampleEntity],
-        maxDisplayPoints: Int = 100
-    ) -> [MetricSampleEntity] {
-
-        guard samples.count > maxDisplayPoints else {
-            return samples
-        }
-
-        let windowSize = Int(
-            ceil(Double(samples.count) / Double(maxDisplayPoints))
-        )
-
-        return stride(
-            from: 0,
-            to: samples.count,
-            by: windowSize
-        ).compactMap { start in
-
-            let end = min(
-                start + windowSize,
-                samples.count
-            )
-
-            let window = samples[start..<end]
-
-            guard !window.isEmpty else {
-                return nil
-            }
-
-            return MetricSampleEntity(
-                time: window.map(\.time).average,
-                value: window.map(\.value).average
-            )
-        }
     }
 }
 
