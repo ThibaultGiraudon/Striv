@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum MetricType: String, CaseIterable, Identifiable, Codable {
     case pace
@@ -48,6 +49,19 @@ extension MetricType {
         }
     }
     
+    var shortUnit: String {
+        switch self {
+        case .pace: return "/km"
+        case .heartRate: return "bpm"
+        case .cadence: return "ppm"
+        case .power: return "w"
+        case .time: return ""
+        case .elevation: return "m"
+        case .calories: return "kcal"
+        case .distance: return "km"
+        }
+    }
+    
     var icon: String {
         switch self {
         case .pace: return "figure.run"
@@ -59,6 +73,28 @@ extension MetricType {
         case .calories: return "flame.fill"
         case .distance: return "figure.run"
         }
+    }
+    
+    var color: Color {
+        switch self {
+        case .pace: return .blue
+        case .heartRate: return .customPink
+        case .power: return .orange
+        case .elevation: return .green
+        default: return .purple
+        }
+    }
+    
+    var gradient: LinearGradient {
+
+        LinearGradient(
+            colors: [
+                color.opacity(0.7),
+                color.opacity(0.05)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
     
     func valuePlusUnit(_ value: String) -> String {
