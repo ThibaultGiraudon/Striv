@@ -121,7 +121,7 @@ class WorkoutsViewModel: BaseViewModel {
             workout.altitudes = locations.map { $0.altitude }.downSample()
             let startDate = locations.sorted { $0.timestamp < $1.timestamp }.first?.timestamp ?? .now
             let elevationSamples: [MetricSample] = locations.map { .init(time: $0.timestamp.timeIntervalSince(startDate), value: $0.altitude)}
-            workout.metricsSeries.append(.init(type: .elevation, samples: elevationSamples))
+            workout.metricsSeries.append(.init(type: .elevation, samples: normalizeSamples(.elevation, for: elevationSamples)))
                         
             try context.save()
             
@@ -174,7 +174,7 @@ class WorkoutsViewModel: BaseViewModel {
             async let kcal = healthKitHelper.fetchActiveEnergy(with: workout.id)
             async let power = healthKitHelper.fetchPower(with: workout.id)
             async let stepCount = healthKitHelper.fetchCadence(with: workout.id)
-//            let metricsSeries = try await healthKitHelper.fetchWorkoutSeries(with: workout.id)
+            let metricsSeries = try await healthKitHelper.fetchWorkoutSeries(with: workout.id)
             
             let minutes = max(Double(newWorkout.duration.totalSeconds) / 60, 1)
             let cadence = (try await stepCount ?? 0) / minutes
@@ -184,13 +184,13 @@ class WorkoutsViewModel: BaseViewModel {
             newWorkout.power = try await power
             newWorkout.cadence = cadence
             
-//            var normalizedSeries: [MetricSeries] = []
-//            
-//            for serie in metricsSeries {
-//                normalizedSeries.append(MetricSeriesEntity(type: serie.type, samples: normalizeSamples(for: serie.samples)))
-//            }
-//            
-//            newWorkout.metricsSeries = normalizedSeries
+            var normalizedSeries: [MetricSeriesEntity] = []
+            
+            for serie in metricsSeries {
+                normalizedSeries.append(MetricSeriesEntity(type: serie.type, samples: normalizeSamples(serie.type, for: serie.samples)))
+            }
+
+            newWorkout.metricsSeries = normalizedSeries
             
             await self.fetchWorkoutRoutes(for: workout)
             
@@ -210,15 +210,34 @@ class WorkoutsViewModel: BaseViewModel {
         return workout
     }
     
-//    func normalizeSamples(for samples: [MetricSampleEntity]) -> [MetricSample] {
-////        let min = samples.map(\.value).min() ?? 0
-//        let max = samples.map(\.value).max() ?? 0
-//        
-//        return samples.map {
-//            let normalizedValue = $0.value * 100 / max
-//            return .init(time: $0.time, value: $0.value, normalizedValue: normalizedValue)
-//        }
-//    }
+    func normalizeSamples(_ type: MetricType, for samples: [MetricSample]) -> [MetricSample] {
+        let minValue = samples.map(\.value).min() ?? 0
+        let maxValue = samples.map(\.value).max() ?? 0
+        
+        guard maxValue != minValue else {
+            return samples.map {
+                .init(
+                    time: $0.time,
+                    value: $0.value,
+                    normalizedValue: 0.5
+                )
+            }
+        }
+        
+        return samples.map {
+            var normalizedValue = (($0.value - minValue) / (maxValue - minValue))
+            
+            if type == .pace {
+                normalizedValue = 1 - normalizedValue
+            }
+            
+            return .init(
+                time: $0.time,
+                value: $0.value,
+                normalizedValue: normalizedValue
+            )
+        }
+    }
         
     /// Fetches workout details only if they are not already available.
     ///
