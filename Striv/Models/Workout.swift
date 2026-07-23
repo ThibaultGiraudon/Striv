@@ -209,7 +209,15 @@ class Workout: Identifiable, Equatable {
     // MARK: - Nested Types
     
     /// Represents pace in minutes and seconds per kilometer.
-    struct Pace: Equatable {
+    struct Pace: Equatable, Hashable, Comparable {
+        static func < (lhs: Workout.Pace, rhs: Workout.Pace) -> Bool {
+            let lhsTotal = lhs.minutes * 60 + lhs.seconds
+            
+            let rhsTotal = rhs.minutes * 60 + rhs.seconds
+            
+            return lhsTotal < rhsTotal
+        }
+        
         var minutes: Int
         var seconds: Int
         
