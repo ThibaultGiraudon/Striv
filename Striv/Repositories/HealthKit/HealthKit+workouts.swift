@@ -139,8 +139,9 @@ extension HealthKitHelper {
 
         let pace = distance
             .sorted(by: { $0.time < $1.time })
+            .dropLast()
             .compactMap { sample -> MetricSample? in
-                let minute = 20.0 / 60
+                let minute = 2.0 / 60
                 let km = sample.value / 1000
                 
                 var currentPace = minute / km
@@ -162,10 +163,10 @@ extension HealthKitHelper {
                 samples: try await power
             ),
 
-            MetricSeries(
-                type: .distance,
-                samples: distance
-            ),
+//            MetricSeries(
+//                type: .distance,
+//                samples: distance
+//            ),
 
             MetricSeries(
                 type: .pace,
