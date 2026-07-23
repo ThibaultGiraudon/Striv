@@ -12,6 +12,23 @@ struct MetricsOverlayChartView: View {
     var workout: Workout
     @State private var primarySeries: MetricSeriesEntity?
     @State private var secondarySeries: MetricSeriesEntity?
+    @State private var selectedTime: Double?
+    var selectedPrimarySample: MetricSampleEntity? {
+        guard let selectedTime else {
+            return nil
+        }
+        return primarySeries?.samples.min {
+            abs($0.time - selectedTime) < abs($1.time - selectedTime)
+        }
+    }
+    var selectedSecondarySample: MetricSampleEntity? {
+        guard let selectedTime else {
+            return nil
+        }
+        return secondarySeries?.samples.min {
+            abs($0.time - selectedTime) < abs($1.time - selectedTime)
+        }
+    }
     
     var body: some View {
         VStack {
@@ -47,10 +64,36 @@ struct MetricsOverlayChartView: View {
                     let secondaryMaxValue = secondarySamples.map(\.value).max() ?? 0
                     
                     Chart {
+                        if let selectedPrimarySample, let selectedSecondarySample {
+                            RuleMark(x: .value("Time", selectedPrimarySample.time))
+                                .foregroundStyle(.white.opacity(0.3))
+                                .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                    VStack {
+                                        let primaryPace: Workout.Pace = .init(pace: selectedPrimarySample.value)
+                                        let secondaryPace: Workout.Pace = .init(pace: selectedSecondarySample.value)
+                                        
+                                        let primaryString: String = primarySeries.type == .pace ? primaryPace.shortLabel : selectedPrimarySample.value.roundedText(to: 0)
+                                        let secondaryString: String = secondarySeries.type == .pace ? secondaryPace.shortLabel : selectedSecondarySample.value.roundedText(to: 0)
+                                        
+                                        Text("\(primaryString) \(primarySeries.type.shortUnit)")
+                                            .foregroundStyle(primarySeries.type.color)
+                                        Text("\(secondaryString) \(secondarySeries.type.shortUnit)")
+                                            .foregroundStyle(secondarySeries.type.color)
+                                    }
+                                        .padding()
+                                        .background {
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .fill(.ultraThinMaterial)
+                                                .stroke(.white, lineWidth: 1)
+                                        }
+                                }
+                        }
+                        
                         MetricChartMarks(series: primarySeries, samples: primarySamples)
                         
                         MetricChartMarks(series: secondarySeries, samples: secondarySamples)
                     }
+                    .chartXSelection(value: $selectedTime)
                     .chartForegroundStyleScale([
                         MetricType.pace.title: MetricType.pace.gradient,
                         MetricType.heartRate.title: MetricType.heartRate.gradient,

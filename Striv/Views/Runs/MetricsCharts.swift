@@ -10,6 +10,16 @@ import Charts
 
 struct MetricsCharts: View {
     var series: MetricSeriesEntity
+    @State private var selectedTime: Double?
+    var selectedMetricSample: MetricSampleEntity? {
+        guard let selectedTime else {
+            return nil
+        }
+        return series.samples.min {
+            abs($0.time - selectedTime) < abs($1.time - selectedTime)
+        }
+    }
+    
     var body: some View {
         
         if series.type == .pace {
@@ -26,6 +36,32 @@ struct MetricsCharts: View {
             
             Chart {
                 ForEach(samples) { sample in
+                    
+                    if let selectedMetricSample {
+                        RuleMark(
+                            x: .value("Time", selectedMetricSample.time)
+                        )
+                        .foregroundStyle(.white.opacity(0.3))
+                        .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                            Text("\(selectedMetricSample.value, specifier: "%0.0f") \(series.type.shortUnit)")
+                                .padding()
+                                .background {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(.ultraThinMaterial)
+                                        .stroke(series.type.color, lineWidth: 1)
+                                }
+                        }
+                    }
+                    
+                    LineMark(
+                        x: .value("Time", sample.time),
+                        y: .value(
+                            series.type.title,
+                            sample.value
+                        )
+                    )
+                    .foregroundStyle(series.type.color)
+                    
                     AreaMark(
                         x: .value("Time", sample.time),
                         yStart: .value("Min", minValue),
@@ -37,6 +73,7 @@ struct MetricsCharts: View {
                     .foregroundStyle(series.type.gradient)
                 }
             }
+            .chartXSelection(value: $selectedTime)
             .chartXScale(domain: 0...maxTime)
             .chartYScale(
                 domain: [minValue, maxValue]
@@ -50,5 +87,15 @@ struct MetricsCharts: View {
 }
 
 #Preview {
-    MetricsCharts(series: MetricSeriesEntity(type: .distance, samples: []))
+    MetricsCharts(series: MetricSeriesEntity(type: .elevation, samples: [
+        .init(time: 0, value: 545),
+        .init(time: 20, value: 550),
+        .init(time: 40, value: 555),
+        .init(time: 60, value: 545),
+        .init(time: 80, value: 535),
+        .init(time: 100, value: 525),
+        .init(time: 120, value: 545),
+        .init(time: 140, value: 565),
+        .init(time: 160, value: 555),
+    ]))
 }

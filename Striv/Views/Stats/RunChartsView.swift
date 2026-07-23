@@ -77,7 +77,6 @@ struct RunChartsView: View {
                         }
                     }
                 }
-
                 .chartXScale(domain: safeDateRange(start: start, end: end))
                 .chartScrollableAxes(.horizontal)
                 .chartXVisibleDomain(length: 60 * 60 * 24 * 7 * 11)

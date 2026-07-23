@@ -10,6 +10,15 @@ import Charts
 
 struct PaceCharts: View {
     var series: MetricSeriesEntity
+    @State private var selectedTime: Double?
+    var selectedMetricSample: MetricSampleEntity? {
+        guard let selectedTime else {
+            return nil
+        }
+        return series.samples.min {
+            abs($0.time - selectedTime) < abs($1.time - selectedTime)
+        }
+    }
     
     var body: some View {
         Text("\(series.type.title)")
@@ -23,6 +32,31 @@ struct PaceCharts: View {
 
         Chart {
             ForEach(samples) { sample in
+                if let selectedMetricSample {
+                    RuleMark(
+                        x: .value("Time", selectedMetricSample.time)
+                    )
+                    .foregroundStyle(.white.opacity(0.3))
+                    .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                        let pace: Workout.Pace = .init(pace: selectedMetricSample.value)
+                        Text("\(pace.shortLabel) \(series.type.shortUnit)")
+                            .padding()
+                            .background {
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(.ultraThinMaterial)
+                                    .stroke(series.type.color, lineWidth: 1)
+                            }
+                    }
+                }
+                
+                LineMark(
+                    x: .value("Time", sample.time),
+                    y: .value(
+                        series.type.title,
+                        sample.value
+                    )
+                )
+                .foregroundStyle(series.type.color)
                 AreaMark(
                     x: .value("Time", sample.time),
                     yStart: .value("Min", maxValue),
@@ -34,6 +68,7 @@ struct PaceCharts: View {
                 .foregroundStyle(series.type.gradient)
             }
         }
+        .chartXSelection(value: $selectedTime)
         .chartXScale(domain: 0...maxTime)
         .chartYScale(
             domain: [maxValue, minValue]
