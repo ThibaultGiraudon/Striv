@@ -27,3 +27,40 @@ extension Array<Double> {
         }
     }
 }
+
+extension Array<MetricSampleEntity> {
+    func downSample(maxDisplayPoints: Int = 100) -> [MetricSampleEntity] {
+
+        guard self.count > maxDisplayPoints else {
+            return self
+        }
+
+        let windowSize = Int(
+            ceil(Double(self.count) / Double(maxDisplayPoints))
+        )
+
+        return stride(
+            from: 0,
+            to: self.count,
+            by: windowSize
+        ).compactMap { start in
+
+            let end = Swift.min(
+                start + windowSize,
+                self.count
+            )
+
+            let window = self[start..<end]
+
+            guard !window.isEmpty else {
+                return nil
+            }
+
+            return MetricSampleEntity(
+                time: window.map(\.time).average,
+                value: window.map(\.value).average,
+                normalizedValue: window.map(\.normalizedValue).average
+            )
+        }
+    }
+}
