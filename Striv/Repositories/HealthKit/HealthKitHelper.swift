@@ -46,6 +46,7 @@ actor HealthKitHelper: HealthKitHelperInterface {
     
     let healthStore = HKHealthStore()
     let anchorKey = "healthkit.workout.anchor"
+    let fetchInterval: Double = 10.0
     
     // MARK: - Authorization
     

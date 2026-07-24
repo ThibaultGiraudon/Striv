@@ -33,8 +33,8 @@ final class DefineGoalViewModel: ObservableObject {
         return h > 0 ? "\(h)h\(m<10 ? "0" : "")\(m)" : "\(m) min"
     }
     
-    var pace: Workout.Pace {
-        Workout.Pace(pace: time / (distanceType.meters / 1000))
+    var pace: Pace {
+        Pace(pace: time / (distanceType.meters / 1000))
     }
     
     var progression: (label: String, feedback: String, state: String, color: Color, image: String) {

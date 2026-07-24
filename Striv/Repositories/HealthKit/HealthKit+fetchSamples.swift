@@ -41,7 +41,7 @@ extension HealthKitHelper {
                 quantitySamplePredicate: predicate,
                 options: options,
                 anchorDate: startDate,
-                intervalComponents: DateComponents(second: 2)
+                intervalComponents: DateComponents(second: Int(self.fetchInterval))
             )
 
             query.initialResultsHandler = { _, results, error in

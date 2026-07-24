@@ -21,40 +21,50 @@ struct MetricsCharts: View {
         }
     }
     
+    let maxTime: Double
+    let minValue: Double
+    let maxValue: Double
+
     init(series: MetricSeriesEntity) {
+
         self.series = series
-        self.downSampled = series.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50)
+
+        let samples = series.samples
+            .sorted(by: { $0.time < $1.time })
+            .downSample(maxDisplayPoints: 50)
+
+        self.downSampled = samples
+
+        self.maxTime = samples.last?.time ?? 0
+        self.minValue = samples.map(\.value).min() ?? 0
+        self.maxValue = samples.map(\.value).max() ?? 0
     }
-    
     var body: some View {
         
         if series.type == .pace {
             PaceCharts(series: series)
         } else {
             
-            let maxTime = downSampled.last?.time ?? 0
-            
-            let minValue = downSampled.map(\.value).min() ?? 0
-            let maxValue = downSampled.map(\.value).max() ?? 0
-            
             Chart {
+
+                if let selectedMetricSample {
+                    RuleMark(
+                        x: .value("Time", selectedMetricSample.time)
+                    )
+                    .foregroundStyle(.white.opacity(0.3))
+                    .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                        Text("\(selectedMetricSample.value, specifier: "%0.0f") \(series.type.shortUnit)")
+                            .padding()
+                            .background {
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(.ultraThinMaterial)
+                                    .stroke(series.type.color, lineWidth: 1)
+                            }
+                    }
+                }
+                
                 ForEach(downSampled) { sample in
                     
-                    if let selectedMetricSample {
-                        RuleMark(
-                            x: .value("Time", selectedMetricSample.time)
-                        )
-                        .foregroundStyle(.white.opacity(0.3))
-                        .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                            Text("\(selectedMetricSample.value, specifier: "%0.0f") \(series.type.shortUnit)")
-                                .padding()
-                                .background {
-                                    RoundedRectangle(cornerRadius: 5)
-                                        .fill(.ultraThinMaterial)
-                                        .stroke(series.type.color, lineWidth: 1)
-                                }
-                        }
-                    }
                     
                     LineMark(
                         x: .value("Time", sample.time),

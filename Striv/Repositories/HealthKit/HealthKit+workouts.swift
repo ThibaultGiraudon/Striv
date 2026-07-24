@@ -141,7 +141,7 @@ extension HealthKitHelper {
             .sorted(by: { $0.time < $1.time })
             .dropLast()
             .compactMap { sample -> MetricSample? in
-                let minute = 2.0 / 60
+                let minute = self.fetchInterval / 60
                 let km = sample.value / 1000
                 
                 var currentPace = minute / km

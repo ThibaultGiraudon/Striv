@@ -10,6 +10,9 @@ import SwiftData
 import Charts
 
 struct RunDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var errorPresenter: ErrorPresenter
+    
     @Query private var profiles: [RunnerProfile]
     var profile: RunnerProfile {
         self.profiles.first ?? RunnerProfile(goal: .init(type: .distance, distance: .preset(.marathon)))
@@ -18,15 +21,27 @@ struct RunDetailView: View {
     @ObservedObject var workoutsVM: WorkoutsViewModel
     
     @StateObject private var analyzeVM = AnalyzeViewModel()
-    @State private var statViewHeight = 400.0
     @State private var isShowingAnalyze: Bool = false
     @State private var analyze: Analyze?
-    @State private var isShowingStats: Bool = true
     @State private var selectedMetric: MetricType?
     @State private var isShowingAIInfo: Bool = false
     @State private var showAIConsent: Bool = false
     @State private var showShareView: Bool = false
-    @State private var selectedDetent: PresentationDetent = .height(100)
+    @State private var selectedDetent: PresentationDetent = .fraction(0.2)
+    @State private var isShowingStats: Bool = true
+    
+    private var overviewSheetBinding: Binding<Bool> {
+        Binding(
+            get: {
+                !isShowingAnalyze &&
+                !isShowingAIInfo &&
+                !showAIConsent &&
+                !showShareView &&
+                isShowingStats
+            },
+            set: { _ in }
+        )
+    }
     
     var body: some View {
         VStack {
@@ -42,41 +57,41 @@ struct RunDetailView: View {
                 AnalyzeView(response: analyze, error: analyzeVM.error)
                     .offset(y: isShowingAnalyze ? 0 : -1000)
             }
-            .task {
-                workout = await workoutsVM.fetchWorkoutDetailIfNeeded(for: workout)
-            }
-            .sheet(isPresented: .constant(true)) {
-                    RunDatasView(workout: workout)
-                    .presentationDetents([.fraction(0.3), .medium, .large], selection: $selectedDetent)
-                    .interactiveDismissDisabled()
-                    .presentationBackgroundInteraction(.enabled)
-            }
+        }
+        .sheet(isPresented: overviewSheetBinding) {
+            WorkoutOverview(workout: workout, errorPresenter: errorPresenter)
+                .presentationDetents([.fraction(0.2), .large], selection: $selectedDetent)
+                .interactiveDismissDisabled()
+                .presentationBackgroundInteraction(.enabled)
         }
         .navigationTitle(workout.date.formatted(format: "dd MMM YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isShowingAnalyze)
         .background(Color.background)
+        .navigationBarBackButtonHidden()
         .toolbar {
-            if isShowingStats {
-                analyzeButton
-                
-                if #available(iOS 26.0, *) {
-                    ToolbarSpacer(placement: .topBarTrailing)
+            
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    isShowingStats = false
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
                 }
-                if isShowingAnalyze {
-                    infoButton
-                } else if !workout.coordinates2d.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu("Menu", systemImage: "ellipsis") {
-                            showStatsButton
-                            shareButton
-                        }
-                        .tint(.primaryText)
-                    }
-                }
-                
+            }
+            
+            analyzeButton
+            
+            if #available(iOS 26.0, *) {
+                ToolbarSpacer(placement: .topBarTrailing)
+            }
+            if isShowingAnalyze {
+                infoButton
+            } else if !workout.coordinates2d.isEmpty {
+                shareButton
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .sheet(item: $selectedMetric) { metric in
             MetricTipView(metric: metric)
                 .padding(.top)
@@ -112,7 +127,6 @@ struct RunDetailView: View {
             print("Screenshot taken")
             showShareView = true
         }
-        .navigationBarBackButtonHidden(!isShowingStats)
     }
     
     private func startAnalyze() {
@@ -140,11 +154,6 @@ extension RunDetailView {
             if !workout.coordinates2d.isEmpty {
                 RouteMapView(coordinates: workout.coordinates2d)
                     .accessibilityHidden(true)
-                    .onTapGesture {
-                        withAnimation {
-                            isShowingStats.toggle()
-                        }
-                    }
             }
         }
     }
@@ -189,26 +198,16 @@ private extension RunDetailView {
         }
     }
     
-    var showStatsButton: some View {
-            Button("Masquer les données", systemImage: "waveform.path.ecg.text.clipboard") {
-                withAnimation {
-                    isShowingStats.toggle()
-                }
+    var shareButton: some ToolbarContent{
+        ToolbarItem(placement: .topBarTrailing) {
+            Button("Partager", systemImage: "square.and.arrow.up") {
+                showShareView = true
             }
             .tint(.primaryText)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Masquer les données")
-            .accessibilityHint("Double tap pour \(isShowingStats ? "masquer" : "afficher") les données de la course")
-    }
-    
-    var shareButton: some View {
-        Button("Partager", systemImage: "square.and.arrow.up") {
-            showShareView = true
+            .accessibilityLabel("Partager")
+            .accessibilityHint("Double tap pour partager ta course")
         }
-        .tint(.primaryText)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Partager")
-        .accessibilityHint("Double tap pour partager ta course")
     }
 }
 

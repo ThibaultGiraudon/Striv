@@ -10,15 +10,16 @@ import SwiftUI
 struct WorkoutOverview: View {
     let workout: Workout
     @StateObject private var workoutDetailVM: WorkoutDetailViewModel
+    @Environment(\.modelContext) var modelContext
     
-    init(workout: Workout) {
+    init(workout: Workout, errorPresenter: ErrorPresenter) {
         self.workout = workout
-        self._workoutDetailVM = StateObject(wrappedValue: .init(workout: workout))
+        self._workoutDetailVM = StateObject(wrappedValue: .init(workout: workout, healthKitHelper: HealthKitHelper(), errorPresenter: errorPresenter))
     }
     
     var body: some View {
-        VStack {
-            LazyVGrid(columns: Array(repeating: .init(), count: 3)) {
+        ScrollView {
+            LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
                 statRow(systemImage: "clock.fill", title: "Temps", value: workout.duration.label, metric: .time)
                 statRow(systemImage: "figure.run", title: "Rythme", value: workout.pace.shortLabel, metric: .pace)
                 statRow(systemImage: "suit.heart.fill", title: "Fréquence", value: workout.hr, metric: .heartRate)
@@ -32,126 +33,148 @@ struct WorkoutOverview: View {
                 RoundedRectangle(cornerRadius: 16)
                     .foregroundStyle(Color.customPrimary)
             }
-            
-            let splits: [WorkoutSplit] = workoutDetailVM.getSplits()
-            
-            Grid {
-                GridRow {
-                    Text("Km")
-                    Text("Allure")
-                    Spacer()
-                    Text("Élev.")
-                    Text("FC")
-                }
-                .bold()
-                ForEach(splits.sorted(by: { $0.index < $1.index }), id: \.self) { split in
-                    GridRow {
-                        Text("\(split.km, specifier: "%0.1f")")
-                        Text(split.pace.shortLabel)
-                        Spacer()
-                        Text("\(split.elevation)")
-                        Text("\(split.hr)")
-                    }
-                }
+            .task {
+                workoutDetailVM.setContext(context: modelContext)
+                await workoutDetailVM.prepareData()
             }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
-            
-            let paceSeries = workout.metricsSeries.first(where: { $0.type == .pace })
-            let elevationSeries = workout.metricsSeries.first(where: { $0.type == .elevation })
-            let hrSeries = workout.metricsSeries.first(where: { $0.type == .heartRate })
-            let powerSeries = workout.metricsSeries.first(where: { $0.type == .power })
-            
-            if let paceSeries, let maxPace = paceSeries.samples.map(\.value).min(), let maxSplit = splits.map(\.pace).min() {
-                VStack {
-                    HStack {
-                        Text("Allure")
-                        Spacer()
-                    }
-                    .font(.title2.bold())
-                    
-                    PaceCharts(series: paceSeries)
-                    LazyVGrid(columns: Array(repeating: .init(), count: 3)) {
-                        statRow(systemImage: "figure.run", title: "Allure moy.", value: workout.pace.shortLabel, metric: .pace)
-                        // TODO: - Max pace bug ??
-//                        statRow(systemImage: "figure.run", title: "Allure max.", value: Workout.Pace(pace: maxPace).shortLabel, metric: .pace)
-                        statRow(systemImage: "figure.run", title: "Meilleur km", value: maxSplit.shortLabel, metric: .pace)
-                    }
-                }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
-            }
-            
-            if let hrSeries, let maxHr = hrSeries.samples.map(\.value).max() {
-                VStack {
-                    HStack {
-                        Text("Fréquence cardiaque")
-                        Spacer()
-                    }
-                    .font(.title2.bold())
-                    
-                    MetricsCharts(series: hrSeries)
-                    LazyVGrid(columns: Array(repeating: .init(), count: 3)) {
-                        statRow(systemImage: "suit.heart.fill", title: "FC moy.", value: workout.hr, metric: .heartRate)
-                        statRow(systemImage: "figure.run", title: "FC max.", value: maxHr, metric: .heartRate)
-                    }
-                }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
-            }
-            
-            if let elevationSeries, let minElevation = elevationSeries.samples.map(\.value).min(), let maxElevation = elevationSeries.samples.map(\.value).max() {
-                VStack {
-                    HStack {
-                        Text("Dénivelé")
-                        Spacer()
-                    }
-                    .font(.title2.bold())
-                    
-                    MetricsCharts(series: elevationSeries)
-                    LazyVGrid(columns: Array(repeating: .init(), count: 3)) {
-                        statRow(systemImage: "mountain.2.fill", title: "Dénivelé +", value: workout.elevation, metric: .elevation)
-                        statRow(systemImage: "mountain.2.fill", title: "Altitude max.", value: maxElevation, metric: .elevation)
-                        statRow(systemImage: "mountain.2.fill", title: "Altitude min.", value: minElevation, metric: .elevation)
-                    }
-                }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
-            }
-            
-            if let powerSeries {
-                VStack {
-                    HStack {
-                        Text("Puissance")
-                        Spacer()
-                    }
-                    .font(.title2.bold())
-                    
-                    MetricsCharts(series: powerSeries)
-                    HStack {
-                        statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
-                        Spacer()
-                    }
-                }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
-            }
+//            
+//            VStack {
+//                HStack {
+//                    Text("Splits")
+//                    Spacer()
+//                }
+//                .font(.title2.bold())
+//                
+//                Grid {
+//                    GridRow {
+//                        Text("Km")
+//                        Text("Allure")
+//                        Spacer()
+//                        Text("Élev.")
+//                        Text("FC")
+//                    }
+//                    .bold()
+//                    ForEach(workout.splits.sorted(by: { $0.index < $1.index }), id: \.self) { split in
+//                        GridRow {
+//                            Text("\(split.km, specifier: "%0.1f")")
+//                            Text(split.pace.shortLabel)
+//                            Spacer()
+//                            Text("\(split.elevation)")
+//                            Text("\(split.hr)")
+//                        }
+//                    }
+//                }
+//            }
+//            .padding()
+//            .background {
+//                RoundedRectangle(cornerRadius: 16)
+//                    .foregroundStyle(Color.customPrimary)
+//            }
+//            
+//            if let paceSeries = workoutDetailVM.paceSeries, let bestSplit = workoutDetailVM.bestSplit {
+//                VStack {
+//                    HStack {
+//                        Text("Allure")
+//                        Spacer()
+//                    }
+//                    .font(.title2.bold())
+//                    
+//                    PaceCharts(series: paceSeries)
+//                    LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
+//                        statRow(systemImage: "figure.run", title: "Allure moy.", value: workout.pace.shortLabel, metric: .pace)
+//                        // TODO: - Max pace bug ??
+////                        statRow(systemImage: "figure.run", title: "Allure max.", value: Pace(pace: maxPace).shortLabel, metric: .pace)
+//                        statRow(systemImage: "figure.run", title: "Meilleur km", value: bestSplit.shortLabel, metric: .pace)
+//                    }
+//                }
+//                .padding()
+//                .background {
+//                    RoundedRectangle(cornerRadius: 16)
+//                        .foregroundStyle(Color.customPrimary)
+//                }
+//            }
+//            
+//            if let hrSeries = workoutDetailVM.heartRateSeries, let maxHr = workoutDetailVM.maxHeartRate {
+//                VStack {
+//                    HStack {
+//                        Text("Fréquence cardiaque")
+//                        Spacer()
+//                    }
+//                    .font(.title2.bold())
+//                    
+//                    MetricsCharts(series: hrSeries)
+//                    LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
+//                        statRow(systemImage: "suit.heart.fill", title: "FC moy.", value: workout.hr, metric: .heartRate)
+//                        statRow(systemImage: "figure.run", title: "FC max.", value: maxHr, metric: .heartRate)
+//                    }
+//                }
+//                .padding()
+//                .background {
+//                    RoundedRectangle(cornerRadius: 16)
+//                        .foregroundStyle(Color.customPrimary)
+//                }
+//            }
+//            
+//            if let elevationSeries = workoutDetailVM.elevationSeries, let minElevation = workoutDetailVM.minElevation, let maxElevation = workoutDetailVM.maxElevation {
+//                VStack {
+//                    HStack {
+//                        Text("Dénivelé")
+//                        Spacer()
+//                    }
+//                    .font(.title2.bold())
+//                    
+//                    MetricsCharts(series: elevationSeries)
+//                    LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
+//                        statRow(systemImage: "mountain.2.fill", title: "Dénivelé +", value: workout.elevation, metric: .elevation)
+//                        statRow(systemImage: "mountain.2.fill", title: "Altitude max.", value: maxElevation, metric: .elevation)
+//                        statRow(systemImage: "mountain.2.fill", title: "Altitude min.", value: minElevation, metric: .elevation)
+//                    }
+//                }
+//                .padding()
+//                .background {
+//                    RoundedRectangle(cornerRadius: 16)
+//                        .foregroundStyle(Color.customPrimary)
+//                }
+//            }
+//            
+//            if let powerSeries = workoutDetailVM.powerSeries {
+//                VStack {
+//                    HStack {
+//                        Text("Puissance")
+//                        Spacer()
+//                    }
+//                    .font(.title2.bold())
+//                    
+//                    MetricsCharts(series: powerSeries)
+//                    HStack {
+//                        statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
+//                        Spacer()
+//                    }
+//                }
+//                .padding()
+//                .background {
+//                    RoundedRectangle(cornerRadius: 16)
+//                        .foregroundStyle(Color.customPrimary)
+//                }
+//            }
+//            
+//            VStack {
+//                HStack {
+//                    Text("Superposition")
+//                    Spacer()
+//                }
+//                .font(.title2.bold())
+//                
+//                MetricsOverlayChartView(workout: workout)
+//            }
+//            .padding()
+//            .background {
+//                RoundedRectangle(cornerRadius: 16)
+//                    .foregroundStyle(Color.customPrimary)
+//            }
         }
+        .padding()
+        .ignoresSafeArea()
     }
     
     @ViewBuilder
@@ -177,6 +200,6 @@ struct WorkoutOverview: View {
 
 #Preview {
     ScrollView {
-        WorkoutOverview(workout: Workout(id: UUID(), date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221))
+        WorkoutOverview(workout: Workout(id: UUID(), date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221), errorPresenter: .init())
     }
 }

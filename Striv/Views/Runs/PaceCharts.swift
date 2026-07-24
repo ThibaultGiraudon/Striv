@@ -21,35 +21,46 @@ struct PaceCharts: View {
         }
     }
     
+    let maxTime: Double
+    let minValue: Double
+    let maxValue: Double
+
     init(series: MetricSeriesEntity) {
+
         self.series = series
-        self.downSampled = series.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50)
+
+        let samples = series.samples
+            .sorted(by: { $0.time < $1.time })
+            .downSample(maxDisplayPoints: 50)
+
+        self.downSampled = samples
+
+        self.maxTime = samples.last?.time ?? 0
+        self.minValue = samples.map(\.value).min() ?? 0
+        self.maxValue = min(12.0, samples.map(\.value).max() ?? 12.0)
     }
     
     var body: some View {
-        let maxTime = downSampled.last?.time ?? 0
-        
-        let minValue = downSampled.map(\.value).min() ?? 0
-        let maxValue = min(12.0, downSampled.map(\.value).max() ?? 12.0)
 
         Chart {
-            ForEach(downSampled) { sample in
-                if let selectedMetricSample {
-                    RuleMark(
-                        x: .value("Time", selectedMetricSample.time)
-                    )
-                    .foregroundStyle(.white.opacity(0.3))
-                    .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                        let pace: Workout.Pace = .init(pace: selectedMetricSample.value)
-                        Text("\(pace.shortLabel) \(series.type.shortUnit)")
-                            .padding()
-                            .background {
-                                RoundedRectangle(cornerRadius: 5)
-                                    .fill(.ultraThinMaterial)
-                                    .stroke(series.type.color, lineWidth: 1)
-                            }
-                    }
+            if let selectedMetricSample {
+                RuleMark(
+                    x: .value("Time", selectedMetricSample.time)
+                )
+                .foregroundStyle(.white.opacity(0.3))
+                .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                    let pace: Pace = .init(pace: selectedMetricSample.value)
+                    Text("\(pace.shortLabel) \(series.type.shortUnit)")
+                        .padding()
+                        .background {
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(.ultraThinMaterial)
+                                .stroke(series.type.color, lineWidth: 1)
+                        }
                 }
+            }
+
+            ForEach(downSampled) { sample in
                 
                 LineMark(
                     x: .value("Time", sample.time),
@@ -59,6 +70,7 @@ struct PaceCharts: View {
                     )
                 )
                 .foregroundStyle(series.type.color)
+                
                 AreaMark(
                     x: .value("Time", sample.time),
                     yStart: .value("Min", maxValue),

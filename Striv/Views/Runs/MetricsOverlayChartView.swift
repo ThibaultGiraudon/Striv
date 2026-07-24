@@ -8,14 +8,21 @@
 import SwiftUI
 import Charts
 
+// TODO: - improve design
+
 struct MetricsOverlayChartView: View {
     var workout: Workout
     @State private var primarySeries: MetricSeriesEntity?
     @State private var secondarySeries: MetricSeriesEntity?
     
     @State private var primarySamples: [MetricSampleEntity] = []
-    
     @State private var secondarySamples: [MetricSampleEntity] = []
+    
+    @State private var primaryMinValue: Double = 0
+    @State private var primaryMaxValue: Double = 0
+
+    @State private var secondaryMinValue: Double = 0
+    @State private var secondaryMaxValue: Double = 0
     
     @State private var selectedTime: Double?
     var selectedPrimarySample: MetricSampleEntity? {
@@ -45,8 +52,13 @@ struct MetricsOverlayChartView: View {
                     }
                 }
                 .tint(primarySeries?.type.color)
-                .onChange(of: primarySeries) { oldValue, newValue in
-                    self.primarySamples = primarySeries?.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50) ?? []
+                .onChange(of: primarySeries) { _, newValue in
+                    primarySamples = newValue?.samples
+                        .sorted(by: { $0.time < $1.time })
+                        .downSample(maxDisplayPoints: 50) ?? []
+
+                    primaryMinValue = primarySamples.map(\.value).min() ?? 0
+                    primaryMaxValue = primarySamples.map(\.value).max() ?? 0
                 }
                 Spacer()
                 Picker("Graphique 2", selection: $secondarySeries) {
@@ -56,19 +68,18 @@ struct MetricsOverlayChartView: View {
                     }
                 }
                 .tint(secondarySeries?.type.color)
-                .onChange(of: secondarySeries) { oldValue, newValue in
-                    self.secondarySamples = secondarySeries?.samples.sorted(by: { $0.time < $1.time }).downSample(maxDisplayPoints: 50) ?? []
+                .onChange(of: secondarySeries) { _, newValue in
+                    secondarySamples = newValue?.samples
+                        .sorted(by: { $0.time < $1.time })
+                        .downSample(maxDisplayPoints: 50) ?? []
+
+                    secondaryMinValue = secondarySamples.map(\.value).min() ?? 0
+                    secondaryMaxValue = secondarySamples.map(\.value).max() ?? 0
                 }
             }
             if let primarySeries, let secondarySeries {
                 ZStack(alignment: .center) {
                     let maxTime: Double = primarySamples.last?.time ?? 0
-                    
-                    let primaryMinValue = primarySamples.map(\.value).min() ?? 0
-                    let primaryMaxValue = primarySamples.map(\.value).max() ?? 0
-                    
-                    let secondaryMinValue = secondarySamples.map(\.value).min() ?? 0
-                    let secondaryMaxValue = secondarySamples.map(\.value).max() ?? 0
                     
                     Chart {
                         if let selectedPrimarySample, let selectedSecondarySample {
@@ -76,8 +87,8 @@ struct MetricsOverlayChartView: View {
                                 .foregroundStyle(.white.opacity(0.3))
                                 .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
                                     VStack {
-                                        let primaryPace: Workout.Pace = .init(pace: selectedPrimarySample.value)
-                                        let secondaryPace: Workout.Pace = .init(pace: selectedSecondarySample.value)
+                                        let primaryPace: Pace = .init(pace: selectedPrimarySample.value)
+                                        let secondaryPace: Pace = .init(pace: selectedSecondarySample.value)
                                         
                                         let primaryString: String = primarySeries.type == .pace ? primaryPace.shortLabel : selectedPrimarySample.value.roundedText(to: 0)
                                         let secondaryString: String = secondarySeries.type == .pace ? secondaryPace.shortLabel : selectedSecondarySample.value.roundedText(to: 0)
@@ -134,7 +145,6 @@ struct MetricsOverlayChartView: View {
                     }
                     .frame(height: 400)
                 }
-                .padding()
             }
         }
         .onAppear {
