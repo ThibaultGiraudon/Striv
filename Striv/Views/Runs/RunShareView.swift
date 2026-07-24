@@ -17,6 +17,7 @@ struct RunMapShareView: View {
         RoutePathView(coordinates: workout.coordinates2d, color: $color)
             .padding(20)
             .background(Color.clear)
+            .aspectRatio(contentMode: .fill)
     }
 }
 

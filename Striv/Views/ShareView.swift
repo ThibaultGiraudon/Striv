@@ -8,64 +8,77 @@
 import SwiftUI
 import MapKit
 
-import SwiftUI
+enum ShareTab: String, CaseIterable {
+    case path = "Carte"
+    case data = "Données"
+    case both = "Complet"
+}
 
 struct RunShareCarouselView: View {
 
     let workout: Workout
 
-    @State private var selectedPage = 0
+    @State private var selectedExport: ShareTab = .path
     @State private var selectedColor: Color = .white
     @State private var showColorPicker = false
 
     var body: some View {
-
-        VStack(spacing: 16) {
-
-            // MARK: - CAROUSEL CARD
-            TabView(selection: $selectedPage) {
-
-                RunMapShareView(workout: workout, color: .constant(.primaryText))
-                    .tag(0)
-                    .frame(width: 350, height: 500)
-
-                RunStatsShareView(workout: workout, color: .constant(.primaryText))
-                    .tag(1)
-                    .frame(width: 350, height: 500)
-
-                RunMapAndStatShareView(workout: workout, color: .constant(.primaryText))
-                    .tag(2)
-                    .frame(width: 350, height: 500)
-            }
-            .frame(width: 350, height: 500)
-            .tabViewStyle(.page(indexDisplayMode: .automatic))
-            .background {
-                RoundedRectangle(cornerRadius: 24)
-                    .foregroundStyle(.customPrimary)
-            }
-            .padding(.horizontal)
-            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-
-            // MARK: - ACTIONS
-            VStack(spacing: 12) {
-
-                Button {
-                    exportCurrentPage()
-                } label: {
-                    Text("Exporter le rendu")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(5)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 16) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Exporter un rendu")
+                            .font(.title.bold())
+                        Text("Choisis le type de rendu à télécharger")
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                // MARK: - CAROUSEL CARD
+                
+                SegmentedPicker(items: ShareTab.allCases, title: { $0.rawValue }, selection: $selectedExport, size: 10)
+                
+                VStack {
+                    switch selectedExport {
+                    case .path:
+                        RunMapShareView(workout: workout, color: $selectedColor)
+                    case .data:
+                        RunStatsShareView(workout: workout, color: $selectedColor)
+                    case .both:
+                        RunMapAndStatShareView(workout: workout, color: $selectedColor)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+                .background {
+                    RoundedRectangle(cornerRadius: 16)
+                        .foregroundStyle(.customPrimary)
+                }
+                
+                // MARK: - ACTIONS
+                VStack(spacing: 12) {
+                    
+                    ColorPicker("Couleur du rendu", selection: $selectedColor)
+                    
+                    Button {
+                        exportCurrentPage()
+                    } label: {
+                        Label("Exporter en PNG", systemImage: "square.and.arrow.down")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding(5)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    
+                    Text("L'image sera enregistrée dans votre galerie")
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
 
-
-                // MARK: - EXPANDED COLOR PICKER
-                ColorPicker("Couleur du rendu", selection: $selectedColor)
+                }
             }
-            .padding(.horizontal)
         }
+        .padding()
     }
 }
 
@@ -96,11 +109,11 @@ extension RunShareCarouselView {
     
     @ViewBuilder
     func currentView() -> some View {
-        switch selectedPage {
-        case 0:
+        switch selectedExport {
+        case .path:
             RunMapShareView(workout: workout, color: $selectedColor)
 
-        case 1:
+        case .data:
             RunStatsShareView(workout: workout, color: $selectedColor)
 
         default:
