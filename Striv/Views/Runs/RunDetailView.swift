@@ -27,59 +27,28 @@ struct RunDetailView: View {
     @State private var isShowingAIInfo: Bool = false
     @State private var showAIConsent: Bool = false
     @State private var showShareView: Bool = false
-    @State private var selectedDetent: PresentationDetent = .fraction(0.2)
-    @State private var isShowingStats: Bool = true
     
-    private var overviewSheetBinding: Binding<Bool> {
-        Binding(
-            get: {
-                !isShowingAnalyze &&
-                !isShowingAIInfo &&
-                !showAIConsent &&
-                !showShareView &&
-                isShowingStats
-            },
-            set: { _ in }
-        )
-    }
+    @State private var mapSize: CGFloat = 400.0
     
     var body: some View {
-        VStack {
-            ZStack(alignment: .top) {
-                map
+        ScrollView {
+            VStack {
                 
                 HStack {
                     distanceView
                     Spacer()
                 }
-                .padding()
-                
-                AnalyzeView(response: analyze, error: analyzeVM.error)
-                    .offset(y: isShowingAnalyze ? 0 : -1000)
+                map
+                    .frame(height: mapSize)
+                WorkoutOverview(workout: workout, errorPresenter: errorPresenter)
             }
-        }
-        .sheet(isPresented: overviewSheetBinding) {
-            WorkoutOverview(workout: workout, errorPresenter: errorPresenter)
-                .presentationDetents([.fraction(0.2), .large], selection: $selectedDetent)
-                .interactiveDismissDisabled()
-                .presentationBackgroundInteraction(.enabled)
+            .padding()
         }
         .navigationTitle(workout.date.formatted(format: "dd MMM YYYY"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isShowingAnalyze)
         .background(Color.background)
-        .navigationBarBackButtonHidden()
         .toolbar {
-            
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    isShowingStats = false
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                }
-            }
-            
             analyzeButton
             
             if #available(iOS 26.0, *) {
@@ -150,10 +119,20 @@ struct RunDetailView: View {
 extension RunDetailView {
     
     var map: some View {
-        Group {
+        GeometryReader { geo in
             if !workout.coordinates2d.isEmpty {
-                RouteMapView(coordinates: workout.coordinates2d)
-                    .accessibilityHidden(true)
+                NavigationLink {
+                    RouteMapView(coordinates: workout.coordinates2d)
+                        .accessibilityHidden(true)
+                } label: {
+                    RouteMapView(coordinates: workout.coordinates2d)
+                        .accessibilityHidden(true)
+                        .frame(width: geo.size.width, height: geo.size.width)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .onAppear {
+                            self.mapSize = geo.size.height
+                        }
+                }
             }
         }
     }
