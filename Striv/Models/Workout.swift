@@ -171,6 +171,8 @@ class Workout: Identifiable, Equatable {
     
     @Relationship(deleteRule: .cascade) var metricsSeries: [MetricSeriesEntity] = []
     
+    @Relationship(deleteRule: .cascade) var splits: [WorkoutSplit] = []
+    
     // MARK: - Initializer
     
     /// Creates a new `Workout`.
@@ -205,30 +207,6 @@ class Workout: Identifiable, Equatable {
     // MARK: - Equatable
     
     static func == (lhs: Workout, rhs: Workout) -> Bool { lhs.id == rhs.id }
-    
-    // MARK: - Nested Types
-    
-    /// Represents pace in minutes and seconds per kilometer.
-    struct Pace: Equatable, Hashable, Comparable {
-        static func < (lhs: Workout.Pace, rhs: Workout.Pace) -> Bool {
-            let lhsTotal = lhs.minutes * 60 + lhs.seconds
-            
-            let rhsTotal = rhs.minutes * 60 + rhs.seconds
-            
-            return lhsTotal < rhsTotal
-        }
-        
-        var minutes: Int
-        var seconds: Int
-        
-        var label: String { String(format: "%02d'%02d\"/km", minutes, seconds) }
-        var shortLabel: String { String(format: "%02d'%02d\"", minutes, seconds) }
-        
-        init(pace: Double) {
-            self.minutes = Int(pace / 1)
-            self.seconds = Int(pace.truncatingRemainder(dividingBy: 1) * 60)
-        }
-    }
 }
 
 @Model
