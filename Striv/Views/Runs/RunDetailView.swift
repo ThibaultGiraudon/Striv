@@ -31,7 +31,7 @@ struct RunDetailView: View {
     @State private var mapSize: CGFloat = 400.0
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack {
                 
                 HStack {
