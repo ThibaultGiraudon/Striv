@@ -32,14 +32,12 @@ struct RunDetailView: View {
     
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack {
+            LazyVStack {
                 
-                HStack {
-                    distanceView
-                    Spacer()
-                }
-                map
-                    .frame(height: mapSize)
+                DistanceCard(workout: workout)
+                
+                MapCard(workout: workout)
+                
                 WorkoutOverview(workout: workout, errorPresenter: errorPresenter)
             }
             .padding()
@@ -111,29 +109,6 @@ struct RunDetailView: View {
             }
             else {
                 analyze = workout.analyze
-            }
-        }
-    }
-}
-
-extension RunDetailView {
-    
-    var map: some View {
-        GeometryReader { geo in
-            if !workout.coordinates2d.isEmpty {
-                NavigationLink {
-                    RouteMapView(coordinates: workout.coordinates2d)
-                        .accessibilityHidden(true)
-                } label: {
-                    RouteMapView(coordinates: workout.coordinates2d)
-                        .disabled(true)
-                        .accessibilityHidden(true)
-                        .frame(width: geo.size.width, height: geo.size.width)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .onAppear {
-                            self.mapSize = geo.size.height
-                        }
-                }
             }
         }
     }
