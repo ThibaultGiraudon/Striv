@@ -34,11 +34,7 @@ struct PRsView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
         }
     }
 }

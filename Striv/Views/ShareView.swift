@@ -49,11 +49,7 @@ struct RunShareCarouselView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(.customPrimary)
-                }
+                .cardStyle()
                 
                 // MARK: - ACTIONS
                 VStack(spacing: 12) {

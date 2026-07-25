@@ -66,11 +66,7 @@ struct DefineGoalView: View {
                         .accessibilityValue("\(defineGoalVM.formatTime)")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
+                .cardStyle()
                 HStack {
                     cardView(systemImage: "figure.run", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
                         .foregroundStyle(.teal)
@@ -92,11 +88,7 @@ struct DefineGoalView: View {
                             .multilineTextAlignment(.leading)
                         Spacer()
                     }
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.customPrimary)
-                    }
+                    .cardStyle()
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).voiceOverLabel)")
                 }
@@ -112,11 +104,7 @@ struct DefineGoalView: View {
                         .font(.title.bold())
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(.customPink)
-                        }
+                        .cardStyle(.customPink)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Enregistrer bouton")

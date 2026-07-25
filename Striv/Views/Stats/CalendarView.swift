@@ -51,11 +51,7 @@ struct CalendarView: View {
             }
             
         }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.customPrimary)
-        }
+        .cardStyle()
         .foregroundStyle(Color.primaryText)
     }
     

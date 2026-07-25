@@ -14,11 +14,7 @@ struct NextRaceView: View {
             Text("Ajoute la date de ta prochaine course")
                 .font(.title3.bold())
             .frame(maxWidth: .infinity)
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
             .foregroundStyle(Color.primaryText)
         } else {
             VStack(alignment: .leading, spacing: 10) {
@@ -36,11 +32,7 @@ struct NextRaceView: View {
                 .font(.title3)
             }
             .frame(maxWidth: .infinity)
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
             .foregroundStyle(Color.primaryText)
         }
     }

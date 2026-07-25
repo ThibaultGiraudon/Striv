@@ -33,11 +33,7 @@ struct WeeklyVolumeView: View {
             }
                 
         }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.customPrimary)
-        }
+        .cardStyle()
     }
     
     func weekStatLabel(weekStat: WeeklyStat) -> String {

@@ -49,11 +49,7 @@ struct NextRaceFormView: View {
                 .font(.title3)
             }
             .frame(maxWidth: .infinity)
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
             .foregroundStyle(Color.primaryText)
             
             Spacer()
@@ -67,11 +63,7 @@ struct NextRaceFormView: View {
                     .font(.title.bold())
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(.customPink.opacity(shouldDisable ? 0.5 : 1))
-                    }
+                    .cardStyle(.customPink.opacity(shouldDisable ? 0.5 : 1))
             }
             .disabled(shouldDisable)
             

@@ -44,11 +44,7 @@ struct TargetFormView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
+                .cardStyle()
                 
                 Spacer()
                 
@@ -66,11 +62,7 @@ struct TargetFormView: View {
                         .font(.title.bold())
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(.customPink)
-                        }
+                        .cardStyle(.customPink)
                 }
             }
         }

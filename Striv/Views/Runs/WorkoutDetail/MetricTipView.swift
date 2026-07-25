@@ -46,11 +46,7 @@ struct MetricTipView: View {
                         }
                     }
                 }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(.customPink.opacity(0.5))
-                }
+                .cardStyle(.customPink.opacity(0.5))
                 .padding(.vertical)
             }
         }

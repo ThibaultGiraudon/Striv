@@ -74,11 +74,7 @@ struct HomeView: View {
                             }
                             .foregroundStyle(.primaryText)
                             .frame(maxWidth: .infinity, alignment: .center)
-                            .padding()
-                            .background {
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(.customPrimary)
-                            }
+                            .cardStyle()
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel("Bouton")
                             .accessibilityHint("Double tap pour importer ta première course")

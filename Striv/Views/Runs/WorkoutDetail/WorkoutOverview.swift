@@ -7,6 +7,25 @@
 
 import SwiftUI
 
+struct CardModifier: ViewModifier {
+    var color: Color
+    
+    func body(content: Content) -> some View {
+        content
+            .padding()
+            .background {
+                RoundedRectangle(cornerRadius: 16)
+                    .foregroundStyle(color)
+            }
+    }
+}
+
+extension View {
+    func cardStyle(_ color: Color = .customPrimary) -> some View {
+        modifier(CardModifier(color: color))
+    }
+}
+
 struct WorkoutOverview: View {
     let workout: Workout
     @StateObject private var workoutDetailVM: WorkoutDetailViewModel
@@ -28,11 +47,7 @@ struct WorkoutOverview: View {
                 statRow(systemImage: "bolt.fill", title: "Puissance", value: workout.power, metric: .power)
                 statRow(systemImage: "shoeprints.fill", title: "Cadence", value: workout.cadence, metric: .cadence)
             }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
             .task {
                 workoutDetailVM.setContext(context: modelContext)
                 await workoutDetailVM.prepareData()
@@ -65,11 +80,7 @@ struct WorkoutOverview: View {
                     }
                 }
             }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
             
             if let paceSeries = workoutDetailVM.paceSeries, let bestSplit = workoutDetailVM.bestSplit {
                 VStack {
@@ -85,11 +96,7 @@ struct WorkoutOverview: View {
                         statRow(systemImage: "figure.run", title: "Meilleur km", value: bestSplit.shortLabel, metric: .pace)
                     }
                 }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
+                .cardStyle()
             }
             
             if let hrSeries = workoutDetailVM.heartRateSeries, let maxHr = workoutDetailVM.maxHeartRate {
@@ -106,11 +113,7 @@ struct WorkoutOverview: View {
                         statRow(systemImage: "figure.run", title: "FC max.", value: maxHr, metric: .heartRate)
                     }
                 }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
+                .cardStyle()
             }
             
             if let elevationSeries = workoutDetailVM.elevationSeries, let minElevation = workoutDetailVM.minElevation, let maxElevation = workoutDetailVM.maxElevation {
@@ -128,11 +131,7 @@ struct WorkoutOverview: View {
                         statRow(systemImage: "mountain.2.fill", title: "Altitude min.", value: minElevation, metric: .elevation)
                     }
                 }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
+                .cardStyle()
             }
             
             if let powerSeries = workoutDetailVM.powerSeries {
@@ -149,11 +148,7 @@ struct WorkoutOverview: View {
                         Spacer()
                     }
                 }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 16)
-                        .foregroundStyle(Color.customPrimary)
-                }
+                .cardStyle()
             }
             
             VStack {
@@ -165,11 +160,7 @@ struct WorkoutOverview: View {
                 
                 MetricsOverlayChartView(workout: workout)
             }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .foregroundStyle(Color.customPrimary)
-            }
+            .cardStyle()
         }
     }
     
