@@ -143,7 +143,7 @@ struct MetricsOverlayChartView: View {
                             }
                         }
                     }
-                    .frame(height: 400)
+                    .frame(height: 300)
                 }
             }
         }

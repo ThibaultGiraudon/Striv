@@ -14,6 +14,7 @@
 		CE867AC22F900D0800A8D96F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE867AC12F900D0800A8D96F /* WidgetKit.framework */; };
 		CE867AC42F900D0800A8D96F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE867AC32F900D0800A8D96F /* SwiftUI.framework */; };
 		CE867AD52F900D0900A8D96F /* StrivWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CE867ABF2F900D0800A8D96F /* StrivWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CE9C83133013BD0A00E92806 /* TODO.md in Resources */ = {isa = PBXBuildFile; fileRef = CE9C83123013BD0A00E92806 /* TODO.md */; };
 		CED9F3342FB1CC6900ED2F2E /* audit.md in Resources */ = {isa = PBXBuildFile; fileRef = CED9F3332FB1CC6900ED2F2E /* audit.md */; };
 		CED9F3E92FB3236D00ED2F2E /* StrivShared in Frameworks */ = {isa = PBXBuildFile; productRef = CED9F3E82FB3236D00ED2F2E /* StrivShared */; };
 		CED9F3EB2FB3255500ED2F2E /* StrivShared in Frameworks */ = {isa = PBXBuildFile; productRef = CED9F3EA2FB3255500ED2F2E /* StrivShared */; };
@@ -58,6 +59,7 @@
 		CE867AC12F900D0800A8D96F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CE867AC32F900D0800A8D96F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StrivWidgetExtension.entitlements; sourceTree = "<group>"; };
+		CE9C83123013BD0A00E92806 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		CED9F3332FB1CC6900ED2F2E /* audit.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = audit.md; sourceTree = "<group>"; };
 		CED9F5F42FB32B4B00ED2F2E /* StrivShared */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = StrivShared; sourceTree = "<group>"; };
 		CED9F6002FB3348700ED2F2E /* StrivTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StrivTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -146,6 +148,7 @@
 		CE7AB5D92EDF30370078BEC3 = {
 			isa = PBXGroup;
 			children = (
+				CE9C83123013BD0A00E92806 /* TODO.md */,
 				CED9F5F42FB32B4B00ED2F2E /* StrivShared */,
 				CED9F3332FB1CC6900ED2F2E /* audit.md */,
 				CE867ADF2F90205C00A8D96F /* StrivWidgetExtension.entitlements */,
@@ -306,6 +309,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE9C83133013BD0A00E92806 /* TODO.md in Resources */,
 				CE2756D72F2262BB00BB378D /* .gitignore in Resources */,
 				CE2756D52F22628E00BB378D /* GoogleService-Info.plist in Resources */,
 				CED9F3342FB1CC6900ED2F2E /* audit.md in Resources */,

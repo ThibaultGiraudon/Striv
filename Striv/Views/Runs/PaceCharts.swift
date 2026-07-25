@@ -90,7 +90,7 @@ struct PaceCharts: View {
         .chartYAxis {
             AxisMarks(preset: .aligned, position: .trailing, values: [maxValue, minValue])
         }
-        .frame(height: 400)
+        .frame(height: 300)
     }
 }
 

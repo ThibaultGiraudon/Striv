@@ -37,7 +37,7 @@ struct WorkoutOverview: View {
                 workoutDetailVM.setContext(context: modelContext)
                 await workoutDetailVM.prepareData()
             }
-//            
+
             VStack {
                 HStack {
                     Text("Splits")
@@ -82,8 +82,6 @@ struct WorkoutOverview: View {
                     PaceCharts(series: paceSeries)
                     LazyVGrid(columns: Array(repeating: .init(), count: 2)) {
                         statRow(systemImage: "figure.run", title: "Allure moy.", value: workout.pace.shortLabel, metric: .pace)
-                        // TODO: - Max pace bug ??
-//                        statRow(systemImage: "figure.run", title: "Allure max.", value: Pace(pace: maxPace).shortLabel, metric: .pace)
                         statRow(systemImage: "figure.run", title: "Meilleur km", value: bestSplit.shortLabel, metric: .pace)
                     }
                 }

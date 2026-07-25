@@ -126,6 +126,7 @@ extension RunDetailView {
                         .accessibilityHidden(true)
                 } label: {
                     RouteMapView(coordinates: workout.coordinates2d)
+                        .disabled(true)
                         .accessibilityHidden(true)
                         .frame(width: geo.size.width, height: geo.size.width)
                         .clipShape(RoundedRectangle(cornerRadius: 16))

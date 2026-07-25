@@ -94,7 +94,7 @@ struct MetricsCharts: View {
             .chartYAxis {
                 AxisMarks(preset: .aligned, position: .trailing, values: [minValue, maxValue])
             }
-            .frame(height: 400)
+            .frame(height: 300)
         }
     }
 }
