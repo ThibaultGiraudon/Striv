@@ -8,9 +8,26 @@
 import SwiftUI
 import SwiftData
 
+enum Stats: String, CaseIterable {
+    case currentMonth = "Ce mois"
+    case currentYear = "Cette année"
+    case allTime = "Tous temps"
+}
+
 struct AllStatsView: View {
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @ObservedObject var dashboardVM: DashboardViewModel
+    @State private var selectedStats: Stats = .allTime
+    private var displayedStats: GlobalStats {
+        switch selectedStats {
+        case .currentMonth:
+            dashboardVM.stats.currentMonth
+        case .currentYear:
+            dashboardVM.stats.currentYear
+        case .allTime:
+            dashboardVM.stats.global
+        }
+    }
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .center) {
@@ -34,7 +51,9 @@ struct AllStatsView: View {
                 StreakView(currentStreak: dashboardVM.stats.currentStreak)
                     .padding(.bottom, 10)
                 
-                StatsView(title: "", stats: dashboardVM.stats.global)
+                SegmentedPicker(items: Stats.allCases, title: { $0.rawValue }, selection: $selectedStats, size: 10)
+                
+                StatsView(title: "", stats: displayedStats)
                     .padding(.bottom, 10)
                 
                 PRsView()
