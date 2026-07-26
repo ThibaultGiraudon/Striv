@@ -13,7 +13,29 @@ struct GoalsView: View {
     @ObservedObject var runnerProfileVM: RunnerProfileViewModel
     @ObservedObject var goalsVM: GoalsViewModel
     var body: some View {
-        ScrollView {
+        VStack(alignment: .center) {
+            if let mainGoal = goalsVM.getMainGoal() {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Objectif principal")
+                            .font(.title.bold())
+                        Text("Ton objectif de référence actuel.")
+                    }
+                    Spacer()
+                }
+                NavigationLink {
+                    DefineGoalView(
+                        goal: goalsVM.getGoal(for: mainGoal.distance),
+                        distance: mainGoal.distance,
+                        runnerProfileVM: runnerProfileVM,
+                        goalsVM: goalsVM)
+                } label: {
+                    MainGoalView(mainGoal: mainGoal)
+                }
+                
+                Spacer()
+            }
+            
             HStack {
                 VStack(alignment: .leading) {
                     Text("Mes objectifs")
@@ -34,8 +56,13 @@ struct GoalsView: View {
                     GoalRowView(goal: goalsVM.getGoal(for: distance), distance: distance)
                 }
             }
+            
+            Spacer()
+            
+            if goalsVM.getMainGoal() == nil {
+                GoalsEmptyView()
+            }
         }
-        .scrollIndicators(.hidden)
         .padding()
         .background {
             Color.background

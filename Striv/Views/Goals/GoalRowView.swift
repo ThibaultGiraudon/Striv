@@ -11,7 +11,7 @@ struct GoalRowView: View {
     let goal: Goal?
     let distance: PresetDistance
     let pace: Pace?
-    let color: Color
+    let color: Color = .teal
     init(goal: Goal?, distance: PresetDistance) {
         self.goal = goal
         if let goal {
@@ -20,7 +20,6 @@ struct GoalRowView: View {
             self.pace = nil
         }
         self.distance = distance
-        self.color = (goal?.isMain ?? false) ? .customPink : .teal
     }
     
     var body: some View {
@@ -48,7 +47,7 @@ struct GoalRowView: View {
             
             Spacer()
             if let goal {
-                Text(Duration(goal.time * 60).label)
+                Text(Duration(goal.time * 60).shortLabel)
                     .font(.title2.bold())
             }
             Image(systemName: "chevron.right")

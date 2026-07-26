@@ -40,7 +40,7 @@ class GoalsViewModel: BaseViewModel {
         goals.first(where: { $0.distance == distance })
     }
     
-    func getMainGoal(in goals: [Goal]) -> Goal? {
+    func getMainGoal() -> Goal? {
         goals.first(where: {$0.isMain == true})
     }
     
