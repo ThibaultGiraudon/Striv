@@ -35,6 +35,10 @@ struct DashboardStats {
     /// Statistics for the current week.
     let currentWeek: GlobalStats
     
+    let currentMonth: GlobalStats
+    
+    let currentYear: GlobalStats
+    
     /// Current consecutive streak of weeks with at least one workout.
     let currentStreak: Int
     
@@ -56,6 +60,8 @@ struct DashboardStats {
         global: GlobalStats = .init(),
         lastFourWeeks: GlobalStats = .init(),
         currentWeek: GlobalStats = .init(),
+        currentMonth: GlobalStats = .init(),
+        currentYear: GlobalStats = .init(),
         currentStreak: Int = 0,
         longestStreak: Int = 0
     ) {
@@ -64,6 +70,8 @@ struct DashboardStats {
         self.global = global
         self.lastFourWeeks = lastFourWeeks
         self.currentWeek = currentWeek
+        self.currentMonth = currentMonth
+        self.currentYear = currentYear
         self.currentStreak = currentStreak
         self.longestStreak = longestStreak
     }

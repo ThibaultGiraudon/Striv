@@ -286,6 +286,8 @@ final class WorkoutStatisticsService {
         
         let lastFourWeeksStats = self.lastFourWeeksStats(for: weeklyStats)
         let currentWeekStats = self.currentWeekStats(for: weeklyStats)
+        let currentMonthStats = self.stats(for: monthlyStats.filter({ $0.startDate == Date().firstDayOfMonth }))
+        let currentYearStats = self.stats(for: monthlyStats.filter( {$0.startDate >= Date().firstDayOfYear }))
         let longestStreak = self.longestStreak(for: weeklyStats)
         let currentStreak = self.currentStreak(for: weeklyStats)
         
@@ -295,6 +297,8 @@ final class WorkoutStatisticsService {
             global: globalStats,
             lastFourWeeks: lastFourWeeksStats,
             currentWeek: currentWeekStats,
+            currentMonth: currentMonthStats,
+            currentYear: currentYearStats,
             currentStreak: currentStreak,
             longestStreak: longestStreak
         )
