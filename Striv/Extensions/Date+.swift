@@ -48,4 +48,9 @@ extension Date {
         calendar.date(from: calendar.dateComponents([.year, .month], from: self))
         ?? self
     }
+    
+    var firstDayOfYear: Date {
+        calendar.date(from: calendar.dateComponents([.year], from: self))
+        ?? self
+    }
 }
