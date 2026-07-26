@@ -31,6 +31,18 @@ final class Duration: Equatable, Hashable {
     /// Total duration in seconds.
     var totalSeconds: Int
     
+    /// Returns a formatted string `"00:00"` for display purposes.
+    var shortLabel: String {
+        let formatted: String
+
+        if hours > 0 {
+            formatted = String(format: "%dh%02d", hours, minutes)
+        } else {
+            formatted = String(format: "%02d:%02d", minutes, seconds)
+        }
+        return formatted
+    }
+    
     /// Returns a formatted string `"H:MM:SS"` for display purposes.
     var label: String {
         let formatted: String
