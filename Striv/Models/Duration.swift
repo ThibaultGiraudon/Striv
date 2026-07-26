@@ -76,6 +76,14 @@ final class Duration: Equatable, Hashable {
         self.totalSeconds = time
     }
     
+    init(_ time: Double) {
+        let intTime = Int(time)
+        self.hours = intTime / 3600
+        self.minutes = (intTime % 3600) / 60
+        self.seconds = intTime % 60
+        self.totalSeconds = intTime
+    }
+    
     // MARK: - Equatable
     
     static func == (lhs: Duration, rhs: Duration) -> Bool {
