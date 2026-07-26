@@ -66,7 +66,7 @@ final class WorkoutStatisticsService {
     ///   statistics for each week.
     /// - Returns: A `GlobalStats` representing the aggregated values
     ///   across the provided weeks.
-    func stats(for weeklyStats: [WeeklyStat]) -> GlobalStats {
+    func stats(for weeklyStats: [PeriodicStat]) -> GlobalStats {
         var distance: Double = 0
         var duration: Int = 0
         var elevation: Double = 0
@@ -92,7 +92,7 @@ final class WorkoutStatisticsService {
     /// - Parameter weeklyStats: An array of weekly statistics.
     /// - Returns: A `GlobalStats` containing aggregated values
     ///   for the last four weeks.
-    func lastFourWeeksStats(for weeklyStats: [WeeklyStat]) -> GlobalStats {
+    func lastFourWeeksStats(for weeklyStats: [PeriodicStat]) -> GlobalStats {
         self.stats(for: weeklyStats.suffix(4))
     }
     
@@ -101,7 +101,7 @@ final class WorkoutStatisticsService {
     /// - Parameter weeklyStats: An array of weekly statistics.
     /// - Returns: A `GlobalStats` containing aggregated values
     ///   for the current week.
-    func currentWeekStats(for weeklyStats: [WeeklyStat]) -> GlobalStats {
+    func currentWeekStats(for weeklyStats: [PeriodicStat]) -> GlobalStats {
         self.stats(for: weeklyStats.suffix(1))
     }
     
@@ -119,7 +119,7 @@ final class WorkoutStatisticsService {
     ///
     /// - Parameter workouts: The workouts used to compute weekly statistics.
     /// - Returns: An array of `WeeklyStat` sorted chronologically.
-    func weeklyStats(for workouts: Workouts) -> [WeeklyStat] {
+    func weeklyStats(for workouts: Workouts) -> [PeriodicStat] {
         guard let firstWeek = workouts
             .min(by: { $0.date < $1.date })?
             .date
@@ -127,7 +127,7 @@ final class WorkoutStatisticsService {
             return []
         }
 
-        var weeksStats: [WeeklyStat] = []
+        var weeksStats: [PeriodicStat] = []
         
         let grouped = Dictionary(grouping: workouts) {
             $0.date.firstDayOfWeek
@@ -154,7 +154,7 @@ final class WorkoutStatisticsService {
             
             weeksStats.append(
                 .init(
-                    startOfWeek: startOfWeek,
+                    startDate: startOfWeek,
                     distance: distance,
                     count: grouped[startOfWeek]?.count ?? 0,
                     duration: .init(duration),
@@ -166,10 +166,10 @@ final class WorkoutStatisticsService {
             currentWeek = previousWeek
         }
         
-        return weeksStats.sorted(by: { $0.startOfWeek < $1.startOfWeek })
+        return weeksStats.sorted(by: { $0.startDate < $1.startDate })
     }
     
-    func monthlyStats(for workouts: Workouts) -> [MonthlyStat] {
+    func monthlyStats(for workouts: Workouts) -> [PeriodicStat] {
         guard let firstMonth = workouts
             .min(by: { $0.date < $1.date })?
             .date
@@ -177,15 +177,13 @@ final class WorkoutStatisticsService {
             return []
         }
         
-        var monthsStats: [MonthlyStat] = []
+        var monthsStats: [PeriodicStat] = []
 
         let grouped = Dictionary(grouping: workouts) {
             $0.date.firstDayOfMonth
         }
 
         var currentMonth = Date().firstDayOfMonth
-
-        var rawStats: [(date: Date, distance: Double, count: Int, duration: Int, elevation: Double)] = []
 
         while firstMonth <= currentMonth {
             let startOfMonth = currentMonth
@@ -199,44 +197,19 @@ final class WorkoutStatisticsService {
                 duration = workouts.reduce(0) { $0 + $1.duration.totalSeconds }
                 elevation = workouts.reduce(0) { $0 + ($1.elevation ?? 0) }
             }
-
-            rawStats.append((
-                date: startOfMonth,
-                distance: distance,
-                count: grouped[startOfMonth]?.count ?? 0,
-                duration: duration,
-                elevation: elevation
-            ))
+            
+            monthsStats.append(
+                .init(
+                    startDate: startOfMonth,
+                    distance: distance,
+                    count: grouped[startOfMonth]?.count ?? 0,
+                    duration: .init(duration),
+                    elevation: elevation
+                )
+            )
 
             guard let previousMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentMonth) else { break }
             currentMonth = previousMonth
-        }
-
-        rawStats.sort { $0.date < $1.date }
-
-        for i in 0..<rawStats.count {
-            let current = rawStats[i]
-            
-            var change: Double? = nil
-            
-            if i > 0 {
-                let previous = rawStats[i - 1]
-                
-                if previous.distance > 0 {
-                    change = ((current.distance - previous.distance) / previous.distance) * 100
-                }
-            }
-
-            monthsStats.append(
-                MonthlyStat(
-                    startOfMonth: current.date,
-                    distance: current.distance,
-                    count: current.count,
-                    duration: TimeInterval(current.duration),
-                    elevation: current.elevation,
-                    distanceChange: change
-                )
-            )
         }
 
         return monthsStats
@@ -251,9 +224,9 @@ final class WorkoutStatisticsService {
     ///
     /// - Parameter weeklyStats: Weekly statistics used to determine the streak.
     /// - Returns: The number of consecutive active weeks.
-    func currentStreak(for weeklyStats: [WeeklyStat]) -> Int {
+    func currentStreak(for weeklyStats: [PeriodicStat]) -> Int {
         var streak: Int = 0
-        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        let sortedWeeks: [PeriodicStat] = weeklyStats.sorted { $0.startDate > $1.startDate }
         var isFirstWeek: Bool = true
         
         for week in sortedWeeks {
@@ -278,10 +251,10 @@ final class WorkoutStatisticsService {
     ///
     /// - Parameter weeklyStats: Weekly statistics used to compute the streak.
     /// - Returns: The length of the longest streak in weeks.
-    func longestStreak(for weeklyStats: [WeeklyStat]) -> Int {
+    func longestStreak(for weeklyStats: [PeriodicStat]) -> Int {
         var longestStreak: Int = 0
         var currentStreak: Int = 0
-        let sortedWeeks: [WeeklyStat] = weeklyStats.sorted { $0.startOfWeek > $1.startOfWeek }
+        let sortedWeeks: [PeriodicStat] = weeklyStats.sorted { $0.startDate > $1.startDate }
         
         for week in sortedWeeks {
             if week.count > 0 {

@@ -13,22 +13,22 @@ import Foundation
 /// including distance, duration, elevation, and number of workouts.
 /// This structure is primarily used by `WorkoutStatisticsService`
 /// to compute streaks, weekly charts, and dashboard metrics.
-struct WeeklyStat: Identifiable, Hashable {
+struct PeriodicStat: Identifiable, Hashable {
     
     /// Unique identifier for the week statistic.
     var id = UUID()
     
     /// The start date of the week.
-    let startOfWeek: Date
+    let startDate: Date
     
     /// The end date of the week (6 days after `startOfWeek`).
     var endOfWeek: Date {
-        startOfWeek.addingTimeInterval(3600 * 24 * 6)
+        startDate.addingTimeInterval(3600 * 24 * 6)
     }
     
     /// A readable label for the week, e.g., "10 Mar-16 Mar".
     var label: String {
-        startOfWeek.formatted(format: "d MMMM") + " - " + endOfWeek.formatted(format: "d MMMM")
+        startDate.formatted(format: "d MMMM") + " - " + endOfWeek.formatted(format: "d MMMM")
     }
     
     /// Total distance run in meters during the week.
@@ -54,14 +54,14 @@ struct WeeklyStat: Identifiable, Hashable {
     ///   - elevation: Total elevation climbed (default: 0 meters)
     init(
         id: UUID = UUID(),
-        startOfWeek: Date = .now,
+        startDate: Date = .now,
         distance: Double = 0.0,
         count: Int = 0,
         duration: Duration = .init(0),
         elevation: Double = 0.0
     ) {
         self.id = id
-        self.startOfWeek = startOfWeek
+        self.startDate = startDate
         self.distance = distance
         self.count = count
         self.duration = duration

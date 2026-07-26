@@ -20,8 +20,8 @@ struct WeeklyVolumeView: View {
             if isVoiceOverEnabled {
                 ScrollView {
                     VStack(alignment: .leading) {
-                        ForEach(dashboardVM.stats.weekly.sorted { $0.startOfWeek > $1.startOfWeek}, id: \.self) { weekStat in
-                            Text("\(weekStat.startOfWeek.formatted(format: "dd MMM")) - \(weekStat.endOfWeek.formatted(format: "dd MMM YYYY")): \(weekStat.distance.roundedText(to: 2))km")
+                        ForEach(dashboardVM.stats.weekly.sorted { $0.startDate > $1.startDate}, id: \.self) { weekStat in
+                            Text("\(weekStat.startDate.formatted(format: "dd MMM")) - \(weekStat.endOfWeek.formatted(format: "dd MMM YYYY")): \(weekStat.distance.roundedText(to: 2))km")
                                 .accessibilityLabel(weekStatLabel(weekStat: weekStat))
                         }
                     }
@@ -36,10 +36,10 @@ struct WeeklyVolumeView: View {
         .cardStyle()
     }
     
-    func weekStatLabel(weekStat: WeeklyStat) -> String {
+    func weekStatLabel(weekStat: PeriodicStat) -> String {
         var labels: [String] = []
         
-        labels.append("du \(weekStat.startOfWeek.formatted(format: "dd MMMM")) au \(weekStat.endOfWeek.formatted(format: "dd MMMM YYYY"))")
+        labels.append("du \(weekStat.startDate.formatted(format: "dd MMMM")) au \(weekStat.endOfWeek.formatted(format: "dd MMMM YYYY"))")
         
         labels.append("distance: \(weekStat.distance.roundedText(to: 1))km")
         

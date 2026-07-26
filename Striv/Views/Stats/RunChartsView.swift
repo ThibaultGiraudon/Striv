@@ -10,9 +10,9 @@ import Charts
 
 struct RunChartsView: View {
     @ObservedObject var dashboardVM: DashboardViewModel
-    @State private var selectedWeek: WeeklyStat? = nil
+    @State private var selectedWeek: PeriodicStat? = nil
 
-    private var weeks: [WeeklyStat] {
+    private var weeks: [PeriodicStat] {
         dashboardVM.stats.weekly
     }
 
@@ -42,26 +42,26 @@ struct RunChartsView: View {
                     .frame(maxWidth: .infinity)
             } else {
 
-                let start = weeks.first?.startOfWeek ?? Date()
-                let end = weeks.last?.startOfWeek ?? Date()
+                let start = weeks.first?.startDate ?? Date()
+                let end = weeks.last?.startDate ?? Date()
 
                 Chart {
                     ForEach(weeks, id: \.id) { weekStat in
 
                         PointMark(
-                            x: .value("Week", weekStat.startOfWeek),
+                            x: .value("Week", weekStat.startDate),
                             y: .value("Distance", weekStat.distance)
                         )
                         .foregroundStyle(selectedWeek?.id == weekStat.id ? .white : .customPink)
 
                         LineMark(
-                            x: .value("Week", weekStat.startOfWeek),
+                            x: .value("Week", weekStat.startDate),
                             y: .value("Distance", weekStat.distance)
                         )
                         .foregroundStyle(.customPink)
 
                         AreaMark(
-                            x: .value("Week", weekStat.startOfWeek),
+                            x: .value("Week", weekStat.startDate),
                             y: .value("Distance", weekStat.distance)
                         )
                         .foregroundStyle(
@@ -73,7 +73,7 @@ struct RunChartsView: View {
                         )
 
                         if selectedWeek?.id == weekStat.id {
-                            RuleMark(x: .value("Week", weekStat.startOfWeek))
+                            RuleMark(x: .value("Week", weekStat.startDate))
                         }
                     }
                 }
@@ -89,7 +89,7 @@ struct RunChartsView: View {
                             }
 
                             selectedWeek = weeks.first(where: {
-                                $0.startOfWeek == result.0.firstDayOfWeek
+                                $0.startDate == result.0.firstDayOfWeek
                             })
                         }
                 }
