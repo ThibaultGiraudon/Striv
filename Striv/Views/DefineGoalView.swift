@@ -9,121 +9,104 @@ import SwiftUI
 import SwiftData
 
 struct DefineGoalView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    let goal: Goal?
+    let distance: PresetDistance
     @ObservedObject var runnerProfileVM: RunnerProfileViewModel
+    @ObservedObject var goalsVM: GoalsViewModel
     
     @Query private var profiles: [RunnerProfile]
     @StateObject private var defineGoalVM = DefineGoalViewModel()
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading) {
-                Text("Définir objectif")
-                    .font(.title.bold())
-                Text("Choisi ton objectif de course.")
-                
-                SegmentedPicker(items: DistanceType.allCases, title: { $0.title }, selection: $defineGoalVM.distanceType, size: 10)
-                
-                Button {
-                    defineGoalVM.distanceType = .custom(defineGoalVM.customDistance)
-                } label: {
-                    Text("Distance personnalisée")
-                        .foregroundStyle(Color.primaryText)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(10)
-                .contentShape(Capsule())
-                .background {
-                    Capsule()
-                        .fill(
-                            defineGoalVM.distanceType.title == "Distance personnalisée" ? .customPink : .customPrimary
-                        )
-                }
-                .padding(.bottom)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Distance personnalisée")
-                .accessibilityHint("Double tap pour rentrer une distance personnalisée")
-                
-                if defineGoalVM.distanceType.title == "Distance personnalisée" {
-                    CustomTextField("Distance en m", systemName: "flag.checkered", value: $defineGoalVM.customDistance)
-                        .onSubmit {
-                            defineGoalVM.distanceType = .custom(defineGoalVM.customDistance)
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Champs de texte")
-                        .accessibilityHint("Double tap pour renseigner votre objectif")
-                }
-                
-                VStack(alignment: .center) {
-                    Text(defineGoalVM.formatTime)
-                        .font(.system(size: 50).bold())
-                        .accessibilityElement(children: .ignore)
-                    Text("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km")
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km : \(defineGoalVM.formatTime)")
-                    Slider(value: $defineGoalVM.time, in: Double(defineGoalVM.timeBounds.min)...Double(defineGoalVM.timeBounds.max))
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Élément ajustable pour définir votre objectif de temps")
-                        .accessibilityValue("\(defineGoalVM.formatTime)")
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .cardStyle()
-                HStack {
-                    cardView(systemImage: "figure.run", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
-                        .foregroundStyle(.teal)
-                    cardView(systemImage: defineGoalVM.progression.image, title: defineGoalVM.progression.state, legend: "actuellement")
-                        .foregroundStyle(defineGoalVM.progression.color)
-                    cardView(systemImage: "star.fill", title: defineGoalVM.progression.label, legend: defineGoalVM.progression.feedback)
-                        .foregroundStyle(.yellow)
-                }
-                .frame(maxWidth: .infinity)
-                
-                if let preset = PresetDistance.allCases.first(where: {$0.meters == defineGoalVM.distanceType.meters}), let pr = defineGoalVM.prs[preset] {
-                    HStack {
-                        Image(systemName: "lightbulb.max")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(height: 60)
-                            .foregroundStyle(.yellow)
-                        Text("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).longLabel)")
-                            .multilineTextAlignment(.leading)
-                        Spacer()
-                    }
-                    .cardStyle()
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).voiceOverLabel)")
-                }
-                    
+        VStack(alignment: .leading) {
+            Text("Définir objectif")
+                .font(.title.bold())
+            Text("Choisi ton objectif de course.")
+            
+            
+            VStack(alignment: .center) {
                 Spacer()
-                
-                Button {
-                    if !runnerProfileVM.save(Goal(type: defineGoalVM.goalType, distance: defineGoalVM.distanceType, targetTime: Int(defineGoalVM.time)), for: profiles.first) {
-
+                Text(defineGoalVM.formatTime)
+                    .font(.system(size: 50).bold())
+                    .accessibilityElement(children: .ignore)
+                Text("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km")
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Objectif pour \(Int(defineGoalVM.distanceType.meters / 1000)) km : \(defineGoalVM.formatTime)")
+                Spacer()
+                Slider(value: $defineGoalVM.time, in: Double(defineGoalVM.timeBounds.min)...Double(defineGoalVM.timeBounds.max), step: 1.0)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Élément ajustable pour définir votre objectif de temps")
+                    .accessibilityValue("\(defineGoalVM.formatTime)")
+                    .transaction {
+                        $0.animation = nil
                     }
-                } label: {
-                    Text("Enregistrer")
-                        .font(.title.bold())
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .cardStyle(.customPink)
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Enregistrer bouton")
-                .accessibilityHint("Double tap pour enregistrer l'objectif")
             }
-            .padding()
+            .frame(maxWidth: .infinity, alignment: .center)
+            .cardStyle()
+            
+            HStack {
+                cardView(systemImage: "figure.run", title: defineGoalVM.pace.shortLabel, legend: "Allure cible")
+                    .foregroundStyle(.teal)
+                cardView(systemImage: defineGoalVM.progression.image, title: defineGoalVM.progression.state, legend: "actuellement")
+                    .foregroundStyle(defineGoalVM.progression.color)
+                cardView(systemImage: "star.fill", title: defineGoalVM.progression.label, legend: defineGoalVM.progression.feedback)
+                    .foregroundStyle(.yellow)
+            }
+            .frame(maxWidth: .infinity)
+            
+            if let preset = PresetDistance.allCases.first(where: {$0.meters == defineGoalVM.distanceType.meters}), let pr = defineGoalVM.prs[preset] {
+                HStack {
+                    Image(systemName: "lightbulb.max")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 60)
+                        .foregroundStyle(.yellow)
+                    Text("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).longLabel)")
+                        .multilineTextAlignment(.leading)
+                    Spacer()
+                }
+                .cardStyle()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Ton record personnel sur \(defineGoalVM.distanceType.title) est de \(Duration(Int(pr.time)).voiceOverLabel)")
+            }
+                
+            Spacer()
+            
+            Toggle("Définir comme objectif principal", isOn: $defineGoalVM.isMain)
+                .tint(.customPink)
+                .padding(.vertical)
+                .onChange(of: defineGoalVM.isMain) { oldValue, newValue in
+                    goalsVM.setMainGoal(for: .init(distance: defineGoalVM.distanceType, time: defineGoalVM.time, isMain: defineGoalVM.isMain))
+                }
+            
+            Button {
+                Task {
+                    await goalsVM.saveGoal(.init(distance: defineGoalVM.distanceType, time: defineGoalVM.time, isMain: defineGoalVM.isMain))
+                    dismiss()
+                }
+            } label: {
+                Text("Enregistrer")
+                    .font(.title.bold())
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .cardStyle(.customPink)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Enregistrer bouton")
+            .accessibilityHint("Double tap pour enregistrer l'objectif")
         }
+        .padding()
         .background(Color.background)
         .onAppear {
             if let profile = profiles.first {
-                let goal = profile.goal
                 defineGoalVM.prs = profile.prs
-                defineGoalVM.distanceType = goal.distance
-                defineGoalVM.customDistance = goal.distance.meters
-                defineGoalVM.time = Double(goal.targetTime ?? 180)
+                defineGoalVM.distanceType = distance
+                defineGoalVM.customDistance = distance.meters
+                defineGoalVM.time = Double(goal?.time ?? 0)
+                defineGoalVM.isMain = goal?.isMain ?? false
             }
-        }
-        .onChange(of: defineGoalVM.distanceType) {
-            defineGoalVM.time = Double(defineGoalVM.timeBounds.max / 2)
         }
     }
     
@@ -170,5 +153,9 @@ struct DefineGoalView: View {
 
 #Preview {
     @Previewable @StateObject var errorPresenter = ErrorPresenter()
-    DefineGoalView(runnerProfileVM: .init(errorPresenter: errorPresenter))
+    DefineGoalView(
+        goal: .init(distance: .marathon, time: 150*60, isMain: false),
+        distance: .marathon,
+        runnerProfileVM: .init(errorPresenter: errorPresenter),
+        goalsVM: .init(errorPresenter: errorPresenter))
 }

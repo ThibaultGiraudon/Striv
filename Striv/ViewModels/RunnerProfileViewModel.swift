@@ -32,7 +32,7 @@ class RunnerProfileViewModel: BaseViewModel {
             return
         }
 
-        let profile = RunnerProfile(goal: .init(type: .distance, distance: .preset(.tenK)))
+        let profile = RunnerProfile()
         
         do {
             context.insert(profile)
@@ -40,22 +40,6 @@ class RunnerProfileViewModel: BaseViewModel {
         } catch {
             self.errorPresenter.error = .database(.saving)
         }
-    }
-    
-    func save(_ goal: Goal, for profile: RunnerProfile?) -> Bool {
-        guard let context, let profile else {
-            return false
-        }
-        
-        do {
-            profile.goal = goal
-            
-            try context.save()
-        } catch {
-            self.errorPresenter.error = .database(.saving)
-            return false
-        }
-        return true
     }
     
     func updatePRs(_ prs: [PRResult]) -> Bool {

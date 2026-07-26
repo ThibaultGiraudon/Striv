@@ -15,7 +15,7 @@ struct RunDetailView: View {
     
     @Query private var profiles: [RunnerProfile]
     var profile: RunnerProfile {
-        self.profiles.first ?? RunnerProfile(goal: .init(type: .distance, distance: .preset(.marathon)))
+        self.profiles.first ?? RunnerProfile()
     }
     @State var workout: Workout
     @ObservedObject var workoutsVM: WorkoutsViewModel

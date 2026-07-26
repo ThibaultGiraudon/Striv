@@ -11,11 +11,10 @@ import SwiftUI
 
 @MainActor
 final class DefineGoalViewModel: ObservableObject {
-    
-    @Published var goalType: GoalType = .time
-    @Published var distanceType: DistanceType = .preset(.marathon)
+    @Published var distanceType: PresetDistance = .marathon
     @Published var customDistance: Double = 0.0
     @Published var time: Double = 180
+    @Published var isMain: Bool = false
     @Published var prs: [PresetDistance: PRResult] = [:]
     
     var timeBounds: (min: Int, max: Int) {

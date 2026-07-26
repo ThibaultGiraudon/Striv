@@ -62,6 +62,6 @@ struct SegmentedPicker<T: Hashable>: View {
 }
 
 #Preview {
-    @Previewable @State var selection: GoalType = .distance
-    SegmentedPicker(items: GoalType.allCases, title: { $0.rawValue }, selection: $selection)
+    @Previewable @State var selection: PresetDistance = .fiveK
+    SegmentedPicker(items: PresetDistance.allCases, title: { $0.rawValue }, selection: $selection)
 }

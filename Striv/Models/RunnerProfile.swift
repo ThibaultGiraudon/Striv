@@ -8,71 +8,6 @@
 import Foundation
 import SwiftData
 
-enum GoalType: String, CaseIterable, Codable {
-    case distance = "Distance"
-    case time = "Temps"
-}
-
-enum PresetDistance: String, Codable, CaseIterable {
-    case fiveK
-    case tenK
-    case halfMarathon
-    case marathon
-    
-    var title: String {
-        switch self {
-        case .fiveK: return "5 km"
-        case .tenK: return "10 km"
-        case .halfMarathon: return "Semi-marathon"
-        case .marathon: return "Marathon"
-        }
-    }
-    
-    var meters: Double {
-        switch self {
-        case .fiveK: return 5_000
-        case .tenK: return 10_000
-        case .halfMarathon: return 21_097.5
-        case .marathon: return 42_195
-        }
-    }
-    
-}
-
-enum DistanceType: Codable, Equatable, Hashable {
-    case preset(PresetDistance)
-    case custom(Double)
-    
-    var meters: Double {
-        switch self {
-        case .preset(let preset): return preset.meters
-        case .custom(let value): return value
-        }
-    }
-    
-    var title: String {
-        switch self {
-        case .preset(let preset):
-            return preset.title
-            
-        case .custom:
-            return "Distance personnalisée"
-        }
-    }
-    
-    static var allCases: [DistanceType] {
-        PresetDistance.allCases.map { .preset($0) }
-    }
-}
-
-struct Goal: Codable, Sendable {
-    var type: GoalType
-    
-    var distance: DistanceType
-    
-    var targetTime: Int?
-}
-
 struct PRResult: Codable {
     let time: TimeInterval
     let workoutId: UUID
@@ -80,32 +15,9 @@ struct PRResult: Codable {
     let prDistance: PresetDistance
 }
 
-enum GoalMapper {
-    static func encode(_ goal: Goal) -> Data? {
-        try? JSONEncoder().encode(goal)
-    }
-    
-    static func decode(_ data: Data?) -> Goal {
-        guard let data,
-              let decoded = try? JSONDecoder().decode(Goal.self, from: data)
-        else {
-            return Goal(type: .distance, distance: .preset(.fiveK), targetTime: nil)
-        }
-        return decoded
-    }
-}
-
 @Model
 class RunnerProfile {
     @Attribute(.unique) var id: UUID
-    
-    private var goalData: Data?
-
-    @Transient
-    var goal: Goal {
-        get { GoalMapper.decode(goalData) }
-        set { goalData = GoalMapper.encode(newValue) }
-    }
     
     private var prsData: Data?
     
@@ -121,19 +33,9 @@ class RunnerProfile {
         return decoded
     }
     
-    init(goal: Goal) {
+    init() {
         self.id = UUID()
-        self.goal = goal
         self.prsData = nil
-    }
-    
-    func goalDescription() -> String {
-        switch goal.type {
-        case .distance:
-            return "Objectif: terminer \(goal.distance.title) mètres"
-        case .time:
-            return "Objectif: courir \(goal.distance.title) mètres en \(goal.targetTime ?? 0) minutes"
-        }
     }
     
     func encodePRs(with newprs: [PresetDistance: PRResult]) {

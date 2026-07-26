@@ -76,7 +76,7 @@ class Workout: Identifiable, Equatable {
     }
     
     /// Generates the AI prompt to analyze this workout.
-    func analyzePrompt(with profile: RunnerProfile) -> String {
+    func analyzePrompt() -> String {
         var prompts: [String] = []
         
         prompts.append("""
@@ -126,7 +126,6 @@ class Workout: Identifiable, Equatable {
         Ne rajoute et n'enlève rien, la réponse doit être strictement conforme et sans Markdown.
         """)
         
-        prompts.append(profile.goalDescription())
         prompts.append("Durée: \(duration.label)")
         prompts.append("Allure moyenne: \(pace.label)")
         

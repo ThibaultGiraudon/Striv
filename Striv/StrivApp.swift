@@ -73,6 +73,7 @@ struct StrivApp: App {
                 MetricSeriesEntity.self,
                 Pace.self,
                 WorkoutSplit.self,
+                Goal.self,
                 configurations: config
             )
             
@@ -88,6 +89,7 @@ struct StrivApp: App {
                 MetricSeriesEntity.self,
                 Pace.self,
                 WorkoutSplit.self,
+                Goal.self
             )
         }
     }

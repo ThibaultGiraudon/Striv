@@ -17,6 +17,7 @@ struct ContentView: View {
     @StateObject var runnerProfileVM: RunnerProfileViewModel
     @StateObject var targetVM: TargetViewModel
     @StateObject var widgetDataVM: WidgetDataViewModel
+    @StateObject var goalsVM: GoalsViewModel
     
     @State private var didRun: Bool = false
     @State private var activError: String?
@@ -31,6 +32,7 @@ struct ContentView: View {
         self._runnerProfileVM = StateObject(wrappedValue: .init(errorPresenter: errorPresenter))
         self._targetVM = StateObject(wrappedValue: .init())
         self._widgetDataVM = StateObject(wrappedValue: .init())
+        self._goalsVM = StateObject(wrappedValue: .init(errorPresenter: errorPresenter))
     }
     
     var body: some View {
@@ -51,7 +53,7 @@ struct ContentView: View {
 
                     Tab("Objectif", systemImage: "trophy.fill") {
                         NavigationStack {
-                            DefineGoalView(runnerProfileVM: runnerProfileVM)
+                            GoalsView(runnerProfileVM: runnerProfileVM, goalsVM: goalsVM)
                         }
                     }
 
@@ -76,7 +78,7 @@ struct ContentView: View {
                     .tabItem { Label("Stats", systemImage: "list.bullet.clipboard.fill") }
 
                     NavigationStack {
-                        DefineGoalView(runnerProfileVM: runnerProfileVM)
+                        GoalsView(runnerProfileVM: runnerProfileVM, goalsVM: goalsVM)
                     }
                     .tabItem { Label("Objectif", systemImage: "trophy.fill") }
 
@@ -98,6 +100,7 @@ struct ContentView: View {
                 workoutsVM.setRunnerProfileVM(runnerProfileVM)
                 runnerProfileVM.setContext(context: modelContext)
                 runnerProfileVM.createProfileIfNeeded()
+                goalsVM.setContext(modelContext)
             }
         }
         .onChange(of: dashboardVM.stats.currentStreak) {
