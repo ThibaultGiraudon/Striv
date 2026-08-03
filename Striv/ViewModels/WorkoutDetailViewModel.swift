@@ -80,8 +80,6 @@ class WorkoutDetailViewModel: BaseViewModel {
     func fetchWorkoutDetail(for workout: Workout) async {
         guard let context else { return }
         
-        print("Fetching details")
-        
         defer { isLoading = false}
         let newWorkout = workout
         
@@ -113,14 +111,12 @@ class WorkoutDetailViewModel: BaseViewModel {
             
             try context.save()
         } catch let err as HealthKitError {
-            print(err)
             if err == .noData {
                 
             } else {
                 self.errorPresenter.error = .unknown()
             }
         } catch {
-            print(error)
             self.errorPresenter.error = .database(.saving)
         }
     }
@@ -266,8 +262,6 @@ class WorkoutDetailViewModel: BaseViewModel {
     }
     
     func getSplits() -> [WorkoutSplit] {
-
-        print("Getting splits")
         
         guard let distanceSamples = workout.metricsSeries.first(where: { $0.type == .distance })?.samples.sorted(by: { $0.time < $1.time }),
               let paceSamples = workout.metricsSeries.first(where: { $0.type == .pace })?.samples.sorted(by: { $0.time < $1.time }),
@@ -333,10 +327,6 @@ class WorkoutDetailViewModel: BaseViewModel {
             )
 
             splits.append(split)
-
-
-            print(split)
-
 
             currentKm += 1
 

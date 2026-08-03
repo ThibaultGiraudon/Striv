@@ -151,6 +151,10 @@ struct MetricsOverlayChartView: View {
             primarySeries = workout.metricsSeries.first(where: { $0.type == .pace })
             secondarySeries = workout.metricsSeries.first(where: { $0.type == .elevation })
         }
+        .onChange(of: workout.metricsSeries) { _, _ in
+            primarySeries = workout.metricsSeries.first(where: { $0.type == .pace })
+            secondarySeries = workout.metricsSeries.first(where: { $0.type == .elevation })
+        }
     }
     
     func denormalize(

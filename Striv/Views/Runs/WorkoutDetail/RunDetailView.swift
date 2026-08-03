@@ -14,6 +14,7 @@ struct RunDetailView: View {
     @EnvironmentObject private var errorPresenter: ErrorPresenter
     
     @Query private var profiles: [RunnerProfile]
+    @Query private var goals: [Goal]
     var profile: RunnerProfile {
         self.profiles.first ?? RunnerProfile()
     }
@@ -31,16 +32,22 @@ struct RunDetailView: View {
     @State private var mapSize: CGFloat = 400.0
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack {
-                
-                DistanceCard(workout: workout)
-                
-                MapCard(workout: workout)
-                
-                WorkoutOverview(workout: workout, errorPresenter: errorPresenter)
+        ZStack {
+            ScrollView(showsIndicators: false) {
+                LazyVStack {
+                    
+                    DistanceCard(workout: workout)
+                    
+                    MapCard(workout: workout)
+                    
+                    WorkoutOverview(workout: workout, errorPresenter: errorPresenter)
+                    
+                }
+                .padding()
             }
-            .padding()
+            
+            AnalyzeView(response: analyze, error: analyzeVM.error)
+                .offset(y: isShowingAnalyze ? 0 : -10000)
         }
         .navigationTitle(workout.date.formatted(format: "dd MMM YYYY"))
         .navigationBarTitleDisplayMode(.inline)
@@ -91,7 +98,6 @@ struct RunDetailView: View {
                 .background(Color.background)
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.userDidTakeScreenshotNotification)) { _ in
-            print("Screenshot taken")
             showShareView = true
         }
     }
@@ -100,7 +106,8 @@ struct RunDetailView: View {
         Task {
             if workout.analyze == nil {
                 do {
-                    let analyzeRaw = try await analyzeVM.analyze(workout, with: profile)
+                    guard let mainGoal = goals.first(where: {$0.isMain == true}) else { return }
+                    let analyzeRaw = try await analyzeVM.analyze(workout, with: mainGoal)
                     workout.analyzeRaw = analyzeRaw
                     analyze = workout.analyze
                 } catch {
@@ -172,6 +179,7 @@ private extension RunDetailView {
     NavigationStack {
         RunDetailView(workout: Workout(id: UUID(), date: .now, distance: 12129, duration: .init(4400), hr: 171, kcal: 949, elevation: 275, cadence: 151, power: 221, coordinates: [], altitudes: sampleAltitudes20km), workoutsVM: .init(healthKitHelper: HealthKitHelper(), errorPresenter: errorPresenter))
     }
+    .environmentObject(errorPresenter)
 }
 
 extension Collection where Element == Double {

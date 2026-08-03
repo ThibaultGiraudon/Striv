@@ -46,9 +46,10 @@ final class AnalyzeViewModel: ObservableObject {
     /// - Returns: A textual analysis of the workout if the operation
     ///   succeeds, otherwise `nil`.
     @MainActor
-    func analyze(_ workout: Workout, with profile: RunnerProfile) async throws -> String? {
+    func analyze(_ workout: Workout, with goal: Goal) async throws -> String? {
         do {
-            return try await self.aiService.analyze(workout, with: profile)
+            let prompt = makePrompt(for: workout, with: goal)
+            return try await self.aiService.analyze(with: prompt)
         } catch let aiError as AIError {
             self.error = aiError
         } catch let consentError as AIConsentError {
@@ -57,5 +58,117 @@ final class AnalyzeViewModel: ObservableObject {
             self.error = .invalid
         }
         return nil
+    }
+    
+    private func makePrompt(for workout: Workout, with goal: Goal) -> String {
+        var prompts: [String] = []
+        
+        // MARK: - Objectif
+        
+        prompts.append("Objectif:")
+        
+        let goalDuration = Duration(goal.time * 60)
+        let goalTitle = "\(goal.distance.title) en \(goalDuration.longLabel)"
+        
+        prompts.append(goalTitle)
+        
+        // MARK: - Summary
+
+        prompts.append("Résumé:")
+        
+        prompts.append("Durée: \(workout.duration.label)")
+        prompts.append("Allure moyenne: \(workout.pace.label)")
+        
+        if let distance = workout.distance {
+            let speed = ((distance / Double(workout.duration.totalSeconds)) * 3.6).roundedText(to: 1)
+            prompts.append("Vitesse moyenne: \(speed)km/h")
+            prompts.append("Distance: \(distance) mètres")
+        }
+        if let hr = workout.hr { prompts.append("Fréquence cardiaque: \(hr) bpm") }
+        if let kcal = workout.kcal { prompts.append("Calories: \(kcal) kcal") }
+        if let elevation = workout.elevation { prompts.append("Dénivelé positif: \(elevation) mètres") }
+        if let cadence = workout.cadence { prompts.append("Cadence: \(cadence) pas par minute") }
+        if let power = workout.power { prompts.append("Puissance: \(power) watts") }
+        
+        // MARK: -
+        
+        prompts.append("""
+        Données temporelles :
+        Les valeurs suivantes représentent l'évolution de la séance dans le temps.
+        Le temps est exprimé en secondes depuis le début de la séance.
+        Les données ont été réduites pour faciliter l'analyse.
+        """)
+        
+        if let paceSamples = workout.metricsSeries.first(where: { $0.type == .pace }) {
+            prompts.append("ALLURE")
+            
+            for sample in paceSamples.samples.downSample(maxDisplayPoints: 50) {
+                prompts.append("\(sample.time.roundedText(to: 0))s: \(Pace(pace: sample.value).label)")
+            }
+        }
+        
+        if let hrSamples = workout.metricsSeries.first(where: { $0.type == .heartRate }) {
+            prompts.append("FREQUENCE CARDIAQUE")
+            
+            for sample in hrSamples.samples.downSample(maxDisplayPoints: 50) {
+                prompts.append("\(sample.time.roundedText(to: 0))s: \(sample.value) bpm")
+            }
+        }
+        
+        if let elevationSamples = workout.metricsSeries.first(where: { $0.type == .elevation }) {
+            prompts.append("DENIVELE")
+            
+            for sample in elevationSamples.samples.downSample(maxDisplayPoints: 50) {
+                prompts.append("\(sample.time.roundedText(to: 0))s: \(sample.value) m")
+            }
+        }
+        
+        prompts.append("""
+                Tu es un coach de course à pied.
+
+                Analyse UNIQUEMENT cette séance de course, pas un plan d’entraînement global.
+                Base-toi strictement sur les données fournies.
+                Certaines données peuvent être absentes.
+                Si une donnée n’est pas fournie, ignore-la complètement dans ton analyse.
+
+                Objectif de l’analyse :
+                - Aider le coureur à comprendre CE QUE cette séance a travaillé
+                - Évaluer si l’objectif défini par le coureur est atteint ou non
+                - Identifier 1 ou 2 points clés d’amélioration
+                - Donner UN conseil clair pour la prochaine séance
+
+                Règles d’évaluation de l’objectif :
+                - Compare la performance réelle avec l’objectif utilisateur
+                - Si l’objectif est atteint → considère-le comme réussi
+                - Si la performance se rapproche de l’objectif → considère cela comme une progression positive
+
+                IMPORTANT :
+                - Tu ne dois PAS ajouter de champ spécifique pour l’objectif.
+                - Tu dois intégrer le verdict directement dans le champ "summary".
+                - Une séance peut être bénéfique même si l’objectif final n’est pas atteint
+                - Valorise les signes de progression
+                - Évite les jugements trop stricts ou décourageants
+                - Si la séance est très différente de l’objectif (distance ou durée), considère qu’il s’agit d’une séance d’entraînement intermédiaire
+                - Analyse alors la qualité de l’effort plutôt que l’atteinte directe de l’objectif
+
+                Contraintes de réponse :
+                - Ton clair, direct et bienveillant
+                - Pas de généralités sur l’entraînement global
+                - workedOn : 2 à 3 éléments
+                - watchPoints : 2 à 3 éléments
+                - Le résumé doit être compréhensible en une seule lecture rapide
+
+                Réponds en suivant EXACTEMENT et UNIQUEMENT ce format:
+                {
+                    "summary": "",
+                    "workedOn": ["", "", ...],
+                    "watchPoints": ["", "", ...],
+                    "nextAdvice": ""
+                }
+
+                Ne rajoute et n'enlève rien, la réponse doit être strictement conforme et sans Markdown.
+                """)
+        
+        return prompts.joined(separator: "\n")
     }
 }
