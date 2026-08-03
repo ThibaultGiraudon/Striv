@@ -26,7 +26,7 @@ class NextRaceViewModel: ObservableObject {
     }
 
     func setTitle(_ title: String) {
-        self.title = title
+        self.title = title.isEmpty ? "Prochaine course" : title
         UserDefaults.standard.set(title, forKey: nextRaceTitleKey)
     }
     

@@ -13,9 +13,6 @@ struct NextRaceFormView: View {
     @State private var date: Date = .now
     @State private var title: String = "Marathon de Paris"
     
-    var shouldDisable: Bool {
-        title.isEmpty
-    }
     var body: some View {
         VStack(alignment: .leading) {
             Text("Prochaine course")
@@ -29,15 +26,58 @@ struct NextRaceFormView: View {
             Divider()
                 .padding(.vertical)
             
-            DatePicker("Date", selection: $date, in: Date.now..., displayedComponents: .date)
-            TextField("Intitulé (ex: Marathon de....)", text: $title)
+            VStack {
+                HStack {
+                    Image(systemName: "calendar")
+                        .font(.title)
+                        .foregroundStyle(.customPink)
+                        .cardStyle()
+                    DatePicker(selection: $date, in: Date.now..., displayedComponents: .date) {
+                        VStack(alignment: .leading) {
+                            Text("Date")
+                            Text("Choisis la date de ta course")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                
+                Divider()
+                    .padding(.vertical)
+                
+                HStack {
+                    Image(systemName: "flag.fill")
+                        .font(.title)
+                        .foregroundStyle(.customPink)
+                        .cardStyle()
+                    VStack(alignment: .leading) {
+                        Text("Intitulé")
+                        Text("Optionnel")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    TextField("ex: Marathon de Paris", text: $title)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background {
+                            Capsule()
+                                .fill(.customPrimary.opacity(0.6))
+                                .stroke(.customPrimary, lineWidth: 1)
+                        }
+                }
+            }
+            .padding()
+            .background {
+                RoundedRectangle(cornerRadius: 16)
+                    .foregroundStyle(.thinMaterial)
+            }
             
             Spacer()
             
             VStack(alignment: .leading, spacing: 10) {
                 Text(date.formatted(format: "dd MMMM yyyy"))
                     .foregroundStyle(.secondary)
-                Text(title)
+                Text("\(title.isEmpty ? "Prochaine course" : title)")
                     .font(.title.bold())
                 HStack(spacing: 0) {
                     Text("dans ")
@@ -63,9 +103,8 @@ struct NextRaceFormView: View {
                     .font(.title.bold())
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .cardStyle(.customPink.opacity(shouldDisable ? 0.5 : 1))
+                    .cardStyle(.customPink)
             }
-            .disabled(shouldDisable)
             
             if !nextRaceVM.title.isEmpty {
                 Button {
