@@ -69,6 +69,7 @@ struct MetricsOverlayChartView: View {
                 }
                 .tint(secondarySeries?.type.color)
                 .onChange(of: secondarySeries) { _, newValue in
+                    print(newValue)
                     secondarySamples = newValue?.samples
                         .sorted(by: { $0.time < $1.time })
                         .downSample(maxDisplayPoints: 50) ?? []
@@ -117,7 +118,7 @@ struct MetricsOverlayChartView: View {
                         MetricType.heartRate.title: MetricType.heartRate.gradient,
                         MetricType.elevation.title: MetricType.elevation.gradient,
                         MetricType.power.title: MetricType.power.gradient,
-                        MetricType.cadence.title: MetricType.cadence.gradient
+                        MetricType.distance.title: MetricType.distance.gradient
                     ])
                     .chartXScale(domain: 0...maxTime)
                     .chartYAxis {
@@ -152,6 +153,12 @@ struct MetricsOverlayChartView: View {
             secondarySeries = workout.metricsSeries.first(where: { $0.type == .elevation })
         }
         .onChange(of: workout.metricsSeries) { _, _ in
+            for series in workout.metricsSeries {
+                print(series.type)
+                for sample in series.samples {
+                    print(sample)
+                }
+            }
             primarySeries = workout.metricsSeries.first(where: { $0.type == .pace })
             secondarySeries = workout.metricsSeries.first(where: { $0.type == .elevation })
         }
