@@ -18,16 +18,21 @@ struct RunsListView: View {
     @Query private var profiles: [RunnerProfile]
     var body: some View {
         ZStack {
-            List(workouts) { workout in
-                NavigationLink {
-                    RunDetailView(workout: workout, workoutsVM: workoutsVM)
-                } label: {
-                    RunRowView(workout: workout)
+            if workouts.isEmpty {
+                ContentUnavailableView("Aucune course", systemImage: "figure.run", description:
+                    Text("Importez votre première course."))
+            } else {
+                List(workouts) { workout in
+                    NavigationLink {
+                        RunDetailView(workout: workout, workoutsVM: workoutsVM)
+                    } label: {
+                        RunRowView(workout: workout)
+                    }
+                    .listRowBackground(Color.customPrimary)
                 }
-                .listRowBackground(Color.customPrimary)
+                .scrollContentBackground(.hidden)
+                .background(Color.background)
             }
-            .scrollContentBackground(.hidden)
-            .background(Color.background)
 
             if workoutsVM.isLoading {
                 VStack(spacing: 12) {

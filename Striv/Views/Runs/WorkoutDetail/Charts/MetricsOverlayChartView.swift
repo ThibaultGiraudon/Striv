@@ -69,7 +69,6 @@ struct MetricsOverlayChartView: View {
                 }
                 .tint(secondarySeries?.type.color)
                 .onChange(of: secondarySeries) { _, newValue in
-                    print(newValue)
                     secondarySamples = newValue?.samples
                         .sorted(by: { $0.time < $1.time })
                         .downSample(maxDisplayPoints: 50) ?? []

@@ -30,7 +30,7 @@ struct CalendarView: View {
                         .padding(.vertical, 10)
                         .opacity(day.month == date.month ? 1 : 0.6)
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("\(workoutExist(for: day) ? "Course enregistré" : "Aucune courses") le \(day.formatted(format: "dd MMMM YYYY"))")
+                        .accessibilityLabel("\(workoutExist(for: day) ? "Course enregistré" : "Aucune course") le \(day.formatted(format: "dd MMMM YYYY"))")
                 }
             }
             

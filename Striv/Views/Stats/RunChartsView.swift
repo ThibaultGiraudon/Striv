@@ -37,7 +37,7 @@ struct RunChartsView: View {
             }
 
             if weeks.isEmpty {
-                Text("Aucune courses enregistrées")
+                Text("Aucune course enregistrée")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
             } else {
