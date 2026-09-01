@@ -57,6 +57,7 @@ struct PaceCharts: View {
                                 .fill(.ultraThinMaterial)
                                 .stroke(series.type.color, lineWidth: 1)
                         }
+                        .sensoryFeedback(.selection, trigger: selectedMetricSample)
                 }
             }
 

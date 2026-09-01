@@ -57,15 +57,14 @@ struct MetricsCharts: View {
                             .padding()
                             .background {
                                 RoundedRectangle(cornerRadius: 5)
-                                    .fill(.ultraThinMaterial)
+                                    .fill(.thinMaterial)
                                     .stroke(series.type.color, lineWidth: 1)
                             }
+                            .sensoryFeedback(.selection, trigger: selectedMetricSample)
                     }
                 }
                 
                 ForEach(downSampled) { sample in
-                    
-                    
                     LineMark(
                         x: .value("Time", sample.time),
                         y: .value(

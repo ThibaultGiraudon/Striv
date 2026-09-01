@@ -98,12 +98,13 @@ struct MetricsOverlayChartView: View {
                                         Text("\(secondaryString) \(secondarySeries.type.shortUnit)")
                                             .foregroundStyle(secondarySeries.type.color)
                                     }
-                                        .padding()
-                                        .background {
-                                            RoundedRectangle(cornerRadius: 5)
-                                                .fill(.ultraThinMaterial)
-                                                .stroke(.white, lineWidth: 1)
-                                        }
+                                    .padding()
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .fill(.ultraThinMaterial)
+                                            .stroke(.white, lineWidth: 1)
+                                    }
+                                    .sensoryFeedback(.selection, trigger: selectedPrimarySample)
                                 }
                         }
                         

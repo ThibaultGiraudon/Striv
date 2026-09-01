@@ -68,12 +68,12 @@ class WorkoutsViewModel: BaseViewModel {
     /// - Creates new `Workout` objects with essential summary data.
     /// - Inserts workouts that are not yet stored locally.
     /// - Removes workouts that were deleted from the Apple Health app.
-    func fetchWorkoutsSummary() async {
+    func fetchWorkoutsSummary() async -> Bool {
         
         defer { isLoading = false }
         
         do {
-            guard let context else { return }
+            guard let context else { return false }
             isLoading = true
             try await healthKitHelper.requestAuthorization()
             let (workouts, deletedIDs) = try await healthKitHelper.syncWorkouts()
@@ -101,11 +101,15 @@ class WorkoutsViewModel: BaseViewModel {
             }
             
             try context.save()
+            
+            return true
         } catch _ as HealthKitError {
             self.errorPresenter.error = .healthKit(.noDataOrNoPermission)
         } catch {
             self.errorPresenter.error = .database(.saving)
         }
+        
+        return false
     }
     
     func processNewWorkout(_ workouts: [WorkoutData]) {

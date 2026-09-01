@@ -18,9 +18,9 @@ class GoalsViewModel: BaseViewModel {
         self.context = context
     }
     
-    func saveGoal(_ goal: Goal) async {
+    func saveGoal(_ goal: Goal) async -> Bool {
         guard let context else {
-            return
+            return false
         }
         
         if let index = goals.firstIndex(where: { $0.distance == goal.distance }) {
@@ -31,9 +31,12 @@ class GoalsViewModel: BaseViewModel {
         
         do {
             try context.save()
+            return true
         } catch {
             self.errorPresenter.error = .database(.saving)
         }
+        
+        return false
     }
     
     func getGoal(for distance: PresetDistance) -> Goal? {

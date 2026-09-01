@@ -9,6 +9,12 @@ import SwiftUI
 import SwiftData
 import StrivShared
 
+enum ImportFeedback: Equatable {
+    case none
+    case success
+    case error
+}
+
 struct RunsListView: View {
     @ObservedObject var workoutsVM: WorkoutsViewModel
     @ObservedObject var targetVM: TargetViewModel
@@ -16,6 +22,9 @@ struct RunsListView: View {
     @StateObject private var widgetDataVM: WidgetDataViewModel = .init()
     @Query(sort: [SortDescriptor(\Workout.date, order: .reverse)]) private var workouts: Workouts
     @Query private var profiles: [RunnerProfile]
+    
+    @State private var importFeedback: ImportFeedback = .none
+    
     var body: some View {
         ZStack {
             if workouts.isEmpty {
@@ -50,7 +59,15 @@ struct RunsListView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Télécharger", systemImage: "arrow.down.circle") {
                     Task { @MainActor in
-                        await workoutsVM.fetchWorkoutsSummary()
+                        importFeedback = .none
+                        
+                        let result = await workoutsVM.fetchWorkoutsSummary()
+                        
+                        if result == true {
+                            importFeedback = .success
+                        } else {
+                            importFeedback = .error
+                        }
                         
                         let widgetData = widgetDataVM.buildWidgetData(
                             workouts: workouts,
@@ -67,6 +84,18 @@ struct RunsListView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Importer les nouvelles courses bouton")
                 .accessibilityHint("Double tap pour importer les courses")
+                .sensoryFeedback(trigger: importFeedback) { _, newValue in
+                    switch newValue {
+                    case .none:
+                        return nil
+
+                    case .success:
+                        return .success
+
+                    case .error:
+                        return .error
+                    }
+                }
             }
         }
         .scrollContentBackground(.hidden)

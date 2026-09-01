@@ -11,6 +11,8 @@ struct TargetFormView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var distance: Double = 20.0
     @ObservedObject var targetVM: TargetViewModel
+    
+    @State private var feedback: Bool = false
     var body: some View {
         VStack {
             VStack(alignment: .leading) {
@@ -34,8 +36,9 @@ struct TargetFormView: View {
                         .foregroundStyle(.secondary)
                         .padding(.bottom)
                     
-                    Slider(value: $distance, in: 0...150)
+                    Slider(value: $distance, in: 0...150, step: 1)
                         .tint(.customPink)
+                        .sensoryFeedback(.selection, trigger: distance)
                     
                     HStack {
                         Text("0 km")
@@ -55,7 +58,9 @@ struct TargetFormView: View {
                 Spacer()
                 
                 Button {
+                    feedback = false
                     targetVM.setDistanceTarget(to: Int(distance.rounded(.down)))
+                    feedback = true
                     dismiss()
                 } label: {
                     Text("Enregistrer")
@@ -64,6 +69,7 @@ struct TargetFormView: View {
                         .frame(maxWidth: .infinity)
                         .cardStyle(.customPink)
                 }
+                .sensoryFeedback(.success, trigger: feedback)
             }
         }
         .padding()

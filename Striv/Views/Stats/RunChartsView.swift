@@ -34,6 +34,7 @@ struct RunChartsView: View {
                                value: "\(selectedWeek.elevation.roundedText(to: 0)) m")
                     }
                 }
+                .sensoryFeedback(.selection, trigger: selectedWeek)
             }
 
             if weeks.isEmpty {

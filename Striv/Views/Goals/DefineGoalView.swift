@@ -19,6 +19,8 @@ struct DefineGoalView: View {
     @Query private var profiles: [RunnerProfile]
     @StateObject private var defineGoalVM = DefineGoalViewModel()
     
+    @State private var feedback: ImportFeedback = .none
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Définir objectif")
@@ -42,6 +44,7 @@ struct DefineGoalView: View {
                     .transaction {
                         $0.animation = nil
                     }
+                    .sensoryFeedback(.selection, trigger: defineGoalVM.time)
             }
             .frame(maxWidth: .infinity, alignment: .center)
             .cardStyle()
@@ -83,7 +86,14 @@ struct DefineGoalView: View {
             
             Button {
                 Task {
-                    await goalsVM.saveGoal(.init(distance: defineGoalVM.distanceType, time: defineGoalVM.time, isMain: defineGoalVM.isMain))
+                    feedback = .none
+                    let result = await goalsVM.saveGoal(.init(distance: defineGoalVM.distanceType, time: defineGoalVM.time, isMain: defineGoalVM.isMain))
+                    
+                    if result == true {
+                        feedback = .success
+                    } else {
+                        feedback = .error
+                    }
                     dismiss()
                 }
             } label: {
@@ -96,6 +106,16 @@ struct DefineGoalView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Enregistrer bouton")
             .accessibilityHint("Double tap pour enregistrer l'objectif")
+            .sensoryFeedback(trigger: feedback) { _, newValue in
+                switch newValue {
+                case .none:
+                    return nil
+                case .success:
+                    return .success
+                case .error:
+                    return .error
+                }
+            }
         }
         .padding()
         .background(Color.background)

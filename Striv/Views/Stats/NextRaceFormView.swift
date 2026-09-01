@@ -12,6 +12,7 @@ struct NextRaceFormView: View {
     @ObservedObject var nextRaceVM: NextRaceViewModel
     @State private var date: Date = .now
     @State private var title: String = "Marathon de Paris"
+    @State private var feedback: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -95,8 +96,10 @@ struct NextRaceFormView: View {
             Spacer()
             
             Button {
+                feedback = false
                 nextRaceVM.setDate(date)
                 nextRaceVM.setTitle(title)
+                feedback = true
                 dismiss()
             } label: {
                 Text("Enregistrer")
@@ -105,13 +108,16 @@ struct NextRaceFormView: View {
                     .frame(maxWidth: .infinity)
                     .cardStyle(.customPink)
             }
+            .sensoryFeedback(.success, trigger: feedback)
             
             if !nextRaceVM.title.isEmpty {
                 Button {
+                    feedback = false
                     nextRaceVM.setDate(.now)
                     nextRaceVM.setTitle("")
                     date = .now
                     title = ""
+                    feedback = true
                 } label: {
                     HStack {
                         Image(systemName: "trash")
