@@ -1,0 +1,588 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "" : {
+
+    },
+    "%.0f" : {
+
+    },
+    "%.2f km" : {
+
+    },
+    "%.2fkm" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ - %@: %@km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@: %3$@km"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ en %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ en %2$@"
+          }
+        }
+      }
+    },
+    "%@ km" : {
+
+    },
+    "%@ le %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ le %2$@"
+          }
+        }
+      }
+    },
+    "%@: %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%@km en moyenne" : {
+
+    },
+    "%@m de dénivelé" : {
+
+    },
+    "%0.0f %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$0.0f %2$@"
+          }
+        }
+      }
+    },
+    "%0.1f" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld courses" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld course"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%lld courses"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld km" : {
+
+    },
+    "%lld semaines" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld semaine"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%lld semaines"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "• Analyses de progression enrichies" : {
+
+    },
+    "• Défis et objectifs avancés" : {
+
+    },
+    "• Nouvelles statistiques de course" : {
+
+    },
+    "• Suggestions d'entraînement personnalisées" : {
+
+    },
+    "0 km" : {
+
+    },
+    "150 km" : {
+
+    },
+    "Accueil" : {
+
+    },
+    "Ajoute la date de ta prochaine course" : {
+
+    },
+    "Allure" : {
+
+    },
+    "Allure moyenne" : {
+
+    },
+    "Allure: " : {
+
+    },
+    "Analyse IA de vos séances" : {
+
+    },
+    "Analyses IA" : {
+
+    },
+    "Analyses intelligentes" : {
+
+    },
+    "Analyze" : {
+
+    },
+    "Aucun record personnel pour le moment. Commence à courir pour en établir !" : {
+
+    },
+    "Aucune course" : {
+
+    },
+    "Aucune course enregistrée" : {
+
+    },
+    "Aucune donnée personnelle identifiable (nom, email, identifiant utilisateur) n’est envoyée à l’IA." : {
+
+    },
+    "Autorise Haaku à utiliser Google Gemini pour analyser vos séances de course." : {
+
+    },
+    "Autoriser l’analyse IA" : {
+
+    },
+    "Bouton" : {
+
+    },
+    "Cadence" : {
+
+    },
+    "Cela t'aidera à structurer ton entrainement." : {
+
+    },
+    "Cette semaine" : {
+
+    },
+    "Choisi ton objectif de course." : {
+
+    },
+    "Choisis la date de ta course" : {
+
+    },
+    "Choisis le type de rendu à télécharger" : {
+
+    },
+    "Choisis une distance cohérente pour te motiver." : {
+
+    },
+    "Choisissez une option" : {
+
+    },
+    "Commencer" : {
+
+    },
+    "Communauté & Feedback" : {
+
+    },
+    "Confidentialité" : {
+
+    },
+    "Confidentialité App Store" : {
+
+    },
+    "Confidentialité Google Gemini" : {
+
+    },
+    "Continuer sans IA" : {
+
+    },
+    "Couleur du rendu" : {
+
+    },
+    "Courses" : {
+
+    },
+    "dans " : {
+
+    },
+    "Date" : {
+
+    },
+    "Définir comme objectif principal" : {
+
+    },
+    "Définir objectif" : {
+
+    },
+    "Définis la distance que tu souhaites parcourir chaque semaine." : {
+
+    },
+    "Définis un objectif principal pour analyser tes courses." : {
+
+    },
+    "Définis, consulte et gère tout tes objectifs." : {
+
+    },
+    "Dénivelé" : {
+
+    },
+    "Dernière course" : {
+
+    },
+    "Des insights générés automatiquement pour t’aider à progresser." : {
+
+    },
+    "Distance" : {
+
+    },
+    "Distance hebdomadaire" : {
+
+    },
+    "Distance total" : {
+
+    },
+    "Distance total : %@km" : {
+
+    },
+    "Distance totale" : {
+
+    },
+    "Données potentiellement envoyées" : {
+
+    },
+    "Double tap pour %@" : {
+
+    },
+    "Double tap pour ajouter ta prochaine course" : {
+
+    },
+    "Double tap pour avoir la notice d'utilisation de l'intelligence artificiel" : {
+
+    },
+    "Double tap pour enregistrer l'objectif" : {
+
+    },
+    "Double tap pour importer les courses" : {
+
+    },
+    "Double tap pour importer ta première course" : {
+
+    },
+    "Double tap pour modifier l'objectif" : {
+
+    },
+    "Double tap pour ouvrir les paramètres" : {
+
+    },
+    "Double tap pour partager ta course" : {
+
+    },
+    "Double tap pour sélectionner" : {
+
+    },
+    "Double tap pour voir les détails de la course" : {
+
+    },
+    "Durée de séance" : {
+
+    },
+    "Élément ajustable pour définir votre objectif de temps" : {
+
+    },
+    "Élev." : {
+
+    },
+    "Enregistrer" : {
+
+    },
+    "Enregistrer bouton" : {
+
+    },
+    "Erreur" : {
+
+    },
+    "ex: Marathon de Paris" : {
+
+    },
+    "Exporter en PNG" : {
+
+    },
+    "Exporter un rendu" : {
+
+    },
+    "FC" : {
+
+    },
+    "Fermer" : {
+
+    },
+    "Fonctionnalités à venir" : {
+
+    },
+    "Fréquence cardiaque" : {
+
+    },
+    "Graphique 1" : {
+
+    },
+    "Graphique 2" : {
+
+    },
+    "Haaku évolue grâce aux retours de ses utilisateurs." : {
+
+    },
+    "Importer les nouvelles courses bouton" : {
+
+    },
+    "Importer ma première course" : {
+
+    },
+    "Importez votre première course." : {
+
+    },
+    "Informations légales" : {
+
+    },
+    "Intelligence artificielle" : {
+
+    },
+    "Intitulé" : {
+
+    },
+    "km" : {
+
+    },
+    "Km" : {
+
+    },
+    "L'image sera enregistrée dans votre galerie" : {
+
+    },
+    "Ma progression" : {
+
+    },
+    "Mes objectifs" : {
+
+    },
+    "Min" : {
+
+    },
+    "Noter Haaku" : {
+
+    },
+    "Notice usage IA" : {
+
+    },
+    "Objectif" : {
+
+    },
+    "Objectif de distance hebdomadaire" : {
+
+    },
+    "Objectif hébdomadaire %@km sur %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Objectif hébdomadaire %1$@km sur %2$lld"
+          }
+        }
+      }
+    },
+    "Objectif pour %lld km" : {
+
+    },
+    "Objectif pour %lld km : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Objectif pour %1$lld km : %2$@"
+          }
+        }
+      }
+    },
+    "Objectif principal" : {
+
+    },
+    "OK" : {
+
+    },
+    "Optionnel" : {
+
+    },
+    "par semaine" : {
+
+    },
+    "Paramètres" : {
+
+    },
+    "Partager" : {
+
+    },
+    "Passer" : {
+
+    },
+    "Politique de confidentialité" : {
+
+    },
+    "Pourquoi c'est utile ?" : {
+
+    },
+    "Prochaine course" : {
+
+    },
+    "Puissance" : {
+
+    },
+    "Rajoute la date de ta prochaine course." : {
+
+    },
+    "Records personnels" : {
+
+    },
+    "Sélecteur" : {
+
+    },
+    "Splits" : {
+
+    },
+    "Statistiques" : {
+
+    },
+    "Stats" : {
+
+    },
+    "Striv peut utiliser l’intelligence artificielle de Google Gemini pour analyser vos séances de course et générer des conseils personnalisés." : {
+
+    },
+    "Suivant" : {
+
+    },
+    "Superposition" : {
+
+    },
+    "Supprimer" : {
+
+    },
+    "Téléchargement des courses..." : {
+
+    },
+    "Télécharger" : {
+
+    },
+    "Temps" : {
+
+    },
+    "Temps %@" : {
+
+    },
+    "Time" : {
+
+    },
+    "Ton objectif de référence actuel." : {
+
+    },
+    "Ton record personnel sur %@ est de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ton record personnel sur %1$@ est de %2$@"
+          }
+        }
+      }
+    },
+    "Tu as réalisé une chaine de %lld semaines, %@" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Tu as réalisé une chaine de %1$lld semaine, %2$@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "Tu as réalisé une chaine de %1$lld semaines, %2$@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Type" : {
+
+    },
+    "Un décompte sera visible sur l'accueil de l'application afin de booster ta motivation." : {
+
+    },
+    "Valeurs typiques" : {
+
+    },
+    "Votre avis aide à définir les prochaines évolutions de Haaku." : {
+
+    },
+    "Vous pouvez désactiver l’analyse IA à tout moment." : {
+
+    },
+    "Week" : {
+
+    }
+  },
+  "version" : "1.1"
+}

@@ -29,7 +29,7 @@ struct StreakView: View {
                     .offset(y: -5)
             }
             VStack(alignment: .leading) {
-                Text("\(currentStreak) semaine\(currentStreak > 1 ? "s" : "")")
+                Text("\(currentStreak) semaines")
                     .font(.largeTitle.bold())
                 Text(streakTitle)
                     .font(.title2)
