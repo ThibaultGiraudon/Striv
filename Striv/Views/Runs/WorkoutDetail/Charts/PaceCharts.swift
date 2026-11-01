@@ -89,7 +89,19 @@ struct PaceCharts: View {
             domain: [maxValue, minValue]
         )
         .chartYAxis {
-            AxisMarks(preset: .aligned, position: .trailing, values: [maxValue, minValue])
+            AxisMarks(
+                preset: .aligned,
+                position: .trailing,
+                values: [maxValue, minValue]
+            ) { value in
+                AxisGridLine()
+                AxisTick()
+                AxisValueLabel {
+                    if let pace = value.as(Double.self) {
+                        Text(Pace(pace: pace).shortLabel)
+                    }
+                }
+            }
         }
         .frame(height: 300)
     }
