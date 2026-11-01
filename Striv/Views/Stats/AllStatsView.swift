@@ -35,7 +35,7 @@ struct AllStatsView: View {
                     .foregroundStyle(.primaryText)
                     .font(.title.bold())
                 HStack(alignment: .bottom) {
-                    Text(dashboardVM.stats.global.totalDistance.roundedText(to: 0))
+                    Text(displayedStats.totalDistance.roundedText(to: 0))
                         .font(.system(size: 70).bold())
                     Text("km")
                         .font(.system(size: 60).bold())
